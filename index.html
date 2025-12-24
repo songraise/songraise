@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SongRaise Lite – Turn Your Cause Into a Song</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      color: #111827;
+      background: #f9fafb;
+    }
+    a { text-decoration: none; color: inherit; }
+    .wrapper { max-width: 1100px; margin: 0 auto; padding: 24px 16px 64px; }
+
+    header {
+      padding: 16px 0 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo { font-weight: 800; font-size: 1.25rem; }
+    .logo span { color: #2563eb; }
+    nav a { margin-left: 20px; font-size: 0.95rem; color: #4b5563; }
+    nav a:hover { color: #111827; }
+
+    .btn {
+      display: inline-block; padding: 10px 18px; border-radius: 999px;
+      font-weight: 600; font-size: 0.95rem; border: none; cursor: pointer;
+    }
+    .btn-primary { background: #2563eb; color: #ffffff; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-ghost { background: transparent; border: 1px solid #d1d5db; color: #111827; }
+    .btn-ghost:hover { background: #e5e7eb; }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1.5fr);
+      gap: 40px; padding: 22px 0 28px; align-items: center;
+    }
+    .hero h1 { font-size: clamp(2.2rem, 3.2vw, 3rem); font-weight: 800; margin-bottom: 16px; }
+    .hero p { font-size: 1.05rem; color: #4b5563; margin-bottom: 20px; }
+    .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+    .hero-note { font-size: 0.85rem; color: #6b7280; }
+
+    .hero-visual {
+      background: #111827; border-radius: 16px; padding: 20px; color: #f9fafb;
+      box-shadow: 0 20px 35px rgba(15,23,42,0.3);
+    }
+    .hero-visual h3 {
+      font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.08em;
+      color: #9ca3af; margin-bottom: 8px;
+    }
+    .hero-visual-main { font-size: 1.1rem; margin-bottom: 16px; }
+    .hero-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .tag { padding: 4px 10px; border-radius: 999px; background: rgba(37,99,235,0.15); font-size: 0.8rem; }
+    .hero-metrics { display: flex; gap: 16px; font-size: 0.85rem; color: #9ca3af; }
+    .hero-metrics strong { display: block; font-size: 1rem; color: #e5e7eb; }
+
+    .section { padding: 28px 0; }
+    .section h2 { font-size: 1.6rem; margin-bottom: 12px; }
+    .section p.lead { color: #4b5563; margin-bottom: 18px; max-width: 750px; }
+
+    .card {
+      background:#ffffff; border-radius:16px; border:1px solid #e5e7eb;
+      padding:18px 16px 20px; font-size:0.9rem;
+    }
+    .auth-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .card h3 { font-size:1.05rem; margin-bottom:8px; }
+    .field-label { display:block; font-size:0.85rem; margin-bottom:3px; color:#374151; }
+    .field-input, .field-select, .field-textarea {
+      width:100%; padding:8px; margin-bottom:10px; border-radius:8px;
+      border:1px solid #d1d5db; font-size:0.9rem;
+    }
+    .field-textarea { resize: vertical; min-height:60px; }
+    .status-text { font-size:0.85rem; margin-top:6px; }
+
+    table { width:100%; border-collapse:collapse; font-size:0.9rem; background:#ffffff; border-radius:12px; border:1px solid #e5e7eb; overflow:hidden; }
+    th, td { padding:8px 10px; border-bottom:1px solid #e5e7eb; text-align:left; }
+    thead tr { background:#f3f4f6; }
+
+    footer {
+      border-top: 1px solid #e5e7eb; margin-top: 32px; padding-top: 16px;
+      font-size: 0.8rem; color: #6b7280; display: flex; flex-wrap: wrap;
+      justify-content: space-between; gap: 12px;
+    }
+
+    .demo-bar {
+      background: #ffffff;
+      border: 2px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin: 10px 0 18px;
+    }
+    .demo-bar-row {
+      display:flex; flex-wrap:wrap; gap:10px; align-items:center; font-size:0.9rem;
+    }
+    .demo-pill {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #eef2ff;
+      font-weight: 700;
+    }
+    .demo-btn {
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      background: #ffffff;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    .demo-btn:hover { background:#f3f4f6; }
+    .demo-small { color:#6b7280; font-size:0.85rem; }
+    details { margin-top: 10px; }
+    summary { cursor:pointer; font-weight:800; }
+    .demo-box {
+      background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px;
+      padding:12px; margin-top:8px; font-size:0.85rem; color:#111827;
+    }
+
+    @media (max-width: 768px) {
+      .hero { grid-template-columns: 1fr; }
+      header { flex-direction: column; align-items: flex-start; gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+
+    <header>
+      <div class="logo">SongRaise<span>Lite</span></div>
+      <nav>
+        <a href="#account">Account</a>
+        <a href="#create-song">Create</a>
+        <a href="#my-campaigns">My campaigns</a>
+        <a href="#org-signup">Charity signup</a>
+      </nav>
+    </header>
+
+    <div class="demo-bar" id="demoBar">
+      <div class="demo-bar-row">
+        <span class="demo-pill" id="demoModeLabel">Demo Mode: ON</span>
+        <button class="demo-btn" id="toggleDemoBtn" type="button">Toggle Demo</button>
+        <button class="demo-btn" id="resetDemoBtn" type="button">Reset Demo</button>
+        <span class="demo-small" id="demoMp3Status">Demo MP3: ⏳</span>
+      </div>
+
+      <details>
+        <summary>📌 30-second pitch script (for demos)</summary>
+        <div class="demo-box">
+          “SongRaise lets nonprofits turn a cause into a song in under a minute.
+          They choose a cause and condition, pick an emotion + genre, attach a donation link,
+          and get a campaign page with audio that supporters can listen to immediately.
+          Instead of one fundraiser post, they get unlimited weekly content for one flat fee.”
+        </div>
+      </details>
+    </div>
+
+    <section class="hero" id="start">
+      <div>
+        <h1>Turn Your Cause Into a Song in 60 Seconds</h1>
+        <p>
+          Pick your cause + condition, choose an emotion and genre, attach your donation link,
+          and launch a campaign that supporters can listen to right inside SongRaise.
+        </p>
+        <div class="hero-cta">
+          <a href="#create-song" class="btn btn-primary">Create a campaign</a>
+          <a href="#my-campaigns" class="btn btn-ghost">View my campaigns</a>
+        </div>
+        <p class="hero-note">Demo Mode can prefill everything for quick presentations.</p>
+      </div>
+
+      <div class="hero-visual">
+        <h3>Live Preview</h3>
+        <div class="hero-visual-main">
+          “Hopeful Pop fundraising song”<br />
+          <span style="font-size:0.9rem; color:#9ca3af;">
+            MP3 plays in-platform · Donation link attached
+          </span>
+        </div>
+        <div class="hero-tags">
+          <div class="tag">Cause + condition</div>
+          <div class="tag">Audio upload</div>
+          <div class="tag">Campaign page</div>
+          <div class="tag">Donation link</div>
+        </div>
+        <div class="hero-metrics">
+          <div><strong>Demo</strong> Mode</div>
+          <div><strong>MP3</strong> Ready</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="account">
+      <h2>Login or Create Your Account</h2>
+      <p class="lead">Log in to attach campaigns to your account.</p>
+
+      <p id="authStatusText" style="font-size:0.9rem; margin-bottom:12px;">Not logged in.</p>
+
+      <div class="auth-grid">
+        <div class="card">
+          <h3>Log in</h3>
+          <form id="loginForm">
+            <label class="field-label" for="loginEmail">Email</label>
+            <input id="loginEmail" type="email" class="field-input" required />
+            <label class="field-label" for="loginPassword">Password</label>
+            <input id="loginPassword" type="password" class="field-input" required />
+            <button type="submit" class="btn btn-primary">Log in</button>
+            <div id="loginStatus" class="status-text"></div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3>Create an account</h3>
+          <form id="signupForm">
+            <label class="field-label" for="signupName">Name</label>
+            <input id="signupName" type="text" class="field-input" placeholder="Your name" />
+            <label class="field-label" for="signupEmail">Email</label>
+            <input id="signupEmail" type="email" class="field-input" required />
+            <label class="field-label" for="signupPassword">Password</label>
+            <input id="signupPassword" type="password" class="field-input" required />
+            <button type="submit" class="btn btn-primary">Create account</button>
+            <div id="signupStatus" class="status-text"></div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3>Account</h3>
+          <p style="font-size:0.9rem;">
+            Email: <span id="accountEmail">Not logged in</span><br/>
+            Org status: <span id="accountOrgStatus">—</span>
+          </p>
+
+          <form id="displayNameForm" style="margin-top:10px;">
+            <label class="field-label" for="displayNameInput">Display name (optional)</label>
+            <input id="displayNameInput" type="text" class="field-input" placeholder="How you want to appear" />
+            <button type="submit" class="btn btn-ghost">Save name</button>
+            <div id="displayNameStatus" class="status-text"></div>
+          </form>
+
+          <button id="logoutButton" class="btn btn-ghost" style="margin-top:12px;">Log out</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="create-song">
+      <h2>Create a Fundraising Song and Campaign</h2>
+      <p class="lead">Choose a cause + condition, then save your campaign. Upload an MP3 to play in-platform.</p>
+
+      <form id="createSongForm" class="card" style="max-width: 720px;">
+        <label for="cause_category" class="field-label">Cause category</label>
+        <select id="cause_category" class="field-select" required></select>
+
+        <label for="cause_condition" class="field-label">Condition</label>
+        <select id="cause_condition" class="field-select" required></select>
+
+        <label for="emotion" class="field-label">Emotion</label>
+        <select id="emotion" class="field-select" required>
+          <option value="Hopeful">Hopeful</option>
+          <option value="Comforting">Comforting</option>
+          <option value="Inspiring">Inspiring</option>
+          <option value="Strong">Strong</option>
+        </select>
+
+        <label for="genre" class="field-label">Genre</label>
+        <select id="genre" class="field-select" required>
+          <option value="Pop">Pop</option>
+          <option value="Acoustic">Acoustic</option>
+          <option value="Folk">Folk</option>
+          <option value="Ballad">Ballad</option>
+        </select>
+
+        <label for="style" class="field-label">Artist style (optional)</label>
+        <input id="style" type="text" class="field-input" placeholder="e.g., like Ed Sheeran" />
+
+        <label for="donation_url" class="field-label">Donation page URL</label>
+        <input id="donation_url" type="url" required class="field-input" placeholder="https://..." />
+
+        <label for="campaign_title" class="field-label">Campaign title</label>
+        <input id="campaign_title" type="text" required class="field-input" placeholder="e.g., You Are Not Alone" />
+
+        <label for="campaign_description" class="field-label">Campaign description</label>
+        <textarea id="campaign_description" class="field-textarea" rows="3" placeholder="Short description..."></textarea>
+
+        <label for="audio_url" class="field-label">Audio URL (auto-filled after upload)</label>
+        <input id="audio_url" type="url" class="field-input" placeholder="(Will be filled automatically after upload)" />
+
+        <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin: 6px 0 10px;">
+          <input id="audio_file" type="file" accept="audio/*" style="font-size:0.85rem;">
+          <button type="button" id="uploadAudioBtn" class="btn btn-primary" style="padding:8px 14px; font-size:0.85rem;">
+            Upload MP3 to SongRaise
+          </button>
+          <span id="uploadAudioStatus" style="font-size:0.85rem; color:#6b7280;"></span>
+        </div>
+
+        <input type="hidden" id="lyric_prompt" />
+
+        <button type="submit" class="btn btn-primary" style="margin-top:4px;">
+          Create Song and Campaign (Save to Supabase)
+        </button>
+
+        <p id="createSongStatus" style="margin-top:10px; font-size:0.9rem;"></p>
+      </form>
+    </section>
+
+    <section class="section" id="my-campaigns">
+      <h2>My Campaigns</h2>
+      <p class="lead">Only shows campaigns created by the currently logged-in user.</p>
+
+      <div id="impactSummary" style="display:flex; flex-wrap:wrap; gap:16px; margin-bottom:12px; font-size:0.9rem;">
+        <div style="padding:8px 12px; border-radius:10px; background:#eef2ff;">
+          <strong id="impactTotalCampaigns">0</strong><br/>Campaigns created
+        </div>
+        <div style="padding:8px 12px; border-radius:10px; background:#ecfeff;">
+          <strong id="impactLatestCreated">—</strong><br/>Latest campaign
+        </div>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr><th>Title</th><th>Donation Link</th><th>Status</th><th>Created</th><th>View</th></tr>
+          </thead>
+          <tbody id="campaignsTableBody"></tbody>
+        </table>
+      </div>
+
+      <p id="myCampaignsStatus" style="margin-top:8px; font-size:0.85rem; color:#6b7280;">
+        Loading campaigns...
+      </p>
+    </section>
+
+    <section class="section" id="org-signup">
+      <h2>Charity / Nonprofit Signup</h2>
+      <p class="lead">We review each signup to prevent fake or fraudulent profiles.</p>
+
+      <form id="orgSignupForm" class="card" style="max-width: 720px;">
+        <label class="field-label" for="org_name">Organization name</label>
+        <input id="org_name" class="field-input" type="text" required />
+
+        <label class="field-label" for="org_email">Organization email</label>
+        <input id="org_email" class="field-input" type="email" required />
+
+        <label class="field-label" for="org_country">Country</label>
+        <input id="org_country" class="field-input" type="text" placeholder="e.g., Canada" />
+
+        <label class="field-label" for="org_number">Nonprofit / charity registration number</label>
+        <input id="org_number" class="field-input" type="text" required />
+
+        <label class="field-label" for="org_website">Website (optional)</label>
+        <input id="org_website" class="field-input" type="url" />
+
+        <label class="field-label" for="org_mission">Mission / what you do</label>
+        <textarea id="org_mission" class="field-textarea"></textarea>
+
+        <button type="submit" class="btn btn-primary">Submit for review</button>
+        <div id="orgSignupStatus" class="status-text"></div>
+      </form>
+    </section>
+
+    <footer>
+      <div>&copy; <span id="year"></span> SongRaise Lite. All rights reserved.</div>
+      <div>
+        <a href="#account">Account</a> ·
+        <a href="#create-song">Create</a> ·
+        <a href="#my-campaigns">Campaigns</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    const SUPABASE_URL = "https://jvvcxpjmdfeqjdmcemet.supabase.co";
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2dmN4cGptZGZlcWpkbWNlbWV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1Nzc3NzYsImV4cCI6MjA3NzE1Mzc3Nn0.LPRIt10bLZYfoOCx7nD4U0PsCURB7YToq4VbByliFi4";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const DEMO_MP3_URL =
+      "https://jvvcxpjmdfeqjdmcemet.supabase.co/storage/v1/object/public/song-audio/Untitled%20folder/Well%20I%20knew%20I%20felt%20a%20tingle%20when%20my%20head%20(1).mp3";
+
+    const demoModeLabel = document.getElementById("demoModeLabel");
+    const demoMp3Status = document.getElementById("demoMp3Status");
+    let DEMO_MODE = (localStorage.getItem("songraise_demo_mode") || "on") === "on";
+
+    function refreshDemoUI() {
+      demoModeLabel.textContent = DEMO_MODE ? "Demo Mode: ON" : "Demo Mode: OFF";
+      demoMp3Status.textContent = DEMO_MP3_URL ? "Demo MP3: ✅ Loaded" : "Demo MP3: ❌ Missing";
+    }
+
+    document.getElementById("toggleDemoBtn").addEventListener("click", () => {
+      DEMO_MODE = !DEMO_MODE;
+      localStorage.setItem("songraise_demo_mode", DEMO_MODE ? "on" : "off");
+      if (DEMO_MODE) applyDemoPrefill();
+      refreshDemoUI();
+    });
+
+    document.getElementById("resetDemoBtn").addEventListener("click", () => {
+      DEMO_MODE = true;
+      localStorage.setItem("songraise_demo_mode", "on");
+      applyDemoPrefill(true);
+      refreshDemoUI();
+      alert("Demo reset to a known-good state.");
+    });
+
+    const CAUSE_MAP = {
+      "Neurological Disorders": ["Alzheimer’s Disease","Dementia","Epilepsy","Seizures","Headache","Stroke","Hydrocephalus","Cerebral Palsy","Parkinson’s Disease","Multiple Sclerosis (MS)"],
+      "Cardiovascular Diseases": ["Arrhythmias","Heart Attack","High Blood Pressure (Hypertension)","High Cholesterol","Vascular Anomalies"],
+      "Endocrine & Metabolic Disorders": ["Diabetes","Hyperthyroidism","Obesity","Osteoporosis"],
+      "Reproductive & Women’s Health": ["Fertility & Reproductive Health","Rare Pregnancy Complications","Pelvic Floor Disorders"],
+      "Genetic & Autoimmune Disorders": ["Genetic Disorders","Systemic Lupus Erythematosus (Lupus)","Sjögren’s Syndrome","Scleroderma"],
+      "Musculoskeletal": ["Arthritis","Bones and Joints (general)","Scoliosis","Sports-Related Conditions","Knee Injuries","Back and Neck Pain","Hand Conditions"],
+      "Respiratory Conditions": ["Asthma","Influenza","Seasonal Allergies"],
+      "Mental Health & Behavioral Conditions": ["Anxiety Disorders","Eating Disorders","Mood Disorders","Stress"],
+      "Infectious Diseases": ["HIV & AIDS","Hepatitis","Herpes (HSV-1 & HSV-2)","Human Papillomavirus (HPV)","Influenza","Lyme Disease","Sexually Transmitted Diseases","Zika Virus","Urinary Tract Infections","Bladder Infections"],
+      "Gastrointestinal Conditions": ["Celiac Disease","Irritable Bowel Syndrome (IBS)","Hernias"],
+      "Dermatologic Conditions": ["Melanoma"],
+      "Kidney & Urinary Conditions": ["Kidney Stones","End Stage Renal Disease (ESRD)","Urinary Incontinence","Urinary Tract Infections"],
+      "Hearing & Sensory Disorders": ["Hearing Loss"],
+      "Cancer (All Types)": ["Solid Tumors","Breast Cancer","Prostate Cancer","Lung Cancer","Colon Cancer","Stomach (Gastric) Cancer","Pancreatic Cancer","Esophageal Cancer","Kidney Cancer","Brain Tumors / Brain Cancer","Head and Neck Cancer","Ovarian Cancer","Bladder Cancer","Melanoma","Sarcoma","Blood Cancers","Leukemia","Lymphoma"],
+      "Thoracic / Aortic Conditions": ["Abdominal Aortic Aneurysm (AAA)"],
+      "Injury & Pain Conditions": ["Knee Injuries","Back & Neck Pain"]
+    };
+
+    const causeCategorySelect = document.getElementById("cause_category");
+    const causeConditionSelect = document.getElementById("cause_condition");
+    const lyricPromptInput = document.getElementById("lyric_prompt");
+
+    function populateCategories() {
+      causeCategorySelect.innerHTML = "";
+      Object.keys(CAUSE_MAP).sort().forEach(cat => {
+        const opt = document.createElement("option");
+        opt.value = cat;
+        opt.textContent = cat;
+        causeCategorySelect.appendChild(opt);
+      });
+    }
+    function populateConditionsForCategory(category) {
+      causeConditionSelect.innerHTML = "";
+      (CAUSE_MAP[category] || []).forEach(cond => {
+        const opt = document.createElement("option");
+        opt.value = cond;
+        opt.textContent = cond;
+        causeConditionSelect.appendChild(opt);
+      });
+    }
+    function buildLyricPrompt(category, condition, emotion, genre, style) {
+      const stylePart = style ? ` in the style of ${style}` : "";
+      return `Write original fundraising song lyrics about "${condition}" under the category "${category}". Emotion: ${emotion}. Genre: ${genre}${stylePart}. Include: empathy, community support, hope, and a clear call-to-action to donate. Keep it uplifting and respectful.`;
+    }
+    function autoUpdatePrompt() {
+      const category = causeCategorySelect.value;
+      const condition = causeConditionSelect.value;
+      const emotion = document.getElementById("emotion").value;
+      const genre = document.getElementById("genre").value;
+      const style = document.getElementById("style").value.trim();
+      lyricPromptInput.value = buildLyricPrompt(category, condition, emotion, genre, style);
+    }
+
+    populateCategories();
+    populateConditionsForCategory(causeCategorySelect.value);
+    causeCategorySelect.addEventListener("change", () => { populateConditionsForCategory(causeCategorySelect.value); autoUpdatePrompt(); });
+    causeConditionSelect.addEventListener("change", autoUpdatePrompt);
+    document.getElementById("emotion").addEventListener("change", autoUpdatePrompt);
+    document.getElementById("genre").addEventListener("change", autoUpdatePrompt);
+    document.getElementById("style").addEventListener("input", autoUpdatePrompt);
+
+    const authStatusText = document.getElementById("authStatusText");
+    const accountEmailSpan = document.getElementById("accountEmail");
+    const accountOrgStatusSpan = document.getElementById("accountOrgStatus");
+
+    const loginForm = document.getElementById("loginForm");
+    const loginEmailInput = document.getElementById("loginEmail");
+    const loginPasswordInput = document.getElementById("loginPassword");
+    const loginStatus = document.getElementById("loginStatus");
+
+    const signupForm = document.getElementById("signupForm");
+    const signupNameInput = document.getElementById("signupName");
+    const signupEmailInput = document.getElementById("signupEmail");
+    const signupPasswordInput = document.getElementById("signupPassword");
+    const signupStatus = document.getElementById("signupStatus");
+
+    const logoutButton = document.getElementById("logoutButton");
+
+    const displayNameForm = document.getElementById("displayNameForm");
+    const displayNameInput = document.getElementById("displayNameInput");
+    const displayNameStatus = document.getElementById("displayNameStatus");
+
+    const createSongForm = document.getElementById("createSongForm");
+    const createSongStatus = document.getElementById("createSongStatus");
+
+    const campaignsTableBody = document.getElementById("campaignsTableBody");
+    const myCampaignsStatus = document.getElementById("myCampaignsStatus");
+    const impactTotalCampaigns = document.getElementById("impactTotalCampaigns");
+    const impactLatestCreated = document.getElementById("impactLatestCreated");
+
+    const audioUrlInput = document.getElementById("audio_url");
+    const audioFileInput = document.getElementById("audio_file");
+    const uploadAudioBtn = document.getElementById("uploadAudioBtn");
+    const uploadAudioStatus = document.getElementById("uploadAudioStatus");
+
+    const orgSignupForm = document.getElementById("orgSignupForm");
+    const orgSignupStatus = document.getElementById("orgSignupStatus");
+
+    let currentUser = null;
+
+    async function refreshUser() {
+      const { data, error } = await supabaseClient.auth.getUser();
+      currentUser = (!error && data?.user) ? data.user : null;
+      updateAuthUI();
+      if (currentUser) {
+        await loadDisplayName();
+        await loadOrgStatus();
+        await loadCampaigns();
+      } else {
+        clearCampaignsTable();
+      }
+    }
+
+    function updateAuthUI() {
+      if (currentUser) {
+        authStatusText.textContent = "Logged in.";
+        accountEmailSpan.textContent = currentUser.email || "(no email)";
+      } else {
+        authStatusText.textContent = "Not logged in.";
+        accountEmailSpan.textContent = "Not logged in";
+        accountOrgStatusSpan.textContent = "—";
+        displayNameInput.value = "";
+      }
+    }
+
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      loginStatus.textContent = "Logging in...";
+      loginStatus.style.color = "#6b7280";
+      const email = loginEmailInput.value.trim();
+      const password = loginPasswordInput.value;
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) {
+        loginStatus.textContent = "Login error: " + error.message;
+        loginStatus.style.color = "red";
+        return;
+      }
+      loginStatus.textContent = "Logged in.";
+      loginStatus.style.color = "green";
+      await refreshUser();
+    });
+
+    signupForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      signupStatus.textContent = "Creating account...";
+      signupStatus.style.color = "#6b7280";
+      const name = signupNameInput.value.trim();
+      const email = signupEmailInput.value.trim();
+      const password = signupPasswordInput.value;
+      const { error } = await supabaseClient.auth.signUp({
+        email, password, options: { data: { full_name: name || null } }
+      });
+      if (error) {
+        signupStatus.textContent = "Signup error: " + error.message;
+        signupStatus.style.color = "red";
+        return;
+      }
+      signupStatus.textContent = "Account created. You can log in now.";
+      signupStatus.style.color = "green";
+    });
+
+    logoutButton.addEventListener("click", async () => {
+      await supabaseClient.auth.signOut();
+      currentUser = null;
+      updateAuthUI();
+      clearCampaignsTable();
+    });
+
+    async function loadDisplayName() {
+      if (!currentUser) return;
+      const { data, error } = await supabaseClient
+        .from("profiles")
+        .select("display_name")
+        .eq("id", currentUser.id)
+        .single();
+      if (error && error.code !== "PGRST116") return;
+      if (data?.display_name) displayNameInput.value = data.display_name;
+    }
+
+    displayNameForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!currentUser) {
+        displayNameStatus.textContent = "Please log in first.";
+        displayNameStatus.style.color = "red";
+        return;
+      }
+      const name = displayNameInput.value.trim();
+      displayNameStatus.textContent = "Saving...";
+      displayNameStatus.style.color = "#6b7280";
+      const { error } = await supabaseClient
+        .from("profiles")
+        .upsert({ id: currentUser.id, display_name: name }, { onConflict: "id" });
+      if (error) {
+        displayNameStatus.textContent = "Error saving name: " + error.message;
+        displayNameStatus.style.color = "red";
+        return;
+      }
+      displayNameStatus.textContent = "Saved.";
+      displayNameStatus.style.color = "green";
+    });
+
+    async function loadOrgStatus() {
+      if (!currentUser) return;
+      const { data, error } = await supabaseClient
+        .from("org_signups")
+        .select("status, created_at")
+        .eq("user_id", currentUser.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) { accountOrgStatusSpan.textContent = "Error loading."; return; }
+      if (!data) accountOrgStatusSpan.textContent = "No application yet.";
+      else accountOrgStatusSpan.textContent = data.status || "pending";
+    }
+
+    orgSignupForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!currentUser) {
+        orgSignupStatus.textContent = "Please log in first.";
+        orgSignupStatus.style.color = "red";
+        return;
+      }
+      orgSignupStatus.textContent = "Submitting...";
+      orgSignupStatus.style.color = "#6b7280";
+      const payload = {
+        user_id: currentUser.id,
+        org_name: document.getElementById("org_name").value.trim(),
+        org_email: document.getElementById("org_email").value.trim(),
+        country: document.getElementById("org_country").value.trim() || null,
+        nonprofit_number: document.getElementById("org_number").value.trim(),
+        website: document.getElementById("org_website").value.trim() || null,
+        mission: document.getElementById("org_mission").value.trim() || null,
+        status: "pending"
+      };
+      const { error } = await supabaseClient.from("org_signups").insert(payload);
+      if (error) {
+        orgSignupStatus.textContent = "Error submitting: " + error.message;
+        orgSignupStatus.style.color = "red";
+        return;
+      }
+      orgSignupStatus.textContent = "Submitted. We will review your organization.";
+      orgSignupStatus.style.color = "green";
+      await loadOrgStatus();
+    });
+
+    uploadAudioBtn.addEventListener("click", async () => {
+      uploadAudioStatus.textContent = "";
+      uploadAudioStatus.style.color = "#6b7280";
+      const file = audioFileInput.files[0];
+      if (!file) { uploadAudioStatus.textContent = "Please choose an audio file first."; uploadAudioStatus.style.color = "red"; return; }
+      if (!file.type.startsWith("audio/")) { uploadAudioStatus.textContent = "File must be an audio file."; uploadAudioStatus.style.color = "red"; return; }
+
+      const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+      if (userError || !userData?.user) { uploadAudioStatus.textContent = "Please sign in before uploading audio."; uploadAudioStatus.style.color = "red"; return; }
+
+      const userId = userData.user.id;
+      uploadAudioStatus.textContent = "Uploading audio...";
+      const timestamp = Date.now();
+      const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+      const filePath = `${userId}/${timestamp}-${safeName}`;
+
+      const { error: uploadError } = await supabaseClient.storage
+        .from("song-audio")
+        .upload(filePath, file, { cacheControl: "3600", upsert: false });
+
+      if (uploadError) { uploadAudioStatus.textContent = "Upload failed: " + uploadError.message; uploadAudioStatus.style.color = "red"; return; }
+
+      const { data: publicData } = supabaseClient.storage.from("song-audio").getPublicUrl(filePath);
+      if (!publicData?.publicUrl) { uploadAudioStatus.textContent = "Uploaded, but could not get public URL."; uploadAudioStatus.style.color = "red"; return; }
+
+      audioUrlInput.value = publicData.publicUrl;
+      uploadAudioStatus.textContent = "Upload complete. Audio URL attached.";
+      uploadAudioStatus.style.color = "green";
+    });
+
+    function formatDateTime(str) {
+      if (!str) return "";
+      const d = new Date(str);
+      if (Number.isNaN(d.getTime())) return "";
+      return d.toLocaleString();
+    }
+
+    function clearCampaignsTable() {
+      campaignsTableBody.innerHTML = "";
+      myCampaignsStatus.textContent = "Log in to see your campaigns.";
+      myCampaignsStatus.style.color = "#6b7280";
+      impactTotalCampaigns.textContent = "0";
+      impactLatestCreated.textContent = "—";
+    }
+
+    async function loadCampaigns() {
+      if (!currentUser) { clearCampaignsTable(); return; }
+      myCampaignsStatus.textContent = "Loading campaigns...";
+      myCampaignsStatus.style.color = "#6b7280";
+
+      const { data, error } = await supabaseClient
+        .from("campaigns")
+        .select("id, title, donation_url, status, created_at")
+        .eq("user_id", currentUser.id)
+        .order("created_at", { ascending: false });
+
+      if (error) { myCampaignsStatus.textContent = "Error loading campaigns: " + error.message; myCampaignsStatus.style.color = "red"; return; }
+
+      if (!data || data.length === 0) {
+        campaignsTableBody.innerHTML = "";
+        myCampaignsStatus.textContent = "No campaigns yet. Create your first one above.";
+        impactTotalCampaigns.textContent = "0";
+        impactLatestCreated.textContent = "—";
+        return;
+      }
+
+      campaignsTableBody.innerHTML = data.map((c) => {
+        const safeTitle = c.title || "(No title)";
+        const safeStatus = c.status || "draft";
+        const created = formatDateTime(c.created_at);
+        const donationCell = c.donation_url ? `<a href="${c.donation_url}" target="_blank" rel="noopener noreferrer">Open link</a>` : "—";
+        const viewLink = `<a href="campaign.html?id=${encodeURIComponent(c.id)}" target="_blank" rel="noopener noreferrer">View</a>`;
+        return `<tr><td>${safeTitle}</td><td>${donationCell}</td><td style="text-transform:capitalize;">${safeStatus}</td><td>${created}</td><td>${viewLink}</td></tr>`;
+      }).join("");
+
+      myCampaignsStatus.textContent = `Showing ${data.length} campaign(s).`;
+      impactTotalCampaigns.textContent = String(data.length);
+      impactLatestCreated.textContent = data[0]?.created_at ? formatDateTime(data[0].created_at) : "—";
+    }
+
+    async function insertSongWithFallback(payload) {
+      let res = await supabaseClient.from("songs").insert(payload).select().single();
+      if (!res.error) return res;
+
+      const msg = (res.error.message || "").toLowerCase();
+      const missingColumn = msg.includes("could not find the") && msg.includes("column");
+      if (!missingColumn) return res;
+
+      const safePayload = { ...payload };
+      delete safePayload.cause_category;
+      delete safePayload.cause_condition;
+      delete safePayload.condition;
+      delete safePayload.category;
+
+      return await supabaseClient.from("songs").insert(safePayload).select().single();
+    }
+
+    function slugify(text) {
+      return (text || "")
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+    }
+
+    // ✅ NEW: guarantees unique campaign_slug
+    async function makeUniqueSlug(baseTitle) {
+      let base = slugify(baseTitle);
+      if (!base) base = "campaign";
+
+      // If no collision, use it
+      const { data: existing, error } = await supabaseClient
+        .from("campaigns")
+        .select("id")
+        .eq("campaign_slug", base)
+        .limit(1);
+
+      if (!error && (!existing || existing.length === 0)) return base;
+
+      // Otherwise, try base-2, base-3, ...
+      for (let i = 2; i < 200; i++) {
+        const candidate = `${base}-${i}`;
+        const { data: ex2, error: err2 } = await supabaseClient
+          .from("campaigns")
+          .select("id")
+          .eq("campaign_slug", candidate)
+          .limit(1);
+
+        if (!err2 && (!ex2 || ex2.length === 0)) return candidate;
+      }
+
+      // Worst-case fallback: random suffix
+      return `${base}-${Math.random().toString(36).slice(2, 8)}`;
+    }
+
+    createSongForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      if (!currentUser) {
+        createSongStatus.textContent = "Please log in first.";
+        createSongStatus.style.color = "red";
+        return;
+      }
+
+      createSongStatus.textContent = "Saving to Supabase...";
+      createSongStatus.style.color = "#6b7280";
+
+      const category = causeCategorySelect.value;
+      const condition = causeConditionSelect.value;
+      const emotion = document.getElementById("emotion").value;
+      const genre = document.getElementById("genre").value;
+      const style = document.getElementById("style").value.trim();
+      const donationUrl = document.getElementById("donation_url").value.trim();
+      const campaignTitle = document.getElementById("campaign_title").value.trim();
+      const campaignDescription = document.getElementById("campaign_description").value.trim();
+      const prompt = lyricPromptInput.value || buildLyricPrompt(category, condition, emotion, genre, style);
+
+      if (DEMO_MODE && !audioUrlInput.value.trim()) audioUrlInput.value = DEMO_MP3_URL;
+
+      if (!category || !condition || !emotion || !genre || !donationUrl || !campaignTitle) {
+        createSongStatus.textContent = "Please fill in all required fields.";
+        createSongStatus.style.color = "red";
+        return;
+      }
+
+      try {
+        const songInsert = await insertSongWithFallback({
+          cause: `${category} — ${condition}`,
+          emotion,
+          genre,
+          style: style || null,
+          lyric_prompt: prompt,
+          audio_url: audioUrlInput.value.trim() || null,
+          cause_category: category,
+          cause_condition: condition,
+          status: "draft"
+        });
+
+        if (songInsert.error) {
+          createSongStatus.textContent = "Error saving song: " + songInsert.error.message;
+          createSongStatus.style.color = "red";
+          return;
+        }
+
+        const uniqueSlug = await makeUniqueSlug(campaignTitle);
+
+        const { error: campaignError } = await supabaseClient
+          .from("campaigns")
+          .insert({
+            user_id: currentUser.id,
+            song_id: songInsert.data.id,
+            title: campaignTitle,
+            description: campaignDescription || null,
+            donation_url: donationUrl,
+            campaign_slug: uniqueSlug,
+            status: "draft"
+          });
+
+        if (campaignError) {
+          createSongStatus.textContent = "Error saving campaign: " + campaignError.message;
+          createSongStatus.style.color = "red";
+          return;
+        }
+
+        createSongStatus.textContent = `Saved! Campaign slug: ${uniqueSlug}`;
+        createSongStatus.style.color = "green";
+
+        createSongForm.reset();
+        audioUrlInput.value = "";
+        autoUpdatePrompt();
+        await loadCampaigns();
+
+      } catch (err) {
+        createSongStatus.textContent = "Unexpected error: " + err.message;
+        createSongStatus.style.color = "red";
+      }
+    });
+
+    function applyDemoPrefill(force = false) {
+      if (!DEMO_MODE && !force) return;
+      const demoCategory = "Neurological Disorders";
+      const demoCondition = "Stroke";
+
+      causeCategorySelect.value = demoCategory;
+      populateConditionsForCategory(demoCategory);
+      causeConditionSelect.value = demoCondition;
+
+      document.getElementById("emotion").value = "Hopeful";
+      document.getElementById("genre").value = "Pop";
+      document.getElementById("style").value = "like Ed Sheeran";
+      document.getElementById("donation_url").value = "https://example.org/donate";
+      document.getElementById("campaign_title").value = "You Are Not Alone";
+      document.getElementById("campaign_description").value = "A hopeful fundraising song to support patients and families.";
+      audioUrlInput.value = DEMO_MP3_URL;
+
+      autoUpdatePrompt();
+    }
+
+    refreshDemoUI();
+    if (DEMO_MODE) applyDemoPrefill();
+    autoUpdatePrompt();
+    refreshUser();
+  </script>
+</body>
+</html>
