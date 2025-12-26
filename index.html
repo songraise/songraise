@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SongRaise Lite</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:#f9fafb;
+      color:#111827;
+      margin:0;
+      padding:0;
+    }
+    .wrapper {
+      max-width:1100px;
+      margin:0 auto;
+      padding:24px 16px 80px;
+    }
+    h1,h2,h3 { margin-top:0; }
+    a { color:#2563eb; text-decoration:none; }
+
+    header {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:24px;
+    }
+    nav a {
+      margin-left:16px;
+      font-size:0.9rem;
+    }
+
+    .card {
+      background:#fff;
+      border:1px solid #e5e7eb;
+      border-radius:14px;
+      padding:18px;
+      margin-bottom:20px;
+    }
+
+    label {
+      display:block;
+      font-size:0.85rem;
+      margin-bottom:4px;
+      margin-top:12px;
+    }
+    input, select, textarea {
+      width:100%;
+      padding:8px;
+      border-radius:8px;
+      border:1px solid #d1d5db;
+      font-size:0.9rem;
+    }
+    textarea { resize:vertical; }
+
+    button {
+      margin-top:14px;
+      padding:10px 18px;
+      border-radius:999px;
+      border:none;
+      background:#2563eb;
+      color:#fff;
+      font-weight:600;
+      cursor:pointer;
+    }
+
+    table {
+      width:100%;
+      border-collapse:collapse;
+      font-size:0.9rem;
+    }
+    th, td {
+      padding:8px;
+      border-bottom:1px solid #e5e7eb;
+      text-align:left;
+    }
+    th { background:#f3f4f6; }
+
+    .demo-bar {
+      background:#fff;
+      border:2px dashed #2563eb;
+      border-radius:12px;
+      padding:14px;
+      margin-bottom:24px;
+    }
+
+    .status {
+      font-size:0.85rem;
+      margin-top:6px;
+    }
+  </style>
+</head>
+
+<body>
+<div class="wrapper">
+
+<header>
+  <h2>SongRaise Lite</h2>
+  <nav>
+    <a href="#create">Create</a>
+    <a href="#campaigns">My Campaigns</a>
+  </nav>
+</header>
+
+<!-- DEMO MODE BAR -->
+<div class="demo-bar">
+  <strong>Demo Mode</strong><br>
+  Creates a demo campaign with prefilled MP3 + lyrics.
+  <br>
+  <button id="demoBtn">Create Demo Campaign</button>
+  <div id="demoStatus" class="status"></div>
+</div>
+
+<!-- CREATE CAMPAIGN -->
+<div class="card" id="create">
+  <h3>Create Fundraising Song & Campaign</h3>
+
+  <label>Cause Category</label>
+  <select id="cause_category">
+    <option value="">Select category...</option>
+  </select>
+
+  <label>Condition</label>
+  <select id="condition" disabled>
+    <option value="">Select condition...</option>
+  </select>
+
+  <label>Emotion</label>
+  <select id="emotion">
+    <option>Hopeful</option>
+    <option>Comforting</option>
+    <option>Inspiring</option>
+    <option>Strong</option>
+  </select>
+
+  <label>Genre</label>
+  <select id="genre">
+    <option>Pop</option>
+    <option>Acoustic</option>
+    <option>Ballad</option>
+    <option>Folk</option>
+  </select>
+
+  <label>Artist Style (optional)</label>
+  <input id="style" placeholder="e.g. like Ed Sheeran" />
+
+  <label>Campaign Title</label>
+  <input id="campaign_title" />
+
+  <label>Donation URL</label>
+  <input id="donation_url" placeholder="https://..." />
+
+  <label>Lyrics Prompt (auto-generated)</label>
+  <textarea id="lyric_prompt" readonly></textarea>
+
+  <button id="createBtn">Create Campaign</button>
+  <div id="createStatus" class="status"></div>
+</div>
+
+<!-- CAMPAIGNS TABLE -->
+<div class="card" id="campaigns">
+  <h3>My Campaigns</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Condition</th>
+        <th>Status</th>
+        <th>View</th>
+      </tr>
+    </thead>
+    <tbody id="campaignRows"></tbody>
+  </table>
+  <div id="campaignStatus" class="status"></div>
+</div>
+
+</div>
+
+<!-- SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://jvvcxpjmdfeqjdmcemet.supabase.co";
+const SUPABASE_ANON_KEY = "PASTE_YOUR_KEY_HERE";
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* CAUSE LIBRARY */
+const CAUSE_LIBRARY = {
+  "Genetic & Autoimmune Disorders": [
+    "Crohn’s Disease",
+    "Lupus",
+    "Sjögren’s Syndrome",
+    "Scleroderma"
+  ],
+  "Mental Health & Behavioral Conditions": [
+    "Anxiety Disorders",
+    "Mood Disorders",
+    "Eating Disorders"
+  ],
+  "Cancer (All Types)": [
+    "Breast Cancer",
+    "Colon Cancer",
+    "Brain Tumors"
+  ]
+};
+
+const causeSelect = document.getElementById("cause_category");
+const conditionSelect = document.getElementById("condition");
+const lyricPrompt = document.getElementById("lyric_prompt");
+
+/* Populate categories */
+Object.keys(CAUSE_LIBRARY).forEach(cat => {
+  causeSelect.innerHTML += `<option value="${cat}">${cat}</option>`;
+});
+
+causeSelect.addEventListener("change", () => {
+  conditionSelect.innerHTML = "<option value=''>Select condition...</option>";
+  CAUSE_LIBRARY[causeSelect.value]?.forEach(c => {
+    conditionSelect.innerHTML += `<option value="${c}">${c}</option>`;
+  });
+  conditionSelect.disabled = false;
+});
+
+conditionSelect.addEventListener("change", updatePrompt);
+
+function updatePrompt() {
+  if (!conditionSelect.value) return;
+  lyricPrompt.value =
+    `Write a hopeful fundraising song about ${conditionSelect.value} (${causeSelect.value}). ` +
+    `Include empathy, community support, and a call to donate.`;
+}
+
+/* CREATE CAMPAIGN */
+document.getElementById("createBtn").onclick = async () => {
+  const title = campaign_title.value;
+  const donation = donation_url.value;
+
+  if (!title || !donation || !conditionSelect.value) {
+    createStatus.textContent = "Please fill all required fields.";
+    return;
+  }
+
+  const slugBase = title.toLowerCase().replace(/[^a-z0-9]+/g,"-");
+  const slug = slugBase + "-" + Math.floor(Math.random()*10000);
+
+  const { error } = await supabase.from("campaigns").insert({
+    title,
+    donation_url: donation,
+    campaign_slug: slug,
+    status: "draft"
+  });
+
+  if (error) {
+    createStatus.textContent = error.message;
+    return;
+  }
+
+  createStatus.textContent = "Campaign created!";
+  loadCampaigns();
+};
+
+/* LOAD CAMPAIGNS */
+async function loadCampaigns() {
+  const { data } = await supabase.from("campaigns").select("*").order("created_at",{ascending:false});
+  campaignRows.innerHTML = data.map(c => `
+    <tr>
+      <td>${c.title}</td>
+      <td>${c.condition || "—"}</td>
+      <td>${c.status}</td>
+      <td>
+        <a href="campaign.html?id=${c.id}">View</a>
+      </td>
+    </tr>
+  `).join("");
+}
+
+loadCampaigns();
+
+/* DEMO MODE */
+document.getElementById("demoBtn").onclick = async () => {
+  await supabase.from("campaigns").insert({
+    title:"Demo: Crohn’s Awareness",
+    condition:"Crohn’s Disease",
+    status:"public"
+  });
+  demoStatus.textContent = "Demo campaign created.";
+  loadCampaigns();
+};
+</script>
+</body>
+</html>
