@@ -317,6 +317,517 @@
     }
 
     loadCampaignPage();
+<!-- ===========================
+     SONG GENERATION (Option C)
+     =========================== -->
+<section id="sr-songjob" style="margin-top:24px; padding:16px; border:1px solid rgba(255,255,255,0.12); border-radius:14px; background:rgba(255,255,255,0.04);">
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+    <h2 style="margin:0; font-size:18px;">Song Job (Semi-Automatic)</h2>
+    <div id="sr-songjob-status" style="font-size:12px; padding:6px 10px; border-radius:999px; background:rgba(255,255,255,0.08);">
+      Status: <span id="sr-songjob-status-text">Loading…</span>
+    </div>
+  </div>
+
+  <p style="margin:10px 0 14px; opacity:0.9; line-height:1.35;">
+    Use this to reduce mistakes: generate a Prompt Pack, copy it into Suno, then upload the MP3 here so it attaches to this campaign automatically.
+  </p>
+
+  <div id="sr-songjob-owner-only" style="display:none;">
+    <div style="display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px;">
+      <div>
+        <label style="font-size:12px; opacity:0.85;">Song Title</label>
+        <input id="sr-song_title" type="text" placeholder="e.g., Every Note Counts" style="width:100%; padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(0,0,0,0.25); color:inherit;">
+      </div>
+      <div>
+        <label style="font-size:12px; opacity:0.85;">Genre</label>
+        <input id="sr-genre" type="text" placeholder="Pop / Rock / Folk / Hip-Hop…" style="width:100%; padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(0,0,0,0.25); color:inherit;">
+      </div>
+      <div>
+        <label style="font-size:12px; opacity:0.85;">Mood</label>
+        <input id="sr-mood" type="text" placeholder="Hopeful / Uplifting / Serious…" style="width:100%; padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(0,0,0,0.25); color:inherit;">
+      </div>
+      <div>
+        <label style="font-size:12px; opacity:0.85;">Style tags (comma separated)</label>
+        <input id="sr-style_tags" type="text" placeholder="Uplifting, Anthemic chorus, Modern pop…" style="width:100%; padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(0,0,0,0.25); color:inherit;">
+      </div>
+    </div>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+      <button id="sr-btn-save" style="padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.10); color:inherit; cursor:pointer;">
+        Save fields
+      </button>
+      <button id="sr-btn-build" style="padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.14); color:inherit; cursor:pointer;">
+        Build Prompt Pack
+      </button>
+      <button id="sr-btn-copy" style="padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.14); color:inherit; cursor:pointer;">
+        Copy Prompt Pack
+      </button>
+      <button id="sr-btn-open-suno" style="padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.14); color:inherit; cursor:pointer;">
+        Open Suno
+      </button>
+    </div>
+
+    <div style="margin-top:12px;">
+      <label style="font-size:12px; opacity:0.85;">Prompt Pack</label>
+      <textarea id="sr-suno_prompt" rows="8" placeholder="Click “Build Prompt Pack” to generate this automatically…" style="width:100%; padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(0,0,0,0.25); color:inherit;"></textarea>
+    </div>
+
+    <div style="margin-top:12px; padding:12px; border-radius:12px; border:1px dashed rgba(255,255,255,0.18);">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+        <strong>Upload MP3</strong>
+        <span style="font-size:12px; opacity:0.8;">(attaches to this campaign)</span>
+      </div>
+      <input id="sr-audio-file" type="file" accept="audio/mpeg,audio/mp3" style="margin-top:10px;">
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+        <button id="sr-btn-upload" style="padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.14); color:inherit; cursor:pointer;">
+          Upload MP3 to SongRaise
+        </button>
+        <button id="sr-btn-publish" style="padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.18); color:inherit; cursor:pointer;">
+          Publish Song (Public)
+        </button>
+        <button id="sr-btn-unpublish" style="padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.10); color:inherit; cursor:pointer;">
+          Unpublish
+        </button>
+      </div>
+      <div id="sr-songjob-msg" style="margin-top:10px; font-size:13px; opacity:0.95;"></div>
+    </div>
+  </div>
+
+  <!-- Public / Owner preview -->
+  <div style="margin-top:12px;">
+    <div id="sr-audio-wrap" style="display:none; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.12); background:rgba(0,0,0,0.18);">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+        <strong>Audio Preview</strong>
+        <span id="sr-audio-privacy" style="font-size:12px; opacity:0.8;"></span>
+      </div>
+      <audio id="sr-audio" controls style="width:100%; margin-top:10px;"></audio>
+      <div id="sr-audio-link" style="margin-top:8px; font-size:12px; opacity:0.8;"></div>
+    </div>
+  </div>
+
+  <div id="sr-songjob-public-note" style="display:none; margin-top:10px; font-size:13px; opacity:0.9;">
+    This campaign has no published song yet.
+  </div>
+</section>
+<script>
+/* =========================================================
+   SongRaise Option C: Song Job Module (safe + additive)
+   Requires: a working Supabase client on the page
+   ========================================================= */
+(function () {
+  const $ = (id) => document.getElementById(id);
+
+  const state = {
+    campaignId: null,
+    user: null,
+    job: null,
+    isOwner: false,
+    campaign: null
+  };
+
+  function msg(text, type="info") {
+    const el = $("sr-songjob-msg");
+    if (!el) return;
+    const colors = { info:"#fff", ok:"#b7ffbf", warn:"#ffe08a", err:"#ffb3b3" };
+    el.style.color = colors[type] || "#fff";
+    el.textContent = text;
+  }
+
+  function setStatus(text) {
+    const el = $("sr-songjob-status-text");
+    if (el) el.textContent = text;
+  }
+
+  function getCampaignIdFromUrl() {
+    const url = new URL(window.location.href);
+    return url.searchParams.get("id");
+  }
+
+  function getSupabaseClient() {
+    // Your v4 pages usually define `supabase` already.
+    // If not, you can set window.supabase = ... in your main script.
+    return window.supabase || window.supabaseClient || null;
+  }
+
+  async function fetchUser(sb) {
+    try {
+      const { data, error } = await sb.auth.getUser();
+      if (error) return null;
+      return data?.user || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async function fetchCampaign(sb, campaignId) {
+    // Minimal assumption: campaigns table has at least (id, user_id, title, description, donation_url, charity, illness)
+    // If your columns differ, this still works as long as id + user_id + title exist.
+    const { data, error } = await sb
+      .from("campaigns")
+      .select("*")
+      .eq("id", campaignId)
+      .single();
+    if (error) throw error;
+    return data;
+  }
+
+  async function getOrCreateJob(sb) {
+    // If owner: ensure there is exactly one "active" job (most recent). If none, create.
+    // If public viewer: only try to load published job.
+    if (!state.isOwner) {
+      const { data, error } = await sb
+        .from("song_jobs")
+        .select("*")
+        .eq("campaign_id", state.campaignId)
+        .eq("status", "published")
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (error) throw error;
+      return data?.[0] || null;
+    }
+
+    // Owner view: load most recent job
+    const { data: existing, error: e1 } = await sb
+      .from("song_jobs")
+      .select("*")
+      .eq("campaign_id", state.campaignId)
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (e1) throw e1;
+    if (existing && existing[0]) return existing[0];
+
+    // Create a new job
+    const payload = {
+      campaign_id: state.campaignId,
+      created_by: state.user.id,
+      status: "draft",
+      song_title: state.campaign?.title ? (state.campaign.title + " (Fundraiser)") : null,
+      genre: "Pop",
+      mood: "Hopeful",
+      style_tags: "Uplifting, Anthemic chorus, Modern pop",
+      suno_prompt: null
+    };
+
+    const { data: created, error: e2 } = await sb
+      .from("song_jobs")
+      .insert(payload)
+      .select("*")
+      .single();
+
+    if (e2) throw e2;
+    return created;
+  }
+
+  function fillFormFromJob(job) {
+    $("sr-song_title").value = job.song_title || "";
+    $("sr-genre").value = job.genre || "";
+    $("sr-mood").value = job.mood || "";
+    $("sr-style_tags").value = job.style_tags || "";
+    $("sr-suno_prompt").value = job.suno_prompt || "";
+  }
+
+  function buildPromptPack() {
+    const title = ($("sr-song_title").value || "").trim();
+    const genre = ($("sr-genre").value || "").trim();
+    const mood = ($("sr-mood").value || "").trim();
+    const tags = ($("sr-style_tags").value || "").trim();
+
+    const campaign = state.campaign || {};
+    const cause = (campaign.illness || campaign.cause || campaign.condition || "this cause");
+    const charity = (campaign.charity || campaign.charity_name || "the charity");
+    const donationUrl = (campaign.donation_url || campaign.donate_url || campaign.donationUrl || "");
+
+    const safetyDonationLine = donationUrl
+      ? `Call-to-action: Tell listeners to donate at: ${donationUrl}`
+      : `Call-to-action: Tell listeners to donate at the campaign link (do not invent a URL).`;
+
+    const pack =
+`TITLE: ${title || "Fundraising Anthem"}
+GENRE: ${genre || "Pop"}
+MOOD: ${mood || "Hopeful"}
+STYLE TAGS: ${tags || "Uplifting, Anthemic, Modern pop"}
+
+CONTEXT:
+- This is a fundraising song for: ${cause}
+- Benefiting: ${charity}
+- Tone: respectful, emotionally uplifting, community-oriented
+
+STRUCTURE:
+- Verse 1 (story / empathy)
+- Pre-chorus (build)
+- Chorus (anthemic, memorable)
+- Verse 2 (community support + hope)
+- Bridge (resilience / togetherness)
+- Final chorus with clear donation call
+
+LYRICS REQUIREMENTS:
+- Include empathy and hope
+- Avoid medical misinformation
+- Avoid promising cures
+- Keep it uplifting and respectful
+- ${safetyDonationLine}
+
+OPTIONAL:
+- Include one short “tag line” that could be used as a campaign slogan.`;
+
+    $("sr-suno_prompt").value = pack;
+    return pack;
+  }
+
+  async function saveJobFields(sb) {
+    if (!state.job) return;
+    const update = {
+      song_title: ($("sr-song_title").value || "").trim() || null,
+      genre: ($("sr-genre").value || "").trim() || null,
+      mood: ($("sr-mood").value || "").trim() || null,
+      style_tags: ($("sr-style_tags").value || "").trim() || null,
+      suno_prompt: ($("sr-suno_prompt").value || "").trim() || null
+    };
+
+    // If prompt exists, mark prompt_ready unless already further along
+    if (update.suno_prompt && (state.job.status === "draft")) {
+      update.status = "prompt_ready";
+    }
+
+    const { data, error } = await sb
+      .from("song_jobs")
+      .update(update)
+      .eq("id", state.job.id)
+      .select("*")
+      .single();
+
+    if (error) throw error;
+    state.job = data;
+    return data;
+  }
+
+  async function copyPrompt() {
+    const text = ($("sr-suno_prompt").value || "").trim();
+    if (!text) { msg("No Prompt Pack to copy. Click “Build Prompt Pack” first.", "warn"); return; }
+    await navigator.clipboard.writeText(text);
+    msg("Copied Prompt Pack to clipboard ✅", "ok");
+  }
+
+  function openSuno() {
+    window.open("https://suno.com/create", "_blank", "noopener,noreferrer");
+    msg("Opened Suno in a new tab. Paste the Prompt Pack there.", "info");
+  }
+
+  async function uploadMp3(sb) {
+    if (!state.job) return;
+    const fileInput = $("sr-audio-file");
+    const file = fileInput?.files?.[0];
+    if (!file) { msg("Choose an MP3 file first.", "warn"); return; }
+    if (!/audio\/mpeg|audio\/mp3/.test(file.type) && !file.name.toLowerCase().endsWith(".mp3")) {
+      msg("Please upload an MP3 file (.mp3).", "warn"); return;
+    }
+
+    // Ensure we have prompt saved first (reduces mistakes)
+    await saveJobFields(sb);
+
+    // Build storage path: userId/jobId.mp3
+    const objectName = `${state.user.id}/${state.job.id}.mp3`;
+
+    msg("Uploading MP3 to storage…", "info");
+    const { error: upErr } = await sb.storage
+      .from("song-audio")
+      .upload(objectName, file, {
+        cacheControl: "3600",
+        upsert: true,
+        contentType: "audio/mpeg"
+      });
+
+    if (upErr) throw upErr;
+
+    // Create a public URL *via storage endpoint* (still private bucket; public read is via policy)
+    const { data: pub } = sb.storage.from("song-audio").getPublicUrl(objectName);
+    const audioUrl = pub?.publicUrl || null;
+
+    const { data: updated, error: uErr } = await sb
+      .from("song_jobs")
+      .update({
+        audio_path: objectName,
+        audio_url: audioUrl,
+        status: (state.job.status === "published") ? "published" : "audio_uploaded"
+      })
+      .eq("id", state.job.id)
+      .select("*")
+      .single();
+
+    if (uErr) throw uErr;
+
+    state.job = updated;
+    msg("MP3 uploaded and attached ✅", "ok");
+    renderAudio();
+    renderStatus();
+  }
+
+  async function publish(sb, publish=true) {
+    if (!state.job) return;
+    if (publish) {
+      if (!state.job.audio_url || !state.job.audio_path) {
+        msg("Upload an MP3 before publishing.", "warn");
+        return;
+      }
+    }
+
+    const newStatus = publish ? "published" : (state.job.audio_url ? "audio_uploaded" : "draft");
+
+    const { data, error } = await sb
+      .from("song_jobs")
+      .update({ status: newStatus })
+      .eq("id", state.job.id)
+      .select("*")
+      .single();
+
+    if (error) throw error;
+    state.job = data;
+    msg(publish ? "Song published ✅ (public viewers can listen)" : "Song unpublished ✅", "ok");
+    renderAudio();
+    renderStatus();
+  }
+
+  function renderAudio() {
+    const wrap = $("sr-audio-wrap");
+    const audio = $("sr-audio");
+    const privacy = $("sr-audio-privacy");
+    const link = $("sr-audio-link");
+    const publicNote = $("sr-songjob-public-note");
+
+    const hasAudio = !!(state.job && state.job.audio_url);
+
+    if (hasAudio) {
+      wrap.style.display = "block";
+      audio.src = state.job.audio_url;
+      const isPub = (state.job.status === "published");
+      privacy.textContent = isPub ? "Public (published)" : "Private (not published yet)";
+      link.textContent = state.job.audio_url;
+      publicNote.style.display = "none";
+    } else {
+      wrap.style.display = "none";
+      if (!state.isOwner) {
+        publicNote.style.display = "block";
+      } else {
+        publicNote.style.display = "none";
+      }
+    }
+  }
+
+  function renderStatus() {
+    if (!state.job) { setStatus(state.isOwner ? "No job yet" : "No published song"); return; }
+    setStatus(state.job.status || "unknown");
+  }
+
+  function renderOwnerUI() {
+    $("sr-songjob-owner-only").style.display = state.isOwner ? "block" : "none";
+    $("sr-songjob-public-note").style.display = state.isOwner ? "none" : "block";
+  }
+
+  function wireButtons(sb) {
+    $("sr-btn-save").onclick = async () => {
+      try {
+        msg("Saving…", "info");
+        await saveJobFields(sb);
+        msg("Saved ✅", "ok");
+        renderStatus();
+      } catch (e) {
+        msg("Save failed: " + (e?.message || e), "err");
+      }
+    };
+
+    $("sr-btn-build").onclick = async () => {
+      try {
+        buildPromptPack();
+        msg("Prompt Pack built. Now click “Copy Prompt Pack” and paste into Suno.", "ok");
+        await saveJobFields(sb);
+        renderStatus();
+      } catch (e) {
+        msg("Build failed: " + (e?.message || e), "err");
+      }
+    };
+
+    $("sr-btn-copy").onclick = async () => {
+      try { await copyPrompt(); } catch (e) { msg("Copy failed: " + (e?.message || e), "err"); }
+    };
+
+    $("sr-btn-open-suno").onclick = () => openSuno();
+
+    $("sr-btn-upload").onclick = async () => {
+      try {
+        await uploadMp3(sb);
+      } catch (e) {
+        msg("Upload failed: " + (e?.message || e), "err");
+      }
+    };
+
+    $("sr-btn-publish").onclick = async () => {
+      try { await publish(sb, true); } catch (e) { msg("Publish failed: " + (e?.message || e), "err"); }
+    };
+
+    $("sr-btn-unpublish").onclick = async () => {
+      try { await publish(sb, false); } catch (e) { msg("Unpublish failed: " + (e?.message || e), "err"); }
+    };
+  }
+
+  async function init() {
+    const sb = getSupabaseClient();
+    if (!sb) {
+      setStatus("Error");
+      msg("Supabase client not found on this page. (The page must initialize Supabase first.)", "err");
+      return;
+    }
+
+    state.campaignId = getCampaignIdFromUrl();
+    if (!state.campaignId) {
+      setStatus("Error");
+      msg("No campaign id found in the URL (expected ?id=...)", "err");
+      return;
+    }
+
+    setStatus("Loading…");
+    state.user = await fetchUser(sb);
+
+    // Load campaign (public view should still work if your campaigns table is publicly readable for published campaigns)
+    try {
+      state.campaign = await fetchCampaign(sb, state.campaignId);
+    } catch (e) {
+      setStatus("Error");
+      msg("Could not load campaign for Song Job module: " + (e?.message || e), "err");
+      return;
+    }
+
+    // Determine owner
+    state.isOwner = !!(state.user && state.campaign && state.campaign.user_id === state.user.id);
+    renderOwnerUI();
+
+    // Load / create job
+    try {
+      if (!state.user && state.isOwner) state.isOwner = false;
+      state.job = await getOrCreateJob(sb);
+    } catch (e) {
+      // Public viewers will often get "no published song" which is fine
+      state.job = null;
+    }
+
+    // Render
+    renderStatus();
+    if (state.isOwner && state.job) fillFormFromJob(state.job);
+    renderAudio();
+    wireButtons(sb);
+
+    if (!state.isOwner) {
+      msg(state.job ? "Published song loaded." : "No published song yet.", "info");
+    } else {
+      msg("Song Job ready. Build → Copy → Generate in Suno → Upload MP3 → Publish.", "info");
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+})();
+</script>
+
+    
   </script>
 </body>
 </html>
