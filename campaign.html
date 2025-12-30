@@ -4,6 +4,328 @@
   <meta charset="UTF-8" />
   <title>SongRaise Lite — Campaign</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      color: #111827;
+      background: #f9fafb;
+    }
+    a { color: inherit; }
+    .wrapper {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 24px 16px 64px;
+    }
+    header {
+      padding: 8px 0 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .logo {
+      font-weight: 800;
+      font-size: 1.2rem;
+    }
+    .logo span { color: #2563eb; }
+
+    .btn {
+      display:inline-block;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      border: 1px solid #d1d5db;
+      background: #ffffff;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn:hover { background:#f3f4f6; }
+    .btn-primary {
+      background:#2563eb;
+      color:#ffffff;
+      border-color:#2563eb;
+    }
+    .btn-primary:hover { background:#1d4ed8; border-color:#1d4ed8; }
+
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1px solid #e5e7eb;
+      padding: 20px 18px;
+      margin-bottom: 16px;
+    }
+    .pill {
+      display:inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #4b5563;
+      margin-bottom: 10px;
+    }
+    h1 {
+      font-size: 1.7rem;
+      margin-bottom: 8px;
+      line-height: 1.25;
+    }
+    h2 {
+      font-size: 1.15rem;
+      margin-bottom: 8px;
+    }
+    p {
+      font-size: 0.95rem;
+      color: #4b5563;
+      margin-bottom: 10px;
+    }
+    .meta {
+      font-size: 0.82rem;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+    .grid {
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-top: 10px;
+    }
+    .label {
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #374151;
+      margin-bottom: 3px;
+    }
+    .value {
+      font-size: 0.95rem;
+      color: #111827;
+      word-break: break-word;
+    }
+    pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.9rem;
+      background: #f9fafb;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      color: #111827;
+      margin-top: 8px;
+    }
+    audio {
+      width: 100%;
+      margin-top: 10px;
+    }
+    #statusMessage {
+      font-size: 0.95rem;
+      color: #6b7280;
+      margin: 10px 0 14px;
+    }
+    .error {
+      color: #b91c1c;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <header>
+      <div class="logo">SongRaise<span>Lite</span></div>
+      <!-- IMPORTANT: relative link works on GitHub Pages + local -->
+      <a class="btn" href="./index.html">← Back to dashboard</a>
+    </header>
+
+    <div id="statusMessage">Loading campaign…</div>
+
+    <div id="campaignContainer" style="display:none;">
+      <!-- Campaign -->
+      <div class="card">
+        <span class="pill" id="campaignStatusPill">Campaign</span>
+        <h1 id="campaignTitle">(Campaign title)</h1>
+        <p id="campaignDescription"></p>
+        <div class="meta" id="campaignMeta"></div>
+
+        <div style="margin-top:14px;">
+          <div class="label">Donation page</div>
+          <div class="value" id="donationLinkCell">—</div>
+        </div>
+      </div>
+
+      <!-- Song -->
+      <div class="card">
+        <h2>Song</h2>
+
+        <div class="grid">
+          <div>
+            <div class="label">Cause category</div>
+            <div class="value" id="songCauseCategory">—</div>
+          </div>
+          <div>
+            <div class="label">Condition</div>
+            <div class="value" id="songCondition">—</div>
+          </div>
+          <div>
+            <div class="label">Emotion</div>
+            <div class="value" id="songEmotion">—</div>
+          </div>
+          <div>
+            <div class="label">Genre</div>
+            <div class="value" id="songGenre">—</div>
+          </div>
+          <div>
+            <div class="label">Style</div>
+            <div class="value" id="songStyle">—</div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <div class="label">Lyrics prompt</div>
+          <div class="value" id="songLyricPrompt">—</div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <div class="label">Audio (MP3)</div>
+          <div id="songAudioBlock" class="value">No audio attached yet.</div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <div class="label">Lyrics (saved draft)</div>
+          <pre id="songLyrics">(No lyrics saved yet)</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Read UUID id from URL ?id=...
+    function getCampaignIdFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("id");
+    }
+
+    // Supabase init (same project)
+    const SUPABASE_URL = "https://jvvcxpjmdfeqjdmcemet.supabase.co";
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2dmN4cGptZGZlcWpkbWNlbWV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1Nzc3NzYsImV4cCI6MjA3NzE1Mzc3Nn0.LPRIt10bLZYfoOCx7nD4U0PsCURB7YToq4VbByliFi4";
+
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function formatDateTime(str) {
+      if (!str) return "";
+      const d = new Date(str);
+      if (Number.isNaN(d.getTime())) return "";
+      return d.toLocaleString();
+    }
+
+    function setError(msg) {
+      const status = document.getElementById("statusMessage");
+      status.textContent = msg;
+      status.classList.add("error");
+    }
+
+    async function loadCampaignPage() {
+      const id = getCampaignIdFromUrl();
+      const statusMessage = document.getElementById("statusMessage");
+      const container = document.getElementById("campaignContainer");
+
+      if (!id) {
+        setError("No campaign id found in URL. Example: campaign.html?id=YOUR_CAMPAIGN_ID");
+        return;
+      }
+
+      statusMessage.textContent = "Loading campaign…";
+
+      // Fetch campaign
+      const { data: campaign, error: campaignError } = await supabaseClient
+        .from("campaigns")
+        .select("id, title, description, donation_url, status, created_at, song_id")
+        .eq("id", id)
+        .single();
+
+      if (campaignError || !campaign) {
+        console.error(campaignError);
+        setError("Could not find a campaign with id: " + id);
+        return;
+      }
+
+      // Fill campaign info
+      document.getElementById("campaignTitle").textContent = campaign.title || "(Untitled campaign)";
+      document.getElementById("campaignDescription").textContent = campaign.description || "";
+      document.getElementById("campaignMeta").textContent = "Created " + formatDateTime(campaign.created_at);
+
+      const statusLabel = (campaign.status || "draft").toUpperCase();
+      document.getElementById("campaignStatusPill").textContent = "Status: " + statusLabel;
+
+      const donationCell = document.getElementById("donationLinkCell");
+      if (campaign.donation_url) {
+        const safeUrl = campaign.donation_url;
+        donationCell.innerHTML = `
+          <a class="btn btn-primary" href="${safeUrl}" target="_blank" rel="noopener noreferrer">Open donation page</a>
+          <div class="meta" style="margin-top:6px;">${safeUrl}</div>
+        `;
+      } else {
+        donationCell.textContent = "No donation URL saved.";
+      }
+
+      // Fetch song (if present)
+      if (campaign.song_id) {
+        const { data: song, error: songError } = await supabaseClient
+          .from("songs")
+          .select("cause_category, condition, cause, emotion, genre, style, lyric_prompt, lyrics, audio_url, created_at")
+          .eq("id", campaign.song_id)
+          .single();
+
+        if (songError) {
+          console.error(songError);
+        } else if (song) {
+          // Support both newer fields (cause_category/condition) and older (cause)
+          document.getElementById("songCauseCategory").textContent = song.cause_category || song.cause || "—";
+          document.getElementById("songCondition").textContent = song.condition || "—";
+          document.getElementById("songEmotion").textContent = song.emotion || "—";
+          document.getElementById("songGenre").textContent = song.genre || "—";
+          document.getElementById("songStyle").textContent = song.style || "—";
+          document.getElementById("songLyricPrompt").textContent = song.lyric_prompt || "—";
+
+          const lyricsEl = document.getElementById("songLyrics");
+          lyricsEl.textContent = (song.lyrics && song.lyrics.trim()) ? song.lyrics : "(No lyrics saved yet)";
+
+          const audioBlock = document.getElementById("songAudioBlock");
+          if (song.audio_url && song.audio_url.trim() !== "") {
+            const url = song.audio_url.trim();
+            audioBlock.innerHTML = `
+              <audio controls preload="metadata" src="${url}"></audio>
+              <div class="meta" style="margin-top:8px;">
+                <a class="btn" href="${url}" target="_blank" rel="noopener noreferrer">Open MP3 in new tab</a>
+              </div>
+            `;
+          } else {
+            audioBlock.textContent = "No audio attached yet.";
+          }
+        }
+      }
+
+      container.style.display = "block";
+      statusMessage.textContent = "";
+      statusMessage.classList.remove("error");
+    }
+
+    loadCampaignPage();
+  </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SongRaise Lite — Campaign</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
