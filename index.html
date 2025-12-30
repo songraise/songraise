@@ -146,6 +146,23 @@
     }
     .small{ font-size: 0.85rem; padding: 7px 10px; }
     code{ background:#f3f4f6; padding:2px 6px; border-radius:8px; }
+
+    /* Auth mini UI */
+    .authbox{
+      display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+    }
+    .authbox input{
+      width: 220px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      font-size: 0.9rem;
+    }
+    .authstatus{
+      font-size: 0.85rem;
+      color:#374151;
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
@@ -159,9 +176,18 @@
           <input type="checkbox" id="demoToggle" />
           Enable demo autofill
         </label>
-        <span class="demo-note">Fills the form with a working demo MP3 + sample data.</span>
+        <span class="demo-note">Fills the form with sample data. (You still must be logged in to save.)</span>
       </div>
+
       <div class="demo-right">
+        <!-- AUTH UI -->
+        <div class="authbox">
+          <span class="authstatus" id="authStatus">Checking login…</span>
+          <input id="emailInput" type="email" placeholder="you@email.com" />
+          <button class="btn btn-ghost small" id="loginBtn" type="button">Email me a login link</button>
+          <button class="btn btn-ghost small" id="logoutBtn" type="button" style="display:none;">Log out</button>
+        </div>
+
         <button class="btn btn-ghost small" id="demoFillBtn" type="button">Fill Demo Now</button>
         <button class="btn btn-ghost small" id="demoClearBtn" type="button">Clear</button>
       </div>
@@ -180,6 +206,7 @@
       <p class="lead">
         Choose a cause category + condition, add your donation link, and attach an MP3.
         “View” opens <code>campaign.html?id=...</code> correctly on GitHub Pages.
+        <br><strong>Note:</strong> You must be logged in to create campaigns (because of database security).
       </p>
 
       <div class="grid">
@@ -242,9 +269,10 @@
 
         <!-- CAMPAIGNS -->
         <div class="card" id="campaigns">
-          <h2>My campaigns</h2>
+          <h2>Campaigns</h2>
           <p class="lead" style="margin-bottom:10px;">
-            Latest campaigns from Supabase. “View” opens the campaign page inside GitHub Pages.
+            If you’re logged in: shows <strong>your</strong> campaigns.
+            If you’re logged out: shows only <strong>published</strong> campaigns.
           </p>
 
           <div style="overflow-x:auto;">
@@ -273,15 +301,12 @@
      * IMPORTANT: BUILD THE RIGHT BASE URL FOR GITHUB PAGES
      ************************************************/
     function getBasePath(){
-      // If you're on .../songraise/index.html -> base is .../songraise/
-      // If you're on .../index.html -> base is .../
       const url = new URL(window.location.href);
       const path = url.pathname;
-      // remove trailing filename if present
       const basePath = path.endsWith("/") ? path : path.replace(/[^\/]+$/, "");
       return url.origin + basePath;
     }
-    const BASE = getBasePath(); // e.g. https://songraise.github.io/songraise/
+    const BASE = getBasePath();
 
     /************************************************
      * SUPABASE
@@ -291,43 +316,73 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     /************************************************
+     * AUTH (Magic link)
+     ************************************************/
+    const authStatusEl = document.getElementById("authStatus");
+    const emailInputEl = document.getElementById("emailInput");
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    let currentUser = null;
+
+    async function refreshAuthUI(){
+      const { data } = await supabaseClient.auth.getUser();
+      currentUser = data?.user || null;
+
+      if (currentUser){
+        authStatusEl.textContent = "Logged in ✅";
+        logoutBtn.style.display = "inline-block";
+      } else {
+        authStatusEl.textContent = "Logged out";
+        logoutBtn.style.display = "none";
+      }
+    }
+
+    loginBtn.addEventListener("click", async () => {
+      const email = (emailInputEl.value || "").trim();
+      if (!email){
+        alert("Type your email address first.");
+        return;
+      }
+
+      // IMPORTANT: this sends a magic link. You must click the link in your email.
+      const { error } = await supabaseClient.auth.signInWithOtp({
+        email,
+        options: {
+          // For GitHub Pages, this returns you to the same site after login
+          emailRedirectTo: window.location.origin + window.location.pathname
+        }
+      });
+
+      if (error){
+        alert("Login error: " + error.message);
+        return;
+      }
+
+      alert("Check your email for the login link, then click it.");
+    });
+
+    logoutBtn.addEventListener("click", async () => {
+      await supabaseClient.auth.signOut();
+      await refreshAuthUI();
+      await loadCampaigns();
+    });
+
+    supabaseClient.auth.onAuthStateChange(async () => {
+      await refreshAuthUI();
+      await loadCampaigns();
+    });
+
+    /************************************************
      * CAUSE CATEGORY + CONDITION DROPDOWNS
      ************************************************/
     const CAUSES = {
-      "Autoimmune & IBD": [
-        "Crohn's Disease",
-        "Ulcerative Colitis",
-        "Celiac Disease",
-        "Lupus"
-      ],
-      "Mental Health": [
-        "Anxiety Disorders",
-        "Mood Disorders",
-        "Eating Disorders"
-      ],
-      "Neurological Disorders": [
-        "Stroke",
-        "Parkinson’s Disease",
-        "Multiple Sclerosis (MS)",
-        "Epilepsy"
-      ],
-      "Cardiovascular Diseases": [
-        "Heart Attack",
-        "High Blood Pressure (Hypertension)",
-        "Arrhythmias"
-      ],
-      "Infectious Diseases": [
-        "Lyme Disease",
-        "HIV & AIDS",
-        "Hepatitis"
-      ],
-      "Cancer": [
-        "Breast Cancer",
-        "Colon Cancer",
-        "Brain Tumors / Brain Cancer",
-        "Leukemia",
-        "Lymphoma"
-      ]
+      "Autoimmune & IBD": ["Crohn's Disease","Ulcerative Colitis","Celiac Disease","Lupus"],
+      "Mental Health": ["Anxiety Disorders","Mood Disorders","Eating Disorders"],
+      "Neurological Disorders": ["Stroke","Parkinson’s Disease","Multiple Sclerosis (MS)","Epilepsy"],
+      "Cardiovascular Diseases": ["Heart Attack","High Blood Pressure (Hypertension)","Arrhythmias"],
+      "Infectious Diseases": ["Lyme Disease","HIV & AIDS","Hepatitis"],
+      "Cancer": ["Breast Cancer","Colon Cancer","Brain Tumors / Brain Cancer","Leukemia","Lymphoma"]
     };
 
     const causeCategoryEl = document.getElementById("cause_category");
@@ -392,7 +447,7 @@
     });
 
     /************************************************
-     * DEMO MODE (your MP3 wired)
+     * DEMO MODE
      ************************************************/
     const DEMO_MP3_URL = "https://jvvcxpjmdfeqjdmcemet.supabase.co/storage/v1/object/public/song-audio/Untitled%20folder/Well%20I%20knew%20I%20felt%20a%20tingle%20when%20my%20head%20(1).mp3";
     const demoToggle = document.getElementById("demoToggle");
@@ -508,7 +563,7 @@
     });
 
     /************************************************
-     * LOAD CAMPAIGNS + FIXED VIEW LINK PATH
+     * LOAD CAMPAIGNS (owner if logged in, else published)
      ************************************************/
     const campaignsBody = document.getElementById("campaignsBody");
     const campaignsStatus = document.getElementById("campaignsStatus");
@@ -517,11 +572,21 @@
       campaignsStatus.textContent = "Loading campaigns…";
       campaignsStatus.style.color = "#6b7280";
 
-      const { data, error } = await supabaseClient
+      let q = supabaseClient
         .from("campaigns")
-        .select("id, title, donation_url, created_at")
+        .select("id, title, donation_url, created_at, status")
         .order("created_at", { ascending: false })
         .limit(25);
+
+      if (currentUser){
+        // show only mine
+        q = q.eq("user_id", currentUser.id);
+      } else {
+        // public mode: show only published
+        q = q.eq("status", "published");
+      }
+
+      const { data, error } = await q;
 
       if (error){
         console.error(error);
@@ -532,7 +597,7 @@
       }
 
       if (!data || data.length === 0){
-        campaignsStatus.textContent = "No campaigns yet.";
+        campaignsStatus.textContent = currentUser ? "No campaigns yet." : "No published campaigns yet.";
         campaignsBody.innerHTML = "";
         return;
       }
@@ -543,8 +608,6 @@
           ? `<a href="${c.donation_url}" target="_blank" rel="noopener noreferrer">Open</a>`
           : "—";
         const created = formatDateTime(c.created_at);
-
-        // ✅ The fix: always use the correct GitHub Pages base path
         const viewHref = `${BASE}campaign.html?id=${encodeURIComponent(c.id)}`;
 
         return `<tr>
@@ -559,7 +622,7 @@
     }
 
     /************************************************
-     * CREATE SONG + CAMPAIGN
+     * CREATE SONG + CAMPAIGN (requires login)
      ************************************************/
     const createForm = document.getElementById("createForm");
     const createStatus = document.getElementById("createStatus");
@@ -568,6 +631,12 @@
       e.preventDefault();
       createStatus.textContent = "Saving…";
       createStatus.style.color = "#6b7280";
+
+      if (!currentUser){
+        createStatus.textContent = "Please log in first (top bar) — then try again.";
+        createStatus.style.color = "red";
+        return;
+      }
 
       const cause_category = causeCategoryEl.value;
       const condition = conditionEl.value;
@@ -588,6 +657,7 @@
       const lyric_prompt = autoLyricPrompt(cause_category, condition, emotion, genre, style || "");
       lyricPromptEl.value = lyric_prompt;
 
+      // 1) Create song
       const { data: song, error: songErr } = await supabaseClient
         .from("songs")
         .insert({
@@ -610,17 +680,19 @@
         return;
       }
 
+      // 2) Create campaign (FIX: include user_id)
       const campaign_slug = slugWithSuffix(title);
 
       const { error: campErr } = await supabaseClient
         .from("campaigns")
         .insert({
+          user_id: currentUser.id,     // ✅ REQUIRED for RLS
           song_id: song.id,
           title,
           description,
           donation_url,
           campaign_slug,
-          status: "public"
+          status: "published"          // ✅ aligns with typical public policy
         });
 
       if (campErr){
@@ -635,7 +707,13 @@
       await loadCampaigns();
     });
 
-    loadCampaigns();
+    /************************************************
+     * INIT
+     ************************************************/
+    (async function init(){
+      await refreshAuthUI();
+      await loadCampaigns();
+    })();
   </script>
 </body>
 </html>
