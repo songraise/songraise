@@ -371,7 +371,7 @@
       authStatusEl.textContent = "Sending link…";
 
       // Cache-bust the redirect URL so GitHub Pages serves fresh JS/CSS
-      const redirectTo = `${BASE}index.html?v=${Date.now()}`;
+      const redirectTo = `https://songraise.github.io/songraise/index.html?v=${Date.now()}`;
 
       const { error } = await supabaseClient.auth.signInWithOtp({
         email,
