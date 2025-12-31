@@ -83,7 +83,6 @@
     }
     .field-textarea{ min-height: 90px; resize: vertical; }
     .status{
-      indicating: 0;
       margin-top: 10px;
       font-size: 0.9rem;
       color:#6b7280;
@@ -308,8 +307,7 @@
     const SUPABASE_ANON_KEY =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2dmN4cGptZGZlcWpkbWNlbWV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1Nzc3NzYsImV4cCI6MjA3NzE1Mzc3Nn0.LPRIt10bLZYfoOCx7nD4U0PsCURB7YToq4VbByliFi4";
 
-    // ✅ IMPORTANT: For OTP code flow, we do NOT use PKCE redirect exchange.
-    // We just send a code and verify it in-page.
+    // OTP code flow: send code + verify code in-page.
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: {
         persistSession: true,
@@ -353,7 +351,7 @@
       }
     }
 
-    // ✅ Step 1: Send email (Supabase emails a 6-digit code when your template uses {{ .Token }})
+    // Step 1: Send email (template shows {{ .Token }}).
     sendCodeBtn.addEventListener("click", async () => {
       const email = (emailInputEl.value || "").trim();
       if (!email){ alert("Type your email address first."); return; }
@@ -373,7 +371,7 @@
       alert("Check your email for the 6-digit code. Paste it here, then click Verify.");
     });
 
-    // ✅ Step 2: Verify code (no links, no redirects)
+    // Step 2: Verify code (tries multiple types to match Supabase email flow).
     verifyCodeBtn.addEventListener("click", async () => {
       const email = (emailInputEl.value || "").trim();
       const token = (otpInputEl.value || "").trim();
@@ -383,36 +381,19 @@
 
       authStatusEl.textContent = "Verifying…";
 
-      let error = null;
+      const candidates = ["magiclink", "email", "signup"];
+      let lastErr = null;
 
-// Try normal email OTP (returning users)
-{
-  const res = await supabaseClient.auth.verifyOtp({ email, token, type: "email" });
-  error = res.error || null;
-}
+      for (const t of candidates) {
+        const res = await supabaseClient.auth.verifyOtp({ email, token, type: t });
+        if (!res.error) { lastErr = null; break; }
+        lastErr = res.error;
+      }
 
-// If that fails, try signup confirmation (new users)
-if (error) {
-  const res2 = await supabaseClient.auth.verifyOtp({ email, token, type: "signup" });
-  error = res2.error || null;
-}
-
-if (error){
-  console.error(error);
-  authStatusEl.textContent = "Logged out";
-  alert("Verify failed: " + error.message);
-  return;
-}
-
-otpInputEl.value = "";
-await refreshAuthUI();
-await loadCampaigns();
-
-
-      if (error){
-        console.error(error);
+      if (lastErr){
+        console.error(lastErr);
         authStatusEl.textContent = "Logged out";
-        alert("Verify failed: " + error.message);
+        alert("Verify failed: " + lastErr.message);
         return;
       }
 
