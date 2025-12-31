@@ -235,6 +235,29 @@
     window.supabaseClient = supabaseClient;
     window.supabase = supabaseClient;
 
+    /************************************************
+     * ✅ CRITICAL: Exchange ?code=... for a session
+     ************************************************/
+    async function handleAuthCodeRedirectIfPresent(){
+      try {
+        const url = new URL(window.location.href);
+        const code = url.searchParams.get("code");
+        if (!code) return;
+
+        const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
+        if (error) {
+          console.error("exchangeCodeForSession error:", error);
+          return;
+        }
+
+        // Remove ?code=... so refresh doesn't repeat it
+        url.searchParams.delete("code");
+        window.history.replaceState({}, document.title, url.toString());
+      } catch (e) {
+        console.error("handleAuthCodeRedirectIfPresent failed:", e);
+      }
+    }
+
     function formatDateTime(str) {
       if (!str) return "";
       const d = new Date(str);
@@ -330,7 +353,11 @@
       statusMessage.classList.remove("error");
     }
 
-    document.addEventListener("DOMContentLoaded", loadCampaignPage);
+    // ✅ IMPORTANT: exchange code first, then load page
+    document.addEventListener("DOMContentLoaded", async () => {
+      await handleAuthCodeRedirectIfPresent();
+      await loadCampaignPage();
+    });
   </script>
 
   <script>
@@ -361,7 +388,6 @@
       return window.supabaseClient || window.supabase || null;
     }
 
-    // ✅ FIX: getSession() first (reliable right after magic-link redirect)
     async function fetchUser(sb) {
       try {
         const { data: sess } = await sb.auth.getSession();
