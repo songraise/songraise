@@ -383,11 +383,31 @@
 
       authStatusEl.textContent = "Verifying…";
 
-      const { error } = await supabaseClient.auth.verifyOtp({
-        email,
-        token,
-        type: "email"
-      });
+      let error = null;
+
+// Try normal email OTP (returning users)
+{
+  const res = await supabaseClient.auth.verifyOtp({ email, token, type: "email" });
+  error = res.error || null;
+}
+
+// If that fails, try signup confirmation (new users)
+if (error) {
+  const res2 = await supabaseClient.auth.verifyOtp({ email, token, type: "signup" });
+  error = res2.error || null;
+}
+
+if (error){
+  console.error(error);
+  authStatusEl.textContent = "Logged out";
+  alert("Verify failed: " + error.message);
+  return;
+}
+
+otpInputEl.value = "";
+await refreshAuthUI();
+await loadCampaigns();
+
 
       if (error){
         console.error(error);
