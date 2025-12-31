@@ -13,11 +13,7 @@
       background: #f9fafb;
     }
     a { color: inherit; }
-    .wrapper {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 24px 16px 64px;
-    }
+    .wrapper { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
     header {
       padding: 8px 0 18px;
       display: flex;
@@ -41,11 +37,7 @@
       text-decoration: none;
     }
     .btn:hover { background:#f3f4f6; }
-    .btn-primary {
-      background:#2563eb;
-      color:#ffffff;
-      border-color:#2563eb;
-    }
+    .btn-primary { background:#2563eb; color:#ffffff; border-color:#2563eb; }
     .btn-primary:hover { background:#1d4ed8; border-color:#1d4ed8; }
 
     .card {
@@ -106,7 +98,6 @@
     <div id="statusMessage">Loading campaign…</div>
 
     <div id="campaignContainer" style="display:none;">
-      <!-- Campaign -->
       <div class="card">
         <span class="pill" id="campaignStatusPill">Campaign</span>
         <h1 id="campaignTitle">(Campaign title)</h1>
@@ -119,7 +110,6 @@
         </div>
       </div>
 
-      <!-- Song -->
       <div class="card">
         <h2>Song</h2>
 
@@ -147,9 +137,6 @@
         </div>
       </div>
 
-      <!-- ===========================
-           SONG GENERATION (Option C)
-           =========================== -->
       <section id="sr-songjob" style="margin-top:24px; padding:16px; border:1px solid rgba(17,24,39,0.12); border-radius:14px; background:#fff;">
         <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
           <h2 style="margin:0; font-size:18px;">Song Job (Semi-Automatic)</h2>
@@ -223,7 +210,6 @@
     </div>
   </div>
 
-  <!-- Supabase client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
@@ -236,18 +222,16 @@
     const SUPABASE_ANON_KEY =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2dmN4cGptZGZlcWpkbWNlbWV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1Nzc3NzYsImV4cCI6MjA3NzE1Mzc3Nn0.LPRIt10bLZYfoOCx7nD4U0PsCURB7YToq4VbByliFi4";
 
-  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: {
-    flowType: "pkce",
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-    storage: window.localStorage
-  }
-});
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        flowType: "pkce",
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storage: window.localStorage
+      }
+    });
 
-
-    // IMPORTANT: expose it so Option C module can find it
     window.supabaseClient = supabaseClient;
     window.supabase = supabaseClient;
 
@@ -349,7 +333,6 @@
     document.addEventListener("DOMContentLoaded", loadCampaignPage);
   </script>
 
-  <!-- OPTION C SCRIPT (unchanged logic, now in the right place) -->
   <script>
   (function () {
     const $ = (id) => document.getElementById(id);
@@ -378,8 +361,13 @@
       return window.supabaseClient || window.supabase || null;
     }
 
+    // ✅ FIX: getSession() first (reliable right after magic-link redirect)
     async function fetchUser(sb) {
       try {
+        const { data: sess } = await sb.auth.getSession();
+        const u = sess?.session?.user || null;
+        if (u) return u;
+
         const { data, error } = await sb.auth.getUser();
         if (error) return null;
         return data?.user || null;
@@ -524,7 +512,6 @@ LYRICS REQUIREMENTS:
       }
 
       await saveJobFields(sb);
-
       const objectName = `${state.user.id}/${state.job.id}.mp3`;
 
       msg("Uploading MP3…", "info");
