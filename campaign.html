@@ -236,23 +236,30 @@
     window.supabase = supabaseClient;
 
     /************************************************
-     * ✅ CRITICAL: Exchange ?code=... for a session
+     * ✅ FIXED: Exchange ?code=... for a session
+     * - ALWAYS removes ?code=... (even on error)
      ************************************************/
     async function handleAuthCodeRedirectIfPresent(){
+      const status = document.getElementById("statusMessage");
       try {
         const url = new URL(window.location.href);
         const code = url.searchParams.get("code");
         if (!code) return;
 
-        const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
-        if (error) {
-          console.error("exchangeCodeForSession error:", error);
-          return;
-        }
+        status.textContent = "Finishing login…";
 
-        // Remove ?code=... so refresh doesn't repeat it
+        const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
+
+        // ✅ Always remove code so you never get stuck
         url.searchParams.delete("code");
         window.history.replaceState({}, document.title, url.toString());
+
+        if (error) {
+          console.error("exchangeCodeForSession error:", error);
+          status.textContent =
+            "Login failed. Request + click the magic link in the SAME browser (Safari→Safari).";
+          status.classList.add("error");
+        }
       } catch (e) {
         console.error("handleAuthCodeRedirectIfPresent failed:", e);
       }
