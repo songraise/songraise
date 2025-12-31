@@ -150,16 +150,11 @@
       display:flex; gap:8px; align-items:center; flex-wrap:wrap;
     }
     .authbox input{
-      width: 220px;
+      width: 240px;
       padding: 8px 10px;
       border-radius: 999px;
       border: 1px solid #d1d5db;
       font-size: 0.9rem;
-    }
-    .authbox input.otp{
-      width: 140px;
-      letter-spacing: 0.12em;
-      text-align: center;
     }
     .authstatus{
       font-size: 0.85rem;
@@ -185,9 +180,7 @@
         <div class="authbox">
           <span class="authstatus" id="authStatus">Checking login…</span>
           <input id="emailInput" type="email" placeholder="you@email.com" />
-          <input id="otpInput" class="otp" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="6-digit code" />
-          <button class="btn btn-ghost small" id="sendCodeBtn" type="button">Send code</button>
-          <button class="btn btn-ghost small" id="verifyCodeBtn" type="button">Verify</button>
+          <button class="btn btn-ghost small" id="loginBtn" type="button">Email me a login link</button>
           <button class="btn btn-ghost small" id="logoutBtn" type="button" style="display:none;">Log out</button>
         </div>
 
@@ -307,7 +300,6 @@
     const SUPABASE_ANON_KEY =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2dmN4cGptZGZlcWpkbWNlbWV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1Nzc3NzYsImV4cCI6MjA3NzE1Mzc3Nn0.LPRIt10bLZYfoOCx7nD4U0PsCURB7YToq4VbByliFi4";
 
-    // OTP code flow: send code + verify code in-page.
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: {
         persistSession: true,
@@ -321,9 +313,7 @@
 
     const authStatusEl = document.getElementById("authStatus");
     const emailInputEl = document.getElementById("emailInput");
-    const otpInputEl = document.getElementById("otpInput");
-    const sendCodeBtn = document.getElementById("sendCodeBtn");
-    const verifyCodeBtn = document.getElementById("verifyCodeBtn");
+    const loginBtn = document.getElementById("loginBtn");
     const logoutBtn = document.getElementById("logoutBtn");
 
     let currentUser = null;
@@ -351,55 +341,52 @@
       }
     }
 
-    // Step 1: Send email (template shows {{ .Token }}).
-    sendCodeBtn.addEventListener("click", async () => {
+    // 🔐 Magic link PKCE exchange (handles ?code=... after clicking email link)
+    async function handleMagicLinkCode(){
+      const url = new URL(window.location.href);
+      const code = url.searchParams.get("code");
+      if (!code) return;
+
+      authStatusEl.textContent = "Finishing login…";
+
+      const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
+
+      // Always remove the code from the URL (even if it failed)
+      url.searchParams.delete("code");
+      // keep any ?v=... you already had
+      window.history.replaceState({}, document.title, url.toString());
+
+      if (error){
+        console.error("exchangeCodeForSession error:", error);
+        authStatusEl.textContent = "Logged out";
+        alert("Login failed: " + error.message);
+        return;
+      }
+    }
+
+    loginBtn.addEventListener("click", async () => {
       const email = (emailInputEl.value || "").trim();
-      if (!email){ alert("Type your email address first."); return; }
+      if (!email){ alert("Type your email first."); return; }
 
-      authStatusEl.textContent = "Sending code…";
+      authStatusEl.textContent = "Sending link…";
 
-      const { error } = await supabaseClient.auth.signInWithOtp({ email });
+      // Cache-bust the redirect URL so GitHub Pages serves fresh JS/CSS
+      const redirectTo = `${BASE}index.html?v=${Date.now()}`;
+
+      const { error } = await supabaseClient.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: redirectTo }
+      });
 
       if (error){
         console.error(error);
         authStatusEl.textContent = "Logged out";
-        alert("Error sending code: " + error.message);
+        alert("Error sending login link: " + error.message);
         return;
       }
 
-      authStatusEl.textContent = "Code sent ✅ (check your email)";
-      alert("Check your email for the 6-digit code. Paste it here, then click Verify.");
-    });
-
-    // Step 2: Verify code (tries multiple types to match Supabase email flow).
-    verifyCodeBtn.addEventListener("click", async () => {
-      const email = (emailInputEl.value || "").trim();
-      const token = (otpInputEl.value || "").trim();
-
-      if (!email){ alert("Type your email address first."); return; }
-      if (!token){ alert("Paste the 6-digit code from your email."); return; }
-
-      authStatusEl.textContent = "Verifying…";
-
-      const candidates = ["magiclink", "email", "signup"];
-      let lastErr = null;
-
-      for (const t of candidates) {
-        const res = await supabaseClient.auth.verifyOtp({ email, token, type: t });
-        if (!res.error) { lastErr = null; break; }
-        lastErr = res.error;
-      }
-
-      if (lastErr){
-        console.error(lastErr);
-        authStatusEl.textContent = "Logged out";
-        alert("Verify failed: " + lastErr.message);
-        return;
-      }
-
-      otpInputEl.value = "";
-      await refreshAuthUI();
-      await loadCampaigns();
+      authStatusEl.textContent = "Check your email (login link sent)";
+      alert("Open the newest email and click the login link in the SAME browser/window you requested it from.");
     });
 
     logoutBtn.addEventListener("click", async () => {
@@ -693,6 +680,7 @@
     });
 
     (async function init(){
+      await handleMagicLinkCode();
       await refreshAuthUI();
       await loadCampaigns();
     })();
