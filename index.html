@@ -83,6 +83,7 @@
     }
     .field-textarea{ min-height: 90px; resize: vertical; }
     .status{
+      indicating: 0;
       margin-top: 10px;
       font-size: 0.9rem;
       color:#6b7280;
@@ -156,6 +157,11 @@
       border: 1px solid #d1d5db;
       font-size: 0.9rem;
     }
+    .authbox input.otp{
+      width: 140px;
+      letter-spacing: 0.12em;
+      text-align: center;
+    }
     .authstatus{
       font-size: 0.85rem;
       color:#374151;
@@ -180,7 +186,9 @@
         <div class="authbox">
           <span class="authstatus" id="authStatus">Checking login…</span>
           <input id="emailInput" type="email" placeholder="you@email.com" />
-          <button class="btn btn-ghost small" id="loginBtn" type="button">Email me a login link</button>
+          <input id="otpInput" class="otp" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="6-digit code" />
+          <button class="btn btn-ghost small" id="sendCodeBtn" type="button">Send code</button>
+          <button class="btn btn-ghost small" id="verifyCodeBtn" type="button">Verify</button>
           <button class="btn btn-ghost small" id="logoutBtn" type="button" style="display:none;">Log out</button>
         </div>
 
@@ -300,12 +308,12 @@
     const SUPABASE_ANON_KEY =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2dmN4cGptZGZlcWpkbWNlbWV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1Nzc3NzYsImV4cCI6MjA3NzE1Mzc3Nn0.LPRIt10bLZYfoOCx7nD4U0PsCURB7YToq4VbByliFi4";
 
+    // ✅ IMPORTANT: For OTP code flow, we do NOT use PKCE redirect exchange.
+    // We just send a code and verify it in-page.
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: {
-        flowType: "pkce",
         persistSession: true,
         autoRefreshToken: true,
-        detectSessionInUrl: true,
         storage: window.localStorage
       }
     });
@@ -315,43 +323,12 @@
 
     const authStatusEl = document.getElementById("authStatus");
     const emailInputEl = document.getElementById("emailInput");
-    const loginBtn = document.getElementById("loginBtn");
+    const otpInputEl = document.getElementById("otpInput");
+    const sendCodeBtn = document.getElementById("sendCodeBtn");
+    const verifyCodeBtn = document.getElementById("verifyCodeBtn");
     const logoutBtn = document.getElementById("logoutBtn");
 
     let currentUser = null;
-
-    /************************************************
-     * ✅ BULLETPROOF: Remove ?code=... immediately
-     * (so you can NEVER get stuck on it)
-     ************************************************/
-    async function handleAuthCodeRedirectIfPresent(){
-      const url = new URL(window.location.href);
-      const code = url.searchParams.get("code");
-      if (!code) return;
-
-      console.log("[SongRaise] magic-link code detected:", code);
-
-      // ✅ Remove code FIRST
-      url.searchParams.delete("code");
-      window.history.replaceState({}, document.title, url.toString());
-
-      authStatusEl.textContent = "Finishing login…";
-
-      try {
-        const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
-        if (error){
-          console.error("exchangeCodeForSession error:", error);
-          authStatusEl.textContent =
-            "Login failed. IMPORTANT: request + click the login link in the SAME browser (Safari→Safari).";
-        } else {
-          console.log("[SongRaise] exchangeCodeForSession success");
-        }
-      } catch (e){
-        console.error("exchangeCodeForSession exception:", e);
-        authStatusEl.textContent =
-          "Login failed (see console). IMPORTANT: request + click in the SAME browser.";
-      }
-    }
 
     async function refreshAuthUI(){
       const { data: sessData } = await supabaseClient.auth.getSession();
@@ -376,20 +353,52 @@
       }
     }
 
-    loginBtn.addEventListener("click", async () => {
+    // ✅ Step 1: Send email (Supabase emails a 6-digit code when your template uses {{ .Token }})
+    sendCodeBtn.addEventListener("click", async () => {
       const email = (emailInputEl.value || "").trim();
       if (!email){ alert("Type your email address first."); return; }
 
-      // ✅ Add cache-buster so GitHub Pages serves the newest file
-      const redirectTo = `${BASE}index.html?v=${Date.now()}`;
+      authStatusEl.textContent = "Sending code…";
 
-      const { error } = await supabaseClient.auth.signInWithOtp({
+      const { error } = await supabaseClient.auth.signInWithOtp({ email });
+
+      if (error){
+        console.error(error);
+        authStatusEl.textContent = "Logged out";
+        alert("Error sending code: " + error.message);
+        return;
+      }
+
+      authStatusEl.textContent = "Code sent ✅ (check your email)";
+      alert("Check your email for the 6-digit code. Paste it here, then click Verify.");
+    });
+
+    // ✅ Step 2: Verify code (no links, no redirects)
+    verifyCodeBtn.addEventListener("click", async () => {
+      const email = (emailInputEl.value || "").trim();
+      const token = (otpInputEl.value || "").trim();
+
+      if (!email){ alert("Type your email address first."); return; }
+      if (!token){ alert("Paste the 6-digit code from your email."); return; }
+
+      authStatusEl.textContent = "Verifying…";
+
+      const { error } = await supabaseClient.auth.verifyOtp({
         email,
-        options: { emailRedirectTo: redirectTo }
+        token,
+        type: "email"
       });
 
-      if (error){ alert("Login error: " + error.message); return; }
-      alert("Check your email for the login link, then click it.");
+      if (error){
+        console.error(error);
+        authStatusEl.textContent = "Logged out";
+        alert("Verify failed: " + error.message);
+        return;
+      }
+
+      otpInputEl.value = "";
+      await refreshAuthUI();
+      await loadCampaigns();
     });
 
     logoutBtn.addEventListener("click", async () => {
@@ -683,7 +692,6 @@
     });
 
     (async function init(){
-      await handleAuthCodeRedirectIfPresent();
       await refreshAuthUI();
       await loadCampaigns();
     })();
