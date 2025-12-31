@@ -145,9 +145,7 @@
       font-weight: 700;
     }
     .small{ font-size: 0.85rem; padding: 7px 10px; }
-    code{ background:#f3f4f6; padding:2px 6px; border-radius:8px; }
 
-    /* Auth mini UI */
     .authbox{
       display:flex; gap:8px; align-items:center; flex-wrap:wrap;
     }
@@ -168,7 +166,6 @@
 <body>
   <div class="wrapper">
 
-    <!-- DEMO BAR -->
     <div class="demo-bar">
       <div class="demo-left">
         <span class="pill">Demo Mode</span>
@@ -180,7 +177,6 @@
       </div>
 
       <div class="demo-right">
-        <!-- AUTH UI -->
         <div class="authbox">
           <span class="authstatus" id="authStatus">Checking login…</span>
           <input id="emailInput" type="email" placeholder="you@email.com" />
@@ -204,13 +200,10 @@
     <section class="section">
       <h1>Create a fundraising song + campaign</h1>
       <p class="lead">
-        Choose a cause category + condition, add your donation link, and attach an MP3.
-        “View” opens <code>campaign.html?id=...</code> correctly on GitHub Pages.
-        <br><strong>Note:</strong> You must be logged in to create campaigns (because of database security).
+        You must be logged in to create campaigns (database security). “View” opens <code>campaign.html?id=...</code>.
       </p>
 
       <div class="grid">
-        <!-- CREATE FORM -->
         <div class="card" id="create">
           <h2>Create campaign</h2>
 
@@ -267,12 +260,10 @@
           </form>
         </div>
 
-        <!-- CAMPAIGNS -->
         <div class="card" id="campaigns">
           <h2>Campaigns</h2>
           <p class="lead" style="margin-bottom:10px;">
-            If you’re logged in: shows <strong>your</strong> campaigns.
-            If you’re logged out: shows only <strong>published</strong> campaigns.
+            Logged in: shows <strong>your</strong> campaigns. Logged out: shows <strong>published</strong> campaigns.
           </p>
 
           <div style="overflow-x:auto;">
@@ -297,9 +288,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    /************************************************
-     * BUILD THE RIGHT BASE URL FOR GITHUB PAGES
-     ************************************************/
     function getBasePath(){
       const url = new URL(window.location.href);
       const path = url.pathname;
@@ -308,11 +296,9 @@
     }
     const BASE = getBasePath();
 
-    /************************************************
-     * SUPABASE
-     ************************************************/
     const SUPABASE_URL = "https://jvvcxpjmdfeqjdmcemet.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2dmN4cGptZGZlcWpkbWNlbWV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1Nzc3NzYsImV4cCI6MjA3NzE1Mzc3Nn0.LPRIt10bLZYfoOCx7nD4U0PsCURB7YToq4VbByliFi4"; // keep your real key
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2dmN4cGptZGZlcWpkbWNlbWV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1Nzc3NzYsImV4cCI6MjA3NzE1Mzc3Nn0.LPRIt10bLZYfoOCx7nD4U0PsCURB7YToq4VbByliFi4";
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: {
@@ -324,13 +310,9 @@
       }
     });
 
-    // Make it available to other pages if needed
     window.supabaseClient = supabaseClient;
     window.supabase = supabaseClient;
 
-    /************************************************
-     * AUTH (Magic link)
-     ************************************************/
     const authStatusEl = document.getElementById("authStatus");
     const emailInputEl = document.getElementById("emailInput");
     const loginBtn = document.getElementById("loginBtn");
@@ -339,18 +321,16 @@
     let currentUser = null;
 
     async function refreshAuthUI(){
-      // Use getSession first (most reliable immediately after magic link redirect)
       const { data: sessData } = await supabaseClient.auth.getSession();
-      const sessionUser = sessData?.session?.user || null;
+      const u = sessData?.session?.user || null;
 
-      if (sessionUser){
-        currentUser = sessionUser;
+      if (u){
+        currentUser = u;
         authStatusEl.textContent = "Logged in ✅";
         logoutBtn.style.display = "inline-block";
         return;
       }
 
-      // Fallback: getUser
       const { data: userData } = await supabaseClient.auth.getUser();
       currentUser = userData?.user || null;
 
@@ -365,23 +345,14 @@
 
     loginBtn.addEventListener("click", async () => {
       const email = (emailInputEl.value || "").trim();
-      if (!email){
-        alert("Type your email address first.");
-        return;
-      }
+      if (!email){ alert("Type your email address first."); return; }
 
       const { error } = await supabaseClient.auth.signInWithOtp({
         email,
-        options: {
-          emailRedirectTo: `${BASE}index.html`
-        }
+        options: { emailRedirectTo: `${BASE}index.html` }
       });
 
-      if (error){
-        alert("Login error: " + error.message);
-        return;
-      }
-
+      if (error){ alert("Login error: " + error.message); return; }
       alert("Check your email for the login link, then click it.");
     });
 
@@ -396,9 +367,6 @@
       await loadCampaigns();
     });
 
-    /************************************************
-     * CAUSE CATEGORY + CONDITION DROPDOWNS
-     ************************************************/
     const CAUSES = {
       "Autoimmune & IBD": ["Crohn's Disease","Ulcerative Colitis","Celiac Disease","Lupus"],
       "Mental Health": ["Anxiety Disorders","Mood Disorders","Eating Disorders"],
@@ -469,9 +437,6 @@
       }
     });
 
-    /************************************************
-     * DEMO MODE
-     ************************************************/
     const DEMO_MP3_URL = "https://jvvcxpjmdfeqjdmcemet.supabase.co/storage/v1/object/public/song-audio/Untitled%20folder/Well%20I%20knew%20I%20felt%20a%20tingle%20when%20my%20head%20(1).mp3";
     const demoToggle = document.getElementById("demoToggle");
     const demoFillBtn = document.getElementById("demoFillBtn");
@@ -489,13 +454,7 @@
       document.getElementById("campaign_description").value = "Demo campaign showing in-page MP3 playback on campaign.html.";
       document.getElementById("audio_url").value = DEMO_MP3_URL;
 
-      lyricPromptEl.value = autoLyricPrompt(
-        "Autoimmune & IBD",
-        "Crohn's Disease",
-        "Hopeful",
-        "Pop",
-        "uplifting pop"
-      );
+      lyricPromptEl.value = autoLyricPrompt("Autoimmune & IBD", "Crohn's Disease", "Hopeful", "Pop", "uplifting pop");
     }
 
     function clearForm(){
@@ -510,9 +469,6 @@
     demoClearBtn.addEventListener("click", clearForm);
     demoToggle.addEventListener("change", () => { if (demoToggle.checked) fillDemo(); });
 
-    /************************************************
-     * HELPERS
-     ************************************************/
     function formatDateTime(str){
       if (!str) return "";
       const d = new Date(str);
@@ -532,9 +488,6 @@
       return `${base}-${suffix}`;
     }
 
-    /************************************************
-     * MP3 UPLOAD (Storage bucket: song-audio)
-     ************************************************/
     const audioFileEl = document.getElementById("audio_file");
     const audioUrlEl = document.getElementById("audio_url");
     const uploadBtn = document.getElementById("uploadAudioBtn");
@@ -545,16 +498,8 @@
       uploadStatus.style.color = "#6b7280";
 
       const file = audioFileEl.files && audioFileEl.files[0];
-      if (!file){
-        uploadStatus.textContent = "Choose an MP3 file first.";
-        uploadStatus.style.color = "red";
-        return;
-      }
-      if (!file.type.startsWith("audio/")){
-        uploadStatus.textContent = "File must be an audio file.";
-        uploadStatus.style.color = "red";
-        return;
-      }
+      if (!file){ uploadStatus.textContent = "Choose an MP3 file first."; uploadStatus.style.color="red"; return; }
+      if (!file.type.startsWith("audio/")){ uploadStatus.textContent="File must be an audio file."; uploadStatus.style.color="red"; return; }
 
       uploadStatus.textContent = "Uploading…";
 
@@ -566,28 +511,16 @@
         .from("song-audio")
         .upload(filePath, file, { cacheControl: "3600", upsert: false });
 
-      if (upErr){
-        console.error(upErr);
-        uploadStatus.textContent = "Upload failed: " + upErr.message;
-        uploadStatus.style.color = "red";
-        return;
-      }
+      if (upErr){ console.error(upErr); uploadStatus.textContent="Upload failed: "+upErr.message; uploadStatus.style.color="red"; return; }
 
       const { data: pub } = supabaseClient.storage.from("song-audio").getPublicUrl(filePath);
-      if (!pub?.publicUrl){
-        uploadStatus.textContent = "Uploaded, but could not get public URL.";
-        uploadStatus.style.color = "red";
-        return;
-      }
+      if (!pub?.publicUrl){ uploadStatus.textContent="Uploaded, but could not get public URL."; uploadStatus.style.color="red"; return; }
 
       audioUrlEl.value = pub.publicUrl;
       uploadStatus.textContent = "Upload complete ✅ MP3 attached.";
       uploadStatus.style.color = "green";
     });
 
-    /************************************************
-     * LOAD CAMPAIGNS
-     ************************************************/
     const campaignsBody = document.getElementById("campaignsBody");
     const campaignsStatus = document.getElementById("campaignsStatus");
 
@@ -630,7 +563,6 @@
           : "—";
         const created = formatDateTime(c.created_at);
         const viewHref = `${BASE}campaign.html?id=${encodeURIComponent(c.id)}`;
-
         return `<tr>
           <td>${title}</td>
           <td>${donation}</td>
@@ -642,9 +574,6 @@
       campaignsStatus.textContent = `Showing ${data.length} campaign(s).`;
     }
 
-    /************************************************
-     * CREATE SONG + CAMPAIGN
-     ************************************************/
     const createForm = document.getElementById("createForm");
     const createStatus = document.getElementById("createStatus");
 
@@ -680,16 +609,7 @@
 
       const { data: song, error: songErr } = await supabaseClient
         .from("songs")
-        .insert({
-          cause_category,
-          condition,
-          emotion,
-          genre,
-          style,
-          lyric_prompt,
-          audio_url,
-          status: "draft"
-        })
+        .insert({ cause_category, condition, emotion, genre, style, lyric_prompt, audio_url, status: "draft" })
         .select()
         .single();
 
@@ -726,9 +646,6 @@
       await loadCampaigns();
     });
 
-    /************************************************
-     * INIT
-     ************************************************/
     (async function init(){
       await refreshAuthUI();
       await loadCampaigns();
