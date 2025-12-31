@@ -166,10 +166,6 @@
   </style>
 </head>
 <body>
-  <div style="background:yellow; padding:10px; font-weight:900;">
-  IF YOU SEE THIS YELLOW BAR, YOU ARE ON THE UPDATED INDEX.HTML ✅
-</div>
-
   <div class="wrapper">
 
     <!-- DEMO BAR -->
@@ -302,7 +298,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     /************************************************
-     * IMPORTANT: BUILD THE RIGHT BASE URL FOR GITHUB PAGES
+     * BUILD THE RIGHT BASE URL FOR GITHUB PAGES
      ************************************************/
     function getBasePath(){
       const url = new URL(window.location.href);
@@ -316,18 +312,21 @@
      * SUPABASE
      ************************************************/
     const SUPABASE_URL = "https://jvvcxpjmdfeqjdmcemet.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2dmN4cGptZGZlcWpkbWNlbWV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1Nzc3NzYsImV4cCI6MjA3NzE1Mzc3Nn0.LPRIt10bLZYfoOCx7nD4U0PsCURB7YToq4VbByliFi4";
-   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: {
-    flowType: "pkce",
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-    storage: window.localStorage
-  }
-});
+    const SUPABASE_ANON_KEY = "PASTE_YOUR_ANON_KEY_HERE"; // keep your real key
 
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        flowType: "pkce",
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storage: window.localStorage
+      }
+    });
 
+    // Make it available to other pages if needed
+    window.supabaseClient = supabaseClient;
+    window.supabase = supabaseClient;
 
     /************************************************
      * AUTH (Magic link)
@@ -340,8 +339,20 @@
     let currentUser = null;
 
     async function refreshAuthUI(){
-      const { data } = await supabaseClient.auth.getUser();
-      currentUser = data?.user || null;
+      // Use getSession first (most reliable immediately after magic link redirect)
+      const { data: sessData } = await supabaseClient.auth.getSession();
+      const sessionUser = sessData?.session?.user || null;
+
+      if (sessionUser){
+        currentUser = sessionUser;
+        authStatusEl.textContent = "Logged in ✅";
+        logoutBtn.style.display = "inline-block";
+        return;
+      }
+
+      // Fallback: getUser
+      const { data: userData } = await supabaseClient.auth.getUser();
+      currentUser = userData?.user || null;
 
       if (currentUser){
         authStatusEl.textContent = "Logged in ✅";
@@ -359,13 +370,10 @@
         return;
       }
 
-      // IMPORTANT: this sends a magic link. You must click the link in your email.
       const { error } = await supabaseClient.auth.signInWithOtp({
         email,
         options: {
-          // For GitHub Pages, this returns you to the same site after login
-         emailRedirectTo: `${BASE}index.html`
-
+          emailRedirectTo: `${BASE}index.html`
         }
       });
 
@@ -578,7 +586,7 @@
     });
 
     /************************************************
-     * LOAD CAMPAIGNS (owner if logged in, else published)
+     * LOAD CAMPAIGNS
      ************************************************/
     const campaignsBody = document.getElementById("campaignsBody");
     const campaignsStatus = document.getElementById("campaignsStatus");
@@ -594,10 +602,8 @@
         .limit(25);
 
       if (currentUser){
-        // show only mine
         q = q.eq("user_id", currentUser.id);
       } else {
-        // public mode: show only published
         q = q.eq("status", "published");
       }
 
@@ -637,7 +643,7 @@
     }
 
     /************************************************
-     * CREATE SONG + CAMPAIGN (requires login)
+     * CREATE SONG + CAMPAIGN
      ************************************************/
     const createForm = document.getElementById("createForm");
     const createStatus = document.getElementById("createStatus");
@@ -672,7 +678,6 @@
       const lyric_prompt = autoLyricPrompt(cause_category, condition, emotion, genre, style || "");
       lyricPromptEl.value = lyric_prompt;
 
-      // 1) Create song
       const { data: song, error: songErr } = await supabaseClient
         .from("songs")
         .insert({
@@ -695,19 +700,18 @@
         return;
       }
 
-      // 2) Create campaign (FIX: include user_id)
       const campaign_slug = slugWithSuffix(title);
 
       const { error: campErr } = await supabaseClient
         .from("campaigns")
         .insert({
-          user_id: currentUser.id,     // ✅ REQUIRED for RLS
+          user_id: currentUser.id,
           song_id: song.id,
           title,
           description,
           donation_url,
           campaign_slug,
-          status: "published"          // ✅ aligns with typical public policy
+          status: "published"
         });
 
       if (campErr){
