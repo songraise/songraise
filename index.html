@@ -313,6 +313,29 @@
     window.supabaseClient = supabaseClient;
     window.supabase = supabaseClient;
 
+    /************************************************
+     * ✅ CRITICAL: Exchange ?code=... for a session
+     ************************************************/
+    async function handleAuthCodeRedirectIfPresent(){
+      try {
+        const url = new URL(window.location.href);
+        const code = url.searchParams.get("code");
+        if (!code) return;
+
+        const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
+        if (error) {
+          console.error("exchangeCodeForSession error:", error);
+          return;
+        }
+
+        // Remove ?code=... so refresh doesn't repeat it
+        url.searchParams.delete("code");
+        window.history.replaceState({}, document.title, url.toString());
+      } catch (e) {
+        console.error("handleAuthCodeRedirectIfPresent failed:", e);
+      }
+    }
+
     const authStatusEl = document.getElementById("authStatus");
     const emailInputEl = document.getElementById("emailInput");
     const loginBtn = document.getElementById("loginBtn");
@@ -647,6 +670,7 @@
     });
 
     (async function init(){
+      await handleAuthCodeRedirectIfPresent();  // ✅ THIS is what you were missing
       await refreshAuthUI();
       await loadCampaigns();
     })();
