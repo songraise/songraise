@@ -321,27 +321,35 @@
     let currentUser = null;
 
     /************************************************
-     * ✅ FIXED: Exchange ?code=... for a session
-     * - ALWAYS removes ?code=... (even on error)
-     * - Shows a helpful message instead of hanging forever
+     * ✅ BULLETPROOF: Remove ?code=... immediately
+     * (so you can NEVER get stuck on it)
      ************************************************/
     async function handleAuthCodeRedirectIfPresent(){
       const url = new URL(window.location.href);
       const code = url.searchParams.get("code");
       if (!code) return;
 
-      authStatusEl.textContent = "Finishing login…";
+      console.log("[SongRaise] magic-link code detected:", code);
 
-      const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
-
-      // ✅ Always clean URL so you don't get stuck on ?code=
+      // ✅ Remove code FIRST
       url.searchParams.delete("code");
       window.history.replaceState({}, document.title, url.toString());
 
-      if (error){
-        console.error("exchangeCodeForSession error:", error);
+      authStatusEl.textContent = "Finishing login…";
+
+      try {
+        const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
+        if (error){
+          console.error("exchangeCodeForSession error:", error);
+          authStatusEl.textContent =
+            "Login failed. IMPORTANT: request + click the login link in the SAME browser (Safari→Safari).";
+        } else {
+          console.log("[SongRaise] exchangeCodeForSession success");
+        }
+      } catch (e){
+        console.error("exchangeCodeForSession exception:", e);
         authStatusEl.textContent =
-          "Login failed. Request + click the link in the SAME browser (Safari→Safari).";
+          "Login failed (see console). IMPORTANT: request + click in the SAME browser.";
       }
     }
 
@@ -372,9 +380,12 @@
       const email = (emailInputEl.value || "").trim();
       if (!email){ alert("Type your email address first."); return; }
 
+      // ✅ Add cache-buster so GitHub Pages serves the newest file
+      const redirectTo = `${BASE}index.html?v=${Date.now()}`;
+
       const { error } = await supabaseClient.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: `${BASE}index.html` }
+        options: { emailRedirectTo: redirectTo }
       });
 
       if (error){ alert("Login error: " + error.message); return; }
@@ -672,7 +683,7 @@
     });
 
     (async function init(){
-      await handleAuthCodeRedirectIfPresent();   // ✅ exchange + ALWAYS remove ?code=
+      await handleAuthCodeRedirectIfPresent();
       await refreshAuthUI();
       await loadCampaigns();
     })();
