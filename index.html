@@ -200,7 +200,7 @@
     <section class="section">
       <h1>Create a fundraising song + campaign</h1>
       <p class="lead">
-        You must be logged in to create campaigns (database security). “View” opens <code>campaign.html?id=...</code>.
+        You must be logged in to create campaigns. “View” opens <code>campaign.html?id=...</code>.
       </p>
 
       <div class="grid">
@@ -242,8 +242,8 @@
             <label class="field-label" for="campaign_description">Campaign description</label>
             <textarea id="campaign_description" class="field-textarea" placeholder="Short description..."></textarea>
 
-            <label class="field-label" for="audio_url">Song audio URL (auto-filled after upload)</label>
-            <input id="audio_url" class="field-input" type="url" placeholder="https://... (optional)" />
+            <label class="field-label" for="audio_url">Song audio URL (optional)</label>
+            <input id="audio_url" class="field-input" type="url" placeholder="https://..." />
 
             <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:10px;">
               <input id="audio_file" type="file" accept="audio/*" />
@@ -310,9 +310,6 @@
       }
     });
 
-    window.supabaseClient = supabaseClient;
-    window.supabase = supabaseClient;
-
     const authStatusEl = document.getElementById("authStatus");
     const emailInputEl = document.getElementById("emailInput");
     const loginBtn = document.getElementById("loginBtn");
@@ -320,31 +317,22 @@
 
     let currentUser = null;
 
-    async function handleAuthCodeRedirectIfPresent(){
+    function cleanUrlArtifacts(){
       const url = new URL(window.location.href);
-      const code = url.searchParams.get("code");
-      if (!code) return;
+      let changed = false;
 
-      console.log("[SongRaise] magic-link code detected:", code);
+      ["code","error","error_code","error_description","type","token","access_token","refresh_token","expires_in","expires_at","token_type"]
+        .forEach(k => {
+          if (url.searchParams.has(k)) { url.searchParams.delete(k); changed = true; }
+        });
 
-      url.searchParams.delete("code");
-      window.history.replaceState({}, document.title, url.toString());
+      if (window.location.hash && window.location.hash.length > 1) {
+        changed = true;
+        url.hash = "";
+      }
 
-      authStatusEl.textContent = "Finishing login…";
-
-      try {
-        const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
-        if (error){
-          console.error("exchangeCodeForSession error:", error);
-          authStatusEl.textContent =
-            "Login failed. IMPORTANT: request + click the login link in the SAME browser.";
-        } else {
-          console.log("[SongRaise] exchangeCodeForSession success");
-        }
-      } catch (e){
-        console.error("exchangeCodeForSession exception:", e);
-        authStatusEl.textContent =
-          "Login failed (see console). IMPORTANT: request + click in the SAME browser.";
+      if (changed) {
+        window.history.replaceState({}, document.title, url.toString());
       }
     }
 
@@ -375,6 +363,8 @@
       const email = (emailInputEl.value || "").trim();
       if (!email){ alert("Type your email address first."); return; }
 
+      authStatusEl.textContent = "Sending link…";
+
       const redirectTo = `${BASE}index.html?v=${Date.now()}`;
 
       const { error } = await supabaseClient.auth.signInWithOtp({
@@ -382,8 +372,14 @@
         options: { emailRedirectTo: redirectTo }
       });
 
-      if (error){ alert("Login error: " + error.message); return; }
-      alert("Check your email for the login link, then click it.");
+      if (error){
+        authStatusEl.textContent = "Logged out";
+        alert("Login error: " + error.message);
+        return;
+      }
+
+      authStatusEl.textContent = "Check your email (login link sent)";
+      alert("Open the newest email and click the login link in the SAME browser.");
     });
 
     logoutBtn.addEventListener("click", async () => {
@@ -392,12 +388,14 @@
       await loadCampaigns();
     });
 
-    supabaseClient.auth.onAuthStateChange(async () => {
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+      if (event === "SIGNED_IN" && session) {
+        cleanUrlArtifacts();
+      }
       await refreshAuthUI();
       await loadCampaigns();
     });
 
-    // ✅ THE KEY FIX: when you come BACK from campaign.html, refresh auth + campaigns
     window.addEventListener("pageshow", async () => {
       await refreshAuthUI();
       await loadCampaigns();
@@ -473,7 +471,6 @@
       }
     });
 
-    const DEMO_MP3_URL = "https://jvvcxpjmdfeqjdmcemet.supabase.co/storage/v1/object/public/song-audio/Untitled%20folder/Well%20I%20knew%20I%20felt%20a%20tingle%20when%20my%20head%20(1).mp3";
     const demoToggle = document.getElementById("demoToggle");
     const demoFillBtn = document.getElementById("demoFillBtn");
     const demoClearBtn = document.getElementById("demoClearBtn");
@@ -488,8 +485,6 @@
       document.getElementById("donation_url").value = "https://example.org/donate";
       document.getElementById("campaign_title").value = "You Are Not Alone (Demo)";
       document.getElementById("campaign_description").value = "Demo campaign showing in-page MP3 playback on campaign.html.";
-      document.getElementById("audio_url").value = DEMO_MP3_URL;
-
       lyricPromptEl.value = autoLyricPrompt("Autoimmune & IBD", "Crohn's Disease", "Hopeful", "Pop", "uplifting pop");
     }
 
@@ -511,6 +506,7 @@
       if (Number.isNaN(d.getTime())) return "";
       return d.toLocaleString();
     }
+
     function slugify(text){
       return (text || "")
         .toLowerCase()
@@ -518,6 +514,7 @@
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "");
     }
+
     function slugWithSuffix(title){
       const base = slugify(title) || "campaign";
       const suffix = Math.random().toString(36).slice(2, 6);
@@ -547,10 +544,18 @@
         .from("song-audio")
         .upload(filePath, file, { cacheControl: "3600", upsert: false });
 
-      if (upErr){ console.error(upErr); uploadStatus.textContent="Upload failed: "+upErr.message; uploadStatus.style.color="red"; return; }
+      if (upErr){
+        uploadStatus.textContent="Upload failed: "+upErr.message;
+        uploadStatus.style.color="red";
+        return;
+      }
 
       const { data: pub } = supabaseClient.storage.from("song-audio").getPublicUrl(filePath);
-      if (!pub?.publicUrl){ uploadStatus.textContent="Uploaded, but could not get public URL."; uploadStatus.style.color="red"; return; }
+      if (!pub?.publicUrl){
+        uploadStatus.textContent="Uploaded, but could not get public URL.";
+        uploadStatus.style.color="red";
+        return;
+      }
 
       audioUrlEl.value = pub.publicUrl;
       uploadStatus.textContent = "Upload complete ✅ MP3 attached.";
@@ -579,7 +584,6 @@
       const { data, error } = await q;
 
       if (error){
-        console.error(error);
         campaignsStatus.textContent = "Error loading campaigns: " + error.message;
         campaignsStatus.style.color = "red";
         campaignsBody.innerHTML = "";
@@ -650,7 +654,6 @@
         .single();
 
       if (songErr){
-        console.error(songErr);
         createStatus.textContent = "Error saving song: " + songErr.message;
         createStatus.style.color = "red";
         return;
@@ -671,7 +674,6 @@
         });
 
       if (campErr){
-        console.error(campErr);
         createStatus.textContent = "Error saving campaign: " + campErr.message;
         createStatus.style.color = "red";
         return;
@@ -683,9 +685,11 @@
     });
 
     (async function init(){
-      await handleAuthCodeRedirectIfPresent();
       await refreshAuthUI();
       await loadCampaigns();
+      if (window.location.hash && window.location.hash.length > 1) {
+        cleanUrlArtifacts();
+      }
     })();
   </script>
 </body>
