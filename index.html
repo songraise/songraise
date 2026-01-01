@@ -23,7 +23,7 @@
     @media(max-width:900px){.grid{grid-template-columns:1fr}}
     .card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;box-shadow:0 8px 18px rgba(15,23,42,.04)}
     label{display:block;margin:10px 0 4px;font-size:.85rem;font-weight:900;color:#374151}
-    input,select,textarea{width:100%;padding:9px 10px;border-radius:12px;border:1px solid #d1d5db;font-size:.95rem;background:#fff}
+    input,textarea{width:100%;padding:9px 10px;border-radius:12px;border:1px solid #d1d5db;font-size:.95rem;background:#fff}
     textarea{min-height:90px;resize:vertical}
     table{width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden}
     th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:.92rem}
@@ -48,13 +48,14 @@
 
     <div class="hero">
       <h1>Create a fundraising song + campaign</h1>
-      <p class="lead">Login should now work reliably on GitHub Pages (no PKCE code exchange). “View” opens <code>campaign.html?id=...</code>.</p>
+      <p class="lead">
+        Login uses magic-link tokens (hash). “View” opens <code>campaign.html?id=...</code>.
+      </p>
     </div>
 
     <div class="grid">
       <div class="card">
         <h2 style="margin-bottom:8px;">Create campaign</h2>
-
         <form id="createForm">
           <label for="title">Title</label>
           <input id="title" required placeholder="e.g., You Are Not Alone" />
@@ -74,7 +75,6 @@
 
       <div class="card">
         <h2 style="margin-bottom:8px;">Campaigns</h2>
-
         <div style="overflow-x:auto;">
           <table>
             <thead>
@@ -83,7 +83,6 @@
             <tbody id="campaignsBody"></tbody>
           </table>
         </div>
-
         <div id="campaignsStatus" class="status">Loading campaigns…</div>
       </div>
     </div>
@@ -91,22 +90,74 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    const SUPABASE_URL = "https://jvvcxpjmdfeqjdmcemet.supabase.co";
+    const SUPABASE_REF = "jvvcxpjmdfeqjdmcemet";
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2dmN4cGptZGZlcWpkbWNlbWV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1Nzc3NzYsImV4cCI6MjA3NzE1Mzc3Nn0.LPRIt10bLZYfoOCx7nD4U0PsCURB7YToq4VbByliFi4";
+
     function baseUrl(){
       const u = new URL(window.location.href);
       const basePath = u.pathname.endsWith("/") ? u.pathname : u.pathname.replace(/[^\/]+$/, "");
       return u.origin + basePath;
     }
 
-    const SUPABASE_URL = "https://jvvcxpjmdfeqjdmcemet.supabase.co";
-    const SUPABASE_ANON_KEY =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2dmN4cGptZGZlcWpkbWNlbWV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1Nzc3NzYsImV4cCI6MjA3NzE1Mzc3Nn0.LPRIt10bLZYfoOCx7nD4U0PsCURB7YToq4VbByliFi4";
+    function parseHashParams() {
+      const hash = (window.location.hash || "").replace(/^#/, "");
+      const params = new URLSearchParams(hash);
+      return {
+        access_token: params.get("access_token"),
+        refresh_token: params.get("refresh_token"),
+        token_type: params.get("token_type"),
+        expires_in: params.get("expires_in"),
+        expires_at: params.get("expires_at"),
+        type: params.get("type")
+      };
+    }
+
+    function saveSessionFromHashIfPresent(){
+      const p = parseHashParams();
+      if (!p.access_token || !p.refresh_token) return false;
+
+      const storageKey = `sb-${SUPABASE_REF}-auth-token`;
+      const now = Math.floor(Date.now() / 1000);
+
+      const expiresAt =
+        p.expires_at ? Number(p.expires_at) :
+        p.expires_in ? (now + Number(p.expires_in)) :
+        (now + 3600);
+
+      const sessionObj = {
+        access_token: p.access_token,
+        refresh_token: p.refresh_token,
+        token_type: p.token_type || "bearer",
+        expires_in: Math.max(0, expiresAt - now),
+        expires_at: expiresAt,
+        user: null
+      };
+
+      localStorage.setItem(storageKey, JSON.stringify(sessionObj));
+      return true;
+    }
+
+    function cleanUrl(){
+      const url = new URL(window.location.href);
+      url.hash = "";
+      url.searchParams.delete("code");
+      url.searchParams.delete("error");
+      url.searchParams.delete("error_code");
+      url.searchParams.delete("error_description");
+      history.replaceState({}, document.title, url.toString());
+    }
+
+    // ✅ IMPORTANT: capture hash tokens BEFORE creating the client
+    const imported = saveSessionFromHashIfPresent();
+    if (imported) cleanUrl();
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: {
-        flowType: "implicit",
         persistSession: true,
         autoRefreshToken: true,
-        detectSessionInUrl: true,
+        detectSessionInUrl: false,   // we already handled it
         storage: window.localStorage
       }
     });
@@ -121,16 +172,6 @@
 
     let currentUser = null;
 
-    function cleanUrl(){
-      const url = new URL(window.location.href);
-      url.searchParams.delete("code");
-      url.searchParams.delete("error");
-      url.searchParams.delete("error_code");
-      url.searchParams.delete("error_description");
-      url.hash = "";
-      history.replaceState({}, document.title, url.toString());
-    }
-
     async function refreshAuth(){
       const { data } = await supabaseClient.auth.getSession();
       currentUser = data?.session?.user || null;
@@ -139,8 +180,17 @@
         authStatusEl.textContent = "Logged in ✅";
         logoutBtn.style.display = "inline-block";
       } else {
-        authStatusEl.textContent = "Logged out";
-        logoutBtn.style.display = "none";
+        // If we stored a session but user isn't hydrated yet, we still treat as logged in
+        // and allow reads/writes; user_id-based operations will require user to load.
+        const { data: u } = await supabaseClient.auth.getUser().catch(() => ({ data: null }));
+        if (u?.user){
+          currentUser = u.user;
+          authStatusEl.textContent = "Logged in ✅";
+          logoutBtn.style.display = "inline-block";
+        } else {
+          authStatusEl.textContent = "Logged out";
+          logoutBtn.style.display = "none";
+        }
       }
     }
 
@@ -205,6 +255,7 @@
       }
 
       alert("Login email sent. Open the newest email and click the login link once.");
+      authStatusEl.textContent = "Check your email (link sent)";
     });
 
     logoutBtn.addEventListener("click", async () => {
@@ -214,15 +265,10 @@
       await loadCampaigns();
     });
 
-    supabaseClient.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN" && session) cleanUrl();
-      await refreshAuth();
-      await loadCampaigns();
-    });
-
     document.getElementById("createForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       createStatus.textContent = "";
+      createStatus.classList.remove("error");
 
       if (!currentUser){
         createStatus.textContent = "Please log in first.";
@@ -235,7 +281,6 @@
       const description = document.getElementById("description").value.trim() || null;
 
       createStatus.textContent = "Saving…";
-      createStatus.classList.remove("error");
 
       const { error } = await supabaseClient.from("campaigns").insert({
         user_id: currentUser.id,
