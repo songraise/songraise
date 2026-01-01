@@ -150,7 +150,7 @@
       display:flex; gap:8px; align-items:center; flex-wrap:wrap;
     }
     .authbox input{
-      width: 240px;
+      width: 220px;
       padding: 8px 10px;
       border-radius: 999px;
       border: 1px solid #d1d5db;
@@ -302,8 +302,10 @@
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: {
+        flowType: "pkce",
         persistSession: true,
         autoRefreshToken: true,
+        detectSessionInUrl: true,
         storage: window.localStorage
       }
     });
@@ -317,6 +319,34 @@
     const logoutBtn = document.getElementById("logoutBtn");
 
     let currentUser = null;
+
+    async function handleAuthCodeRedirectIfPresent(){
+      const url = new URL(window.location.href);
+      const code = url.searchParams.get("code");
+      if (!code) return;
+
+      console.log("[SongRaise] magic-link code detected:", code);
+
+      url.searchParams.delete("code");
+      window.history.replaceState({}, document.title, url.toString());
+
+      authStatusEl.textContent = "Finishing login…";
+
+      try {
+        const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
+        if (error){
+          console.error("exchangeCodeForSession error:", error);
+          authStatusEl.textContent =
+            "Login failed. IMPORTANT: request + click the login link in the SAME browser.";
+        } else {
+          console.log("[SongRaise] exchangeCodeForSession success");
+        }
+      } catch (e){
+        console.error("exchangeCodeForSession exception:", e);
+        authStatusEl.textContent =
+          "Login failed (see console). IMPORTANT: request + click in the SAME browser.";
+      }
+    }
 
     async function refreshAuthUI(){
       const { data: sessData } = await supabaseClient.auth.getSession();
@@ -341,52 +371,19 @@
       }
     }
 
-    // 🔐 Magic link PKCE exchange (handles ?code=... after clicking email link)
-    async function handleMagicLinkCode(){
-      const url = new URL(window.location.href);
-      const code = url.searchParams.get("code");
-      if (!code) return;
-
-      authStatusEl.textContent = "Finishing login…";
-
-      const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
-
-      // Always remove the code from the URL (even if it failed)
-      url.searchParams.delete("code");
-      // keep any ?v=... you already had
-      window.history.replaceState({}, document.title, url.toString());
-
-      if (error){
-        console.error("exchangeCodeForSession error:", error);
-        authStatusEl.textContent = "Logged out";
-        alert("Login failed: " + error.message);
-        return;
-      }
-    }
-
     loginBtn.addEventListener("click", async () => {
       const email = (emailInputEl.value || "").trim();
-      if (!email){ alert("Type your email first."); return; }
+      if (!email){ alert("Type your email address first."); return; }
 
-      authStatusEl.textContent = "Sending link…";
-
-      // Cache-bust the redirect URL so GitHub Pages serves fresh JS/CSS
-      const redirectTo = `https://songraise.github.io/songraise/index.html?v=${Date.now()}`.trim();
+      const redirectTo = `${BASE}index.html?v=${Date.now()}`;
 
       const { error } = await supabaseClient.auth.signInWithOtp({
         email,
         options: { emailRedirectTo: redirectTo }
       });
 
-      if (error){
-        console.error(error);
-        authStatusEl.textContent = "Logged out";
-        alert("Error sending login link: " + error.message);
-        return;
-      }
-
-      authStatusEl.textContent = "Check your email (login link sent)";
-      alert("Open the newest email and click the login link in the SAME browser/window you requested it from.");
+      if (error){ alert("Login error: " + error.message); return; }
+      alert("Check your email for the login link, then click it.");
     });
 
     logoutBtn.addEventListener("click", async () => {
@@ -396,6 +393,12 @@
     });
 
     supabaseClient.auth.onAuthStateChange(async () => {
+      await refreshAuthUI();
+      await loadCampaigns();
+    });
+
+    // ✅ THE KEY FIX: when you come BACK from campaign.html, refresh auth + campaigns
+    window.addEventListener("pageshow", async () => {
       await refreshAuthUI();
       await loadCampaigns();
     });
@@ -680,7 +683,7 @@
     });
 
     (async function init(){
-      await handleMagicLinkCode();
+      await handleAuthCodeRedirectIfPresent();
       await refreshAuthUI();
       await loadCampaigns();
     })();
