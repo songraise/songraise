@@ -7,37 +7,14 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body{ font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; line-height:1.6; color:#111827; background:#f9fafb; }
-    a{ color: inherit; }
     .wrapper{ max-width:1100px; margin:0 auto; padding:22px 16px 70px; }
-    header{ display:flex; justify-content:space-between; align-items:center; padding:10px 0 18px; }
-    .logo{ font-weight:900; font-size:1.25rem; letter-spacing:-0.02em; }
-    .logo span{ color:#2563eb; }
-    nav a{ margin-left:16px; font-size:0.95rem; color:#4b5563; text-decoration:none; }
-    nav a:hover{ color:#111827; }
     .card{ background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:18px 16px; box-shadow:0 8px 18px rgba(15,23,42,0.04); }
-    .section{ padding:18px 0; }
-    h1{ font-size:1.9rem; letter-spacing:-0.02em; margin-bottom:6px; }
-    h2{ font-size:1.25rem; margin-bottom:8px; }
-    .lead{ color:#4b5563; margin-bottom:14px; max-width:800px; }
-    .btn{ display:inline-block; padding:10px 16px; border-radius:999px; border:1px solid #d1d5db; background:#fff; cursor:pointer; font-weight:700; font-size:0.95rem; text-decoration:none; }
-    .btn-primary{ background:#2563eb; color:#fff; border-color:#2563eb; }
-    .btn-primary:hover{ background:#1d4ed8; }
-    .btn-ghost:hover{ background:#f3f4f6; }
-    .grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:start; }
-    @media (max-width:900px){ .grid{ grid-template-columns:1fr; } nav{ display:none; } }
-    .field-label{ display:block; font-size:0.85rem; color:#374151; font-weight:700; margin:10px 0 4px; }
-    .field-input,.field-select,.field-textarea{ width:100%; padding:9px 10px; border-radius:10px; border:1px solid #d1d5db; font-size:0.95rem; background:#fff; }
-    .field-textarea{ min-height:90px; resize:vertical; }
-    .status{ margin-top:10px; font-size:0.9rem; color:#6b7280; }
-    table{ width:100%; border-collapse:collapse; font-size:0.92rem; background:#fff; border:1px solid #e5e7eb; border-radius:14px; overflow:hidden; }
-    th,td{ padding:10px 10px; border-bottom:1px solid #e5e7eb; text-align:left; }
-    th{ background:#f3f4f6; font-size:0.85rem; color:#374151; }
-    tr:last-child td{ border-bottom:none; }
     .demo-bar{ position:sticky; top:0; z-index:50; background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:10px 12px; display:flex; gap:10px; align-items:center; justify-content:space-between; margin-bottom:14px; box-shadow:0 10px 24px rgba(15,23,42,0.06); }
     .demo-left{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
     .demo-right{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
     .pill{ display:inline-block; padding:4px 10px; border-radius:999px; background:#eef2ff; color:#1d4ed8; font-size:0.75rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; }
-    .toggle{ display:flex; align-items:center; gap:8px; font-size:0.9rem; color:#374151; font-weight:700; }
+    .btn{ display:inline-block; padding:10px 16px; border-radius:999px; border:1px solid #d1d5db; background:#fff; cursor:pointer; font-weight:700; font-size:0.95rem; }
+    .btn:hover{ background:#f3f4f6; }
     .small{ font-size:0.85rem; padding:7px 10px; }
     .authbox{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
     .authbox input{ width:220px; padding:8px 10px; border-radius:999px; border:1px solid #d1d5db; font-size:0.9rem; }
@@ -54,92 +31,29 @@
   <div class="wrapper">
     <div class="demo-bar">
       <div class="demo-left">
-        <span class="pill">Demo Mode</span>
-        <label class="toggle">
-          <input type="checkbox" id="demoToggle" />
-          Enable demo autofill
-        </label>
-        <span class="status" id="versionStamp"></span>
+        <span class="pill">Debug Build</span>
+        <span class="authstatus" id="versionStamp"></span>
       </div>
-
       <div class="demo-right">
         <div class="authbox">
           <span class="authstatus" id="authStatus">Checking login…</span>
           <input id="emailInput" type="email" placeholder="you@email.com" />
-          <button class="btn btn-ghost small" id="loginBtn" type="button">Email me a login link</button>
-          <button class="btn btn-ghost small" id="logoutBtn" type="button" style="display:none;">Log out</button>
-          <button class="btn btn-ghost small" id="resetAuthBtn" type="button">Reset Auth Storage</button>
+          <button class="btn small" id="loginBtn" type="button">Email me a login link</button>
+          <button class="btn small" id="logoutBtn" type="button" style="display:none;">Log out</button>
+          <button class="btn small" id="resetAuthBtn" type="button">Reset Auth Storage</button>
         </div>
       </div>
     </div>
 
     <div class="card">
-      <h2>Login Debug</h2>
+      <h2 style="margin-bottom:8px;">Login Debug</h2>
       <div id="debugBox" class="debug">Loading debug…</div>
     </div>
-
-    <section class="section" style="margin-top:18px;">
-      <h1>Create a fundraising song + campaign</h1>
-      <p class="lead">Once login works, we’ll confirm View → Back stays logged in.</p>
-      <div class="grid">
-        <div class="card">
-          <h2>Create campaign</h2>
-          <form id="createForm">
-            <label class="field-label" for="cause_category">Cause category</label>
-            <select id="cause_category" class="field-select" required></select>
-
-            <label class="field-label" for="condition">Condition</label>
-            <select id="condition" class="field-select" required></select>
-
-            <label class="field-label" for="emotion">Emotion</label>
-            <select id="emotion" class="field-select" required>
-              <option>Hopeful</option><option>Comforting</option><option>Inspiring</option><option>Strong</option>
-            </select>
-
-            <label class="field-label" for="genre">Genre</label>
-            <select id="genre" class="field-select" required>
-              <option>Pop</option><option>Acoustic</option><option>Folk</option><option>Ballad</option>
-            </select>
-
-            <label class="field-label" for="style">Artist style (optional)</label>
-            <input id="style" class="field-input" placeholder="e.g., uplifting pop" />
-
-            <label class="field-label" for="donation_url">Donation page URL</label>
-            <input id="donation_url" class="field-input" type="url" required placeholder="https://..." />
-
-            <label class="field-label" for="campaign_title">Campaign title</label>
-            <input id="campaign_title" class="field-input" required placeholder="e.g., You Are Not Alone" />
-
-            <label class="field-label" for="campaign_description">Campaign description</label>
-            <textarea id="campaign_description" class="field-textarea" placeholder="Short description..."></textarea>
-
-            <label class="field-label" for="audio_url">Song audio URL (optional)</label>
-            <input id="audio_url" class="field-input" type="url" placeholder="https://..." />
-
-            <div style="margin-top:14px;">
-              <button class="btn btn-primary" type="submit">Create Song + Campaign</button>
-              <div id="createStatus" class="status"></div>
-            </div>
-          </form>
-        </div>
-
-        <div class="card">
-          <h2>Campaigns</h2>
-          <div style="overflow-x:auto;">
-            <table>
-              <thead><tr><th>Title</th><th>Donation</th><th>Created</th><th>View</th></tr></thead>
-              <tbody id="campaignsBody"></tbody>
-            </table>
-          </div>
-          <div id="campaignsStatus" class="status">Loading campaigns…</div>
-        </div>
-      </div>
-    </section>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const BUILD_ID = "SR-LITE-PKCE-EXCHANGE-2026-01-01-001";
+    const BUILD_ID = "SR-LITE-PKCE-EXCHANGE-2026-01-01-002";
     document.getElementById("versionStamp").textContent = "Build: " + BUILD_ID;
 
     function getBasePath(){
@@ -171,8 +85,6 @@
     const resetAuthBtn = document.getElementById("resetAuthBtn");
     const debugBox = document.getElementById("debugBox");
 
-    let currentUser = null;
-
     function dbg(obj, danger=false){
       debugBox.classList.toggle("danger", !!danger);
       debugBox.textContent = (typeof obj === "string") ? obj : JSON.stringify(obj, null, 2);
@@ -189,72 +101,88 @@
     function dumpLocalStorageKeys(){
       const keys = [];
       for (let i=0;i<localStorage.length;i++){
-        const k = localStorage.key(i);
-        keys.push(k);
+        keys.push(localStorage.key(i));
       }
       keys.sort();
       return keys;
-    }
-
-    async function exchangeCodeIfPresent(){
-      const url = new URL(window.location.href);
-      const code = url.searchParams.get("code");
-      if (!code) {
-        dbg({
-          build: BUILD_ID,
-          page: window.location.href,
-          note: "No ?code= present. Request login from this page.",
-          localStorageKeys: dumpLocalStorageKeys().slice(0, 40)
-        });
-        return;
-      }
-
-      authStatusEl.textContent = "Finishing login…";
-      dbg({
-        build: BUILD_ID,
-        page: window.location.href,
-        foundCode: true,
-        note: "Attempting exchangeCodeForSession(code). If this fails, we will see the exact error below.",
-        localStorageKeys: dumpLocalStorageKeys().slice(0, 40)
-      });
-
-      const { data, error } = await supabaseClient.auth.exchangeCodeForSession(code);
-
-      if (error){
-        authStatusEl.textContent = "Logged out";
-        dbg({
-          build: BUILD_ID,
-          exchangeError: { name: error.name, message: error.message, status: error.status },
-          mostCommonCause: "PKCE verifier missing/mismatched (different Chrome profile/incognito/multiple login requests). Click 'Reset Auth Storage' then request ONE new email link and click it once."
-        }, true);
-        return;
-      }
-
-      cleanUrl();
-      dbg({
-        build: BUILD_ID,
-        exchangeSuccess: true,
-        sessionUser: data?.session?.user?.email || null
-      });
     }
 
     async function refreshAuthUI(){
       const { data: sessData } = await supabaseClient.auth.getSession();
       const u = sessData?.session?.user || null;
       if (u){
-        currentUser = u;
-        authStatusEl.textContent = "Logged in ✅";
-        logoutBtn.style.display = "inline-block";
-        return;
-      }
-      const { data: userData } = await supabaseClient.auth.getUser();
-      currentUser = userData?.user || null;
-      if (currentUser){
-        authStatusEl.textContent = "Logged in ✅";
+        authStatusEl.textContent = "Logged in ✅ " + (u.email || "");
         logoutBtn.style.display = "inline-block";
       } else {
         authStatusEl.textContent = "Logged out";
         logoutBtn.style.display = "none";
+      }
+    }
+
+    async function exchangeCodeIfPresent(){
+      const url = new URL(window.location.href);
+      const code = url.searchParams.get("code");
+
+      dbg({
+        build: BUILD_ID,
+        page: window.location.href,
+        foundCode: !!code,
+        localStorageKeys: dumpLocalStorageKeys()
+      });
+
+      if (!code) return;
+
+      authStatusEl.textContent = "Finishing login…";
+
+      // Timeout wrapper so we can detect “hangs”
+      const timeoutMs = 12000;
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Timeout: exchangeCodeForSession did not return within " + timeoutMs + "ms")), timeoutMs)
+      );
+
+      try {
+        dbg({
+          build: BUILD_ID,
+          step: "exchange-start",
+          note: "Attempting exchangeCodeForSession(code). If this hangs, it’s being blocked (extension/privacy) or network failing."
+        });
+
+        const result = await Promise.race([
+          supabaseClient.auth.exchangeCodeForSession(code),
+          timeoutPromise
+        ]);
+
+        // If exchangeCodeForSession returns a normal object
+        const { data, error } = result || {};
+
+        if (error){
+          dbg({
+            build: BUILD_ID,
+            step: "exchange-error",
+            error: { name: error.name, message: error.message, status: error.status }
+          }, true);
+          authStatusEl.textContent = "Logged out";
+          return;
+        }
+
+        cleanUrl();
+        await refreshAuthUI();
+
+        const { data: sessNow } = await supabaseClient.auth.getSession();
+        dbg({
+          build: BUILD_ID,
+          step: "exchange-success",
+          sessionEmail: sessNow?.session?.user?.email || null
+        });
+
+      } catch (e) {
+        dbg({
+          build: BUILD_ID,
+          step: "exchange-threw",
+          message: e?.message || String(e),
+          hint: "Most common cause: an extension (adblock/privacy) or browser setting is blocking requests to supabase.co. Temporarily disable extensions and retry."
+        }, true);
+        authStatusEl.textContent = "Logged out";
       }
     }
 
@@ -280,12 +208,7 @@
       authStatusEl.textContent = "Sending link…";
 
       const redirectTo = `${BASE}index.html?v=${Date.now()}`;
-      dbg({
-        build: BUILD_ID,
-        action: "signInWithOtp",
-        redirectTo,
-        note: "IMPORTANT: Do not request twice. Click the newest email link once."
-      });
+      dbg({ build: BUILD_ID, action: "signInWithOtp", redirectTo });
 
       const { error } = await supabaseClient.auth.signInWithOtp({
         email,
@@ -293,137 +216,25 @@
       });
 
       if (error){
-        authStatusEl.textContent = "Logged out";
         dbg({ build: BUILD_ID, signInError: error.message }, true);
+        authStatusEl.textContent = "Logged out";
         alert("Login error: " + error.message);
         return;
       }
 
-      authStatusEl.textContent = "Check your email (login link sent)";
+      authStatusEl.textContent = "Check your email (link sent)";
       alert("Open the newest email and click the login link ONCE.");
     });
 
     logoutBtn.addEventListener("click", async () => {
       await supabaseClient.auth.signOut();
       await refreshAuthUI();
-      await loadCampaigns();
-    });
-
-    supabaseClient.auth.onAuthStateChange(async () => {
-      await refreshAuthUI();
-      await loadCampaigns();
-    });
-
-    window.addEventListener("pageshow", async () => {
-      await refreshAuthUI();
-      await loadCampaigns();
-    });
-
-    const CAUSES = {
-      "Autoimmune & IBD": ["Crohn's Disease","Ulcerative Colitis","Celiac Disease","Lupus"],
-      "Mental Health": ["Anxiety Disorders","Mood Disorders","Eating Disorders"],
-      "Neurological Disorders": ["Stroke","Parkinson’s Disease","Multiple Sclerosis (MS)","Epilepsy"],
-      "Cardiovascular Diseases": ["Heart Attack","High Blood Pressure (Hypertension)","Arrhythmias"],
-      "Infectious Diseases": ["Lyme Disease","HIV & AIDS","Hepatitis"],
-      "Cancer": ["Breast Cancer","Colon Cancer","Brain Tumors / Brain Cancer","Leukemia","Lymphoma"]
-    };
-
-    const causeCategoryEl = document.getElementById("cause_category");
-    const conditionEl = document.getElementById("condition");
-
-    function buildCauseDropdowns(){
-      causeCategoryEl.innerHTML = "";
-      const firstOpt = document.createElement("option");
-      firstOpt.value = "";
-      firstOpt.textContent = "Select a category…";
-      causeCategoryEl.appendChild(firstOpt);
-
-      Object.keys(CAUSES).forEach(cat => {
-        const opt = document.createElement("option");
-        opt.value = cat;
-        opt.textContent = cat;
-        causeCategoryEl.appendChild(opt);
-      });
-
-      conditionEl.innerHTML = "";
-      const opt2 = document.createElement("option");
-      opt2.value = "";
-      opt2.textContent = "Select a condition…";
-      conditionEl.appendChild(opt2);
-    }
-
-    function populateConditions(category){
-      conditionEl.innerHTML = "";
-      const opt2 = document.createElement("option");
-      opt2.value = "";
-      opt2.textContent = "Select a condition…";
-      conditionEl.appendChild(opt2);
-
-      (CAUSES[category] || []).forEach(cond => {
-        const opt = document.createElement("option");
-        opt.value = cond;
-        opt.textContent = cond;
-        conditionEl.appendChild(opt);
-      });
-    }
-
-    buildCauseDropdowns();
-    causeCategoryEl.addEventListener("change", () => populateConditions(causeCategoryEl.value));
-
-    const campaignsBody = document.getElementById("campaignsBody");
-    const campaignsStatus = document.getElementById("campaignsStatus");
-
-    async function loadCampaigns(){
-      campaignsStatus.textContent = "Loading campaigns…";
-      campaignsStatus.style.color = "#6b7280";
-
-      let q = supabaseClient
-        .from("campaigns")
-        .select("id, title, donation_url, created_at, status")
-        .order("created_at", { ascending: false })
-        .limit(25);
-
-      if (currentUser){
-        q = q.eq("user_id", currentUser.id);
-      } else {
-        q = q.eq("status", "published");
-      }
-
-      const { data, error } = await q;
-
-      if (error){
-        campaignsStatus.textContent = "Error loading campaigns: " + error.message;
-        campaignsStatus.style.color = "red";
-        campaignsBody.innerHTML = "";
-        return;
-      }
-
-      if (!data || data.length === 0){
-        campaignsStatus.textContent = currentUser ? "No campaigns yet." : "No published campaigns yet.";
-        campaignsBody.innerHTML = "";
-        return;
-      }
-
-      campaignsBody.innerHTML = data.map(c => {
-        const title = c.title || "(Untitled)";
-        const donation = c.donation_url ? `<a href="${c.donation_url}" target="_blank" rel="noopener noreferrer">Open</a>` : "—";
-        const created = c.created_at ? new Date(c.created_at).toLocaleString() : "";
-        const viewHref = `${BASE}campaign.html?id=${encodeURIComponent(c.id)}`;
-        return `<tr><td>${title}</td><td>${donation}</td><td>${created}</td><td><a href="${viewHref}">View</a></td></tr>`;
-      }).join("");
-
-      campaignsStatus.textContent = `Showing ${data.length} campaign(s).`;
-    }
-
-    document.getElementById("createForm").addEventListener("submit", (e) => {
-      e.preventDefault();
-      document.getElementById("createStatus").textContent = "Login must be fixed first.";
+      dbg({ build: BUILD_ID, signedOut: true });
     });
 
     (async function init(){
       await exchangeCodeIfPresent();
       await refreshAuthUI();
-      await loadCampaigns();
     })();
   </script>
 </body>
