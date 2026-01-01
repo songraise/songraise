@@ -35,7 +35,6 @@
     tr:last-child td{ border-bottom:none; }
     .demo-bar{ position:sticky; top:0; z-index:50; background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:10px 12px; display:flex; gap:10px; align-items:center; justify-content:space-between; margin-bottom:14px; box-shadow:0 10px 24px rgba(15,23,42,0.06); }
     .demo-left{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-    .demo-note{ font-size:0.85rem; color:#6b7280; }
     .demo-right{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
     .pill{ display:inline-block; padding:4px 10px; border-radius:999px; background:#eef2ff; color:#1d4ed8; font-size:0.75rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; }
     .toggle{ display:flex; align-items:center; gap:8px; font-size:0.9rem; color:#374151; font-weight:700; }
@@ -43,6 +42,12 @@
     .authbox{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
     .authbox input{ width:220px; padding:8px 10px; border-radius:999px; border:1px solid #d1d5db; font-size:0.9rem; }
     .authstatus{ font-size:0.85rem; color:#374151; font-weight:700; }
+    .debug{
+      margin-top:10px; padding:10px 12px; border-radius:12px;
+      border:1px solid #e5e7eb; background:#f3f4f6; font-size:12px; color:#111827;
+      white-space: pre-wrap; word-break: break-word;
+    }
+    .danger{ border-color:#fecaca; background:#fff1f2; }
   </style>
 </head>
 <body>
@@ -54,7 +59,7 @@
           <input type="checkbox" id="demoToggle" />
           Enable demo autofill
         </label>
-        <span class="demo-note">Fills the form with sample data. (You still must be logged in to save.)</span>
+        <span class="status" id="versionStamp"></span>
       </div>
 
       <div class="demo-right">
@@ -63,28 +68,22 @@
           <input id="emailInput" type="email" placeholder="you@email.com" />
           <button class="btn btn-ghost small" id="loginBtn" type="button">Email me a login link</button>
           <button class="btn btn-ghost small" id="logoutBtn" type="button" style="display:none;">Log out</button>
+          <button class="btn btn-ghost small" id="resetAuthBtn" type="button">Reset Auth Storage</button>
         </div>
-        <button class="btn btn-ghost small" id="demoFillBtn" type="button">Fill Demo Now</button>
-        <button class="btn btn-ghost small" id="demoClearBtn" type="button">Clear</button>
       </div>
     </div>
 
-    <header>
-      <div class="logo">SongRaise<span>Lite</span></div>
-      <nav>
-        <a href="#create">Create</a>
-        <a href="#campaigns">My campaigns</a>
-      </nav>
-    </header>
+    <div class="card">
+      <h2>Login Debug</h2>
+      <div id="debugBox" class="debug">Loading debug…</div>
+    </div>
 
-    <section class="section">
+    <section class="section" style="margin-top:18px;">
       <h1>Create a fundraising song + campaign</h1>
-      <p class="lead">You must be logged in to create campaigns. “View” opens <code>campaign.html?id=...</code>.</p>
-
+      <p class="lead">Once login works, we’ll confirm View → Back stays logged in.</p>
       <div class="grid">
-        <div class="card" id="create">
+        <div class="card">
           <h2>Create campaign</h2>
-
           <form id="createForm">
             <label class="field-label" for="cause_category">Cause category</label>
             <select id="cause_category" class="field-select" required></select>
@@ -94,18 +93,12 @@
 
             <label class="field-label" for="emotion">Emotion</label>
             <select id="emotion" class="field-select" required>
-              <option>Hopeful</option>
-              <option>Comforting</option>
-              <option>Inspiring</option>
-              <option>Strong</option>
+              <option>Hopeful</option><option>Comforting</option><option>Inspiring</option><option>Strong</option>
             </select>
 
             <label class="field-label" for="genre">Genre</label>
             <select id="genre" class="field-select" required>
-              <option>Pop</option>
-              <option>Acoustic</option>
-              <option>Folk</option>
-              <option>Ballad</option>
+              <option>Pop</option><option>Acoustic</option><option>Folk</option><option>Ballad</option>
             </select>
 
             <label class="field-label" for="style">Artist style (optional)</label>
@@ -123,14 +116,6 @@
             <label class="field-label" for="audio_url">Song audio URL (optional)</label>
             <input id="audio_url" class="field-input" type="url" placeholder="https://..." />
 
-            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:10px;">
-              <input id="audio_file" type="file" accept="audio/*" />
-              <button class="btn btn-ghost small" type="button" id="uploadAudioBtn">Upload MP3</button>
-              <span id="uploadStatus" class="status"></span>
-            </div>
-
-            <input type="hidden" id="lyric_prompt" />
-
             <div style="margin-top:14px;">
               <button class="btn btn-primary" type="submit">Create Song + Campaign</button>
               <div id="createStatus" class="status"></div>
@@ -138,21 +123,14 @@
           </form>
         </div>
 
-        <div class="card" id="campaigns">
+        <div class="card">
           <h2>Campaigns</h2>
-          <p class="lead" style="margin-bottom:10px;">
-            Logged in: shows <strong>your</strong> campaigns. Logged out: shows <strong>published</strong> campaigns.
-          </p>
-
           <div style="overflow-x:auto;">
             <table>
-              <thead>
-                <tr><th>Title</th><th>Donation</th><th>Created</th><th>View</th></tr>
-              </thead>
+              <thead><tr><th>Title</th><th>Donation</th><th>Created</th><th>View</th></tr></thead>
               <tbody id="campaignsBody"></tbody>
             </table>
           </div>
-
           <div id="campaignsStatus" class="status">Loading campaigns…</div>
         </div>
       </div>
@@ -161,6 +139,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    const BUILD_ID = "SR-LITE-PKCE-EXCHANGE-2026-01-01-001";
+    document.getElementById("versionStamp").textContent = "Build: " + BUILD_ID;
+
     function getBasePath(){
       const url = new URL(window.location.href);
       const path = url.pathname;
@@ -187,8 +168,15 @@
     const emailInputEl = document.getElementById("emailInput");
     const loginBtn = document.getElementById("loginBtn");
     const logoutBtn = document.getElementById("logoutBtn");
+    const resetAuthBtn = document.getElementById("resetAuthBtn");
+    const debugBox = document.getElementById("debugBox");
 
     let currentUser = null;
+
+    function dbg(obj, danger=false){
+      debugBox.classList.toggle("danger", !!danger);
+      debugBox.textContent = (typeof obj === "string") ? obj : JSON.stringify(obj, null, 2);
+    }
 
     function cleanUrl(){
       const url = new URL(window.location.href);
@@ -198,19 +186,56 @@
       window.history.replaceState({}, document.title, url.toString());
     }
 
+    function dumpLocalStorageKeys(){
+      const keys = [];
+      for (let i=0;i<localStorage.length;i++){
+        const k = localStorage.key(i);
+        keys.push(k);
+      }
+      keys.sort();
+      return keys;
+    }
+
     async function exchangeCodeIfPresent(){
       const url = new URL(window.location.href);
       const code = url.searchParams.get("code");
-      if (!code) return;
-
-      authStatusEl.textContent = "Finishing login…";
-      const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
-      if (error){
-        authStatusEl.textContent = "Logged out";
-        alert("Login failed: " + error.message + "\n\nRequest a NEW email link and click it once.");
+      if (!code) {
+        dbg({
+          build: BUILD_ID,
+          page: window.location.href,
+          note: "No ?code= present. Request login from this page.",
+          localStorageKeys: dumpLocalStorageKeys().slice(0, 40)
+        });
         return;
       }
+
+      authStatusEl.textContent = "Finishing login…";
+      dbg({
+        build: BUILD_ID,
+        page: window.location.href,
+        foundCode: true,
+        note: "Attempting exchangeCodeForSession(code). If this fails, we will see the exact error below.",
+        localStorageKeys: dumpLocalStorageKeys().slice(0, 40)
+      });
+
+      const { data, error } = await supabaseClient.auth.exchangeCodeForSession(code);
+
+      if (error){
+        authStatusEl.textContent = "Logged out";
+        dbg({
+          build: BUILD_ID,
+          exchangeError: { name: error.name, message: error.message, status: error.status },
+          mostCommonCause: "PKCE verifier missing/mismatched (different Chrome profile/incognito/multiple login requests). Click 'Reset Auth Storage' then request ONE new email link and click it once."
+        }, true);
+        return;
+      }
+
       cleanUrl();
+      dbg({
+        build: BUILD_ID,
+        exchangeSuccess: true,
+        sessionUser: data?.session?.user?.email || null
+      });
     }
 
     async function refreshAuthUI(){
@@ -233,12 +258,34 @@
       }
     }
 
+    resetAuthBtn.addEventListener("click", () => {
+      const keys = dumpLocalStorageKeys();
+      keys.forEach(k => {
+        if (k.includes("supabase") || k.includes("sb-") || k.includes("auth")) {
+          try { localStorage.removeItem(k); } catch {}
+        }
+      });
+      dbg({
+        build: BUILD_ID,
+        reset: true,
+        note: "Auth storage cleared. Now request ONE new email login link and click it once."
+      }, true);
+      authStatusEl.textContent = "Logged out";
+    });
+
     loginBtn.addEventListener("click", async () => {
       const email = (emailInputEl.value || "").trim();
       if (!email){ alert("Type your email address first."); return; }
 
       authStatusEl.textContent = "Sending link…";
+
       const redirectTo = `${BASE}index.html?v=${Date.now()}`;
+      dbg({
+        build: BUILD_ID,
+        action: "signInWithOtp",
+        redirectTo,
+        note: "IMPORTANT: Do not request twice. Click the newest email link once."
+      });
 
       const { error } = await supabaseClient.auth.signInWithOtp({
         email,
@@ -247,6 +294,7 @@
 
       if (error){
         authStatusEl.textContent = "Logged out";
+        dbg({ build: BUILD_ID, signInError: error.message }, true);
         alert("Login error: " + error.message);
         return;
       }
@@ -282,7 +330,6 @@
 
     const causeCategoryEl = document.getElementById("cause_category");
     const conditionEl = document.getElementById("condition");
-    const lyricPromptEl = document.getElementById("lyric_prompt");
 
     function buildCauseDropdowns(){
       causeCategoryEl.innerHTML = "";
@@ -320,117 +367,8 @@
       });
     }
 
-    function autoLyricPrompt(category, condition, emotion, genre, style){
-      const styleText = style ? ` in the style of ${style}` : "";
-      return `Write original fundraising song lyrics about "${condition}" (Category: ${category}). Emotion: ${emotion}. Genre: ${genre}${styleText}. Include empathy, community support, hope, and a clear call-to-action to donate. Keep it uplifting and respectful.`;
-    }
-
     buildCauseDropdowns();
-
-    causeCategoryEl.addEventListener("change", () => {
-      populateConditions(causeCategoryEl.value);
-      lyricPromptEl.value = "";
-    });
-
-    conditionEl.addEventListener("change", () => {
-      const emotion = document.getElementById("emotion").value;
-      const genre = document.getElementById("genre").value;
-      const style = document.getElementById("style").value.trim();
-      if (causeCategoryEl.value && conditionEl.value){
-        lyricPromptEl.value = autoLyricPrompt(causeCategoryEl.value, conditionEl.value, emotion, genre, style);
-      }
-    });
-
-    const demoToggle = document.getElementById("demoToggle");
-    const demoFillBtn = document.getElementById("demoFillBtn");
-    const demoClearBtn = document.getElementById("demoClearBtn");
-
-    function fillDemo(){
-      causeCategoryEl.value = "Autoimmune & IBD";
-      populateConditions("Autoimmune & IBD");
-      conditionEl.value = "Crohn's Disease";
-      document.getElementById("emotion").value = "Hopeful";
-      document.getElementById("genre").value = "Pop";
-      document.getElementById("style").value = "uplifting pop";
-      document.getElementById("donation_url").value = "https://example.org/donate";
-      document.getElementById("campaign_title").value = "You Are Not Alone (Demo)";
-      document.getElementById("campaign_description").value = "Demo campaign.";
-      lyricPromptEl.value = autoLyricPrompt("Autoimmune & IBD", "Crohn's Disease", "Hopeful", "Pop", "uplifting pop");
-    }
-
-    function clearForm(){
-      document.getElementById("createForm").reset();
-      buildCauseDropdowns();
-      lyricPromptEl.value = "";
-      document.getElementById("uploadStatus").textContent = "";
-      document.getElementById("createStatus").textContent = "";
-    }
-
-    demoFillBtn.addEventListener("click", fillDemo);
-    demoClearBtn.addEventListener("click", clearForm);
-    demoToggle.addEventListener("change", () => { if (demoToggle.checked) fillDemo(); });
-
-    function formatDateTime(str){
-      if (!str) return "";
-      const d = new Date(str);
-      if (Number.isNaN(d.getTime())) return "";
-      return d.toLocaleString();
-    }
-
-    function slugify(text){
-      return (text || "")
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
-    }
-
-    function slugWithSuffix(title){
-      const base = slugify(title) || "campaign";
-      const suffix = Math.random().toString(36).slice(2, 6);
-      return `${base}-${suffix}`;
-    }
-
-    const audioFileEl = document.getElementById("audio_file");
-    const audioUrlEl = document.getElementById("audio_url");
-    const uploadBtn = document.getElementById("uploadAudioBtn");
-    const uploadStatus = document.getElementById("uploadStatus");
-
-    uploadBtn.addEventListener("click", async () => {
-      uploadStatus.textContent = "";
-      uploadStatus.style.color = "#6b7280";
-
-      const file = audioFileEl.files && audioFileEl.files[0];
-      if (!file){ uploadStatus.textContent = "Choose an MP3 file first."; uploadStatus.style.color="red"; return; }
-      if (!file.type.startsWith("audio/")){ uploadStatus.textContent="File must be an audio file."; uploadStatus.style.color="red"; return; }
-
-      uploadStatus.textContent = "Uploading…";
-
-      const ts = Date.now();
-      const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
-      const filePath = `public-uploads/${ts}-${safeName}`;
-
-      const { error: upErr } = await supabaseClient.storage
-        .from("song-audio")
-        .upload(filePath, file, { cacheControl: "3600", upsert: false });
-
-      if (upErr){
-        uploadStatus.textContent="Upload failed: "+upErr.message;
-        uploadStatus.style.color="red";
-        return;
-      }
-
-      const { data: pub } = supabaseClient.storage.from("song-audio").getPublicUrl(filePath);
-      if (!pub?.publicUrl){
-        uploadStatus.textContent="Uploaded, but could not get public URL.";
-        uploadStatus.style.color="red";
-        return;
-      }
-
-      audioUrlEl.value = pub.publicUrl;
-      uploadStatus.textContent = "Upload complete ✅ MP3 attached.";
-      uploadStatus.style.color = "green";
-    });
+    causeCategoryEl.addEventListener("change", () => populateConditions(causeCategoryEl.value));
 
     const campaignsBody = document.getElementById("campaignsBody");
     const campaignsStatus = document.getElementById("campaignsStatus");
@@ -469,7 +407,7 @@
       campaignsBody.innerHTML = data.map(c => {
         const title = c.title || "(Untitled)";
         const donation = c.donation_url ? `<a href="${c.donation_url}" target="_blank" rel="noopener noreferrer">Open</a>` : "—";
-        const created = formatDateTime(c.created_at);
+        const created = c.created_at ? new Date(c.created_at).toLocaleString() : "";
         const viewHref = `${BASE}campaign.html?id=${encodeURIComponent(c.id)}`;
         return `<tr><td>${title}</td><td>${donation}</td><td>${created}</td><td><a href="${viewHref}">View</a></td></tr>`;
       }).join("");
@@ -477,66 +415,9 @@
       campaignsStatus.textContent = `Showing ${data.length} campaign(s).`;
     }
 
-    const createForm = document.getElementById("createForm");
-    const createStatus = document.getElementById("createStatus");
-
-    createForm.addEventListener("submit", async (e) => {
+    document.getElementById("createForm").addEventListener("submit", (e) => {
       e.preventDefault();
-      createStatus.textContent = "Saving…";
-      createStatus.style.color = "#6b7280";
-
-      if (!currentUser){
-        createStatus.textContent = "Please log in first — then try again.";
-        createStatus.style.color = "red";
-        return;
-      }
-
-      const cause_category = causeCategoryEl.value;
-      const condition = conditionEl.value;
-      const emotion = document.getElementById("emotion").value;
-      const genre = document.getElementById("genre").value;
-      const style = document.getElementById("style").value.trim() || null;
-      const donation_url = document.getElementById("donation_url").value.trim();
-      const title = document.getElementById("campaign_title").value.trim();
-      const description = document.getElementById("campaign_description").value.trim() || null;
-      const audio_url = document.getElementById("audio_url").value.trim() || null;
-
-      if (!cause_category || !condition || !emotion || !genre || !donation_url || !title){
-        createStatus.textContent = "Please fill in all required fields.";
-        createStatus.style.color = "red";
-        return;
-      }
-
-      const lyric_prompt = autoLyricPrompt(cause_category, condition, emotion, genre, style || "");
-      lyricPromptEl.value = lyric_prompt;
-
-      const { data: song, error: songErr } = await supabaseClient
-        .from("songs")
-        .insert({ cause_category, condition, emotion, genre, style, lyric_prompt, audio_url, status: "draft" })
-        .select()
-        .single();
-
-      if (songErr){
-        createStatus.textContent = "Error saving song: " + songErr.message;
-        createStatus.style.color = "red";
-        return;
-      }
-
-      const campaign_slug = slugWithSuffix(title);
-
-      const { error: campErr } = await supabaseClient
-        .from("campaigns")
-        .insert({ user_id: currentUser.id, song_id: song.id, title, description, donation_url, campaign_slug, status: "published" });
-
-      if (campErr){
-        createStatus.textContent = "Error saving campaign: " + campErr.message;
-        createStatus.style.color = "red";
-        return;
-      }
-
-      createStatus.textContent = "Saved ✅ Campaign created.";
-      createStatus.style.color = "green";
-      await loadCampaigns();
+      document.getElementById("createStatus").textContent = "Login must be fixed first.";
     });
 
     (async function init(){
