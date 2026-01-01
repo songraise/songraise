@@ -5,64 +5,97 @@
   <title>SongRaise Lite</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body{ font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; line-height:1.6; color:#111827; background:#f9fafb; }
-    .wrapper{ max-width:1100px; margin:0 auto; padding:22px 16px 70px; }
-    .card{ background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:18px 16px; box-shadow:0 8px 18px rgba(15,23,42,0.04); }
-    .demo-bar{ position:sticky; top:0; z-index:50; background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:10px 12px; display:flex; gap:10px; align-items:center; justify-content:space-between; margin-bottom:14px; box-shadow:0 10px 24px rgba(15,23,42,0.06); }
-    .demo-left{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-    .demo-right{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-    .pill{ display:inline-block; padding:4px 10px; border-radius:999px; background:#eef2ff; color:#1d4ed8; font-size:0.75rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; }
-    .btn{ display:inline-block; padding:10px 16px; border-radius:999px; border:1px solid #d1d5db; background:#fff; cursor:pointer; font-weight:700; font-size:0.95rem; }
-    .btn:hover{ background:#f3f4f6; }
-    .small{ font-size:0.85rem; padding:7px 10px; }
-    .authbox{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-    .authbox input{ width:220px; padding:8px 10px; border-radius:999px; border:1px solid #d1d5db; font-size:0.9rem; }
-    .authstatus{ font-size:0.85rem; color:#374151; font-weight:700; }
-    .debug{
-      margin-top:10px; padding:10px 12px; border-radius:12px;
-      border:1px solid #e5e7eb; background:#f3f4f6; font-size:12px; color:#111827;
-      white-space: pre-wrap; word-break: break-word;
-    }
-    .danger{ border-color:#fecaca; background:#fff1f2; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f9fafb;color:#111827;line-height:1.6}
+    .wrap{max-width:1100px;margin:0 auto;padding:18px 14px 70px}
+    .top{position:sticky;top:0;z-index:50;background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:10px 12px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:0 10px 24px rgba(15,23,42,.06)}
+    .logo{font-weight:900;font-size:1.15rem;letter-spacing:-.02em}
+    .logo span{color:#2563eb}
+    .auth{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .auth span{font-size:.9rem;font-weight:800;color:#374151}
+    .auth input{width:240px;padding:8px 10px;border-radius:999px;border:1px solid #d1d5db}
+    .btn{padding:8px 12px;border-radius:999px;border:1px solid #d1d5db;background:#fff;cursor:pointer;font-weight:800}
+    .btn:hover{background:#f3f4f6}
+    .hero{padding:18px 0}
+    h1{font-size:1.9rem;letter-spacing:-.02em;margin-bottom:6px}
+    .lead{color:#4b5563;margin-bottom:14px;max-width:820px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media(max-width:900px){.grid{grid-template-columns:1fr}}
+    .card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;box-shadow:0 8px 18px rgba(15,23,42,.04)}
+    label{display:block;margin:10px 0 4px;font-size:.85rem;font-weight:900;color:#374151}
+    input,select,textarea{width:100%;padding:9px 10px;border-radius:12px;border:1px solid #d1d5db;font-size:.95rem;background:#fff}
+    textarea{min-height:90px;resize:vertical}
+    table{width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden}
+    th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:.92rem}
+    th{background:#f3f4f6;font-size:.85rem;color:#374151}
+    tr:last-child td{border-bottom:none}
+    .status{margin-top:10px;font-size:.9rem;color:#6b7280}
+    .error{color:#b91c1c;font-weight:900}
+    code{background:#f3f4f6;padding:2px 6px;border-radius:8px}
   </style>
 </head>
 <body>
-  <div class="wrapper">
-    <div class="demo-bar">
-      <div class="demo-left">
-        <span class="pill">Debug Build</span>
-        <span class="authstatus" id="versionStamp"></span>
-      </div>
-      <div class="demo-right">
-        <div class="authbox">
-          <span class="authstatus" id="authStatus">Checking login…</span>
-          <input id="emailInput" type="email" placeholder="you@email.com" />
-          <button class="btn small" id="loginBtn" type="button">Email me a login link</button>
-          <button class="btn small" id="logoutBtn" type="button" style="display:none;">Log out</button>
-          <button class="btn small" id="resetAuthBtn" type="button">Reset Auth Storage</button>
-        </div>
+  <div class="wrap">
+    <div class="top">
+      <div class="logo">SongRaise<span>Lite</span></div>
+      <div class="auth">
+        <span id="authStatus">Checking login…</span>
+        <input id="emailInput" type="email" placeholder="you@email.com" />
+        <button class="btn" id="loginBtn" type="button">Email me a login link</button>
+        <button class="btn" id="logoutBtn" type="button" style="display:none;">Log out</button>
       </div>
     </div>
 
-    <div class="card">
-      <h2 style="margin-bottom:8px;">Login Debug</h2>
-      <div id="debugBox" class="debug">Loading debug…</div>
+    <div class="hero">
+      <h1>Create a fundraising song + campaign</h1>
+      <p class="lead">Login should now work reliably on GitHub Pages (no PKCE code exchange). “View” opens <code>campaign.html?id=...</code>.</p>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2 style="margin-bottom:8px;">Create campaign</h2>
+
+        <form id="createForm">
+          <label for="title">Title</label>
+          <input id="title" required placeholder="e.g., You Are Not Alone" />
+
+          <label for="donation_url">Donation URL</label>
+          <input id="donation_url" type="url" required placeholder="https://..." />
+
+          <label for="description">Description</label>
+          <textarea id="description" placeholder="Short description…"></textarea>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+            <button class="btn" type="submit">Create</button>
+          </div>
+          <div id="createStatus" class="status"></div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-bottom:8px;">Campaigns</h2>
+
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr><th>Title</th><th>Donation</th><th>Created</th><th>View</th></tr>
+            </thead>
+            <tbody id="campaignsBody"></tbody>
+          </table>
+        </div>
+
+        <div id="campaignsStatus" class="status">Loading campaigns…</div>
+      </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const BUILD_ID = "SR-LITE-PKCE-EXCHANGE-2026-01-01-002";
-    document.getElementById("versionStamp").textContent = "Build: " + BUILD_ID;
-
-    function getBasePath(){
-      const url = new URL(window.location.href);
-      const path = url.pathname;
-      const basePath = path.endsWith("/") ? path : path.replace(/[^\/]+$/, "");
-      return url.origin + basePath;
+    function baseUrl(){
+      const u = new URL(window.location.href);
+      const basePath = u.pathname.endsWith("/") ? u.pathname : u.pathname.replace(/[^\/]+$/, "");
+      return u.origin + basePath;
     }
-    const BASE = getBasePath();
 
     const SUPABASE_URL = "https://jvvcxpjmdfeqjdmcemet.supabase.co";
     const SUPABASE_ANON_KEY =
@@ -70,48 +103,40 @@
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: {
-        flowType: "pkce",
+        flowType: "implicit",
         persistSession: true,
         autoRefreshToken: true,
-        detectSessionInUrl: false,
+        detectSessionInUrl: true,
         storage: window.localStorage
       }
     });
 
     const authStatusEl = document.getElementById("authStatus");
-    const emailInputEl = document.getElementById("emailInput");
+    const emailEl = document.getElementById("emailInput");
     const loginBtn = document.getElementById("loginBtn");
     const logoutBtn = document.getElementById("logoutBtn");
-    const resetAuthBtn = document.getElementById("resetAuthBtn");
-    const debugBox = document.getElementById("debugBox");
+    const campaignsBody = document.getElementById("campaignsBody");
+    const campaignsStatus = document.getElementById("campaignsStatus");
+    const createStatus = document.getElementById("createStatus");
 
-    function dbg(obj, danger=false){
-      debugBox.classList.toggle("danger", !!danger);
-      debugBox.textContent = (typeof obj === "string") ? obj : JSON.stringify(obj, null, 2);
-    }
+    let currentUser = null;
 
     function cleanUrl(){
       const url = new URL(window.location.href);
-      ["code","error","error_code","error_description","type","token","access_token","refresh_token","expires_in","expires_at","token_type"]
-        .forEach(k => url.searchParams.delete(k));
+      url.searchParams.delete("code");
+      url.searchParams.delete("error");
+      url.searchParams.delete("error_code");
+      url.searchParams.delete("error_description");
       url.hash = "";
-      window.history.replaceState({}, document.title, url.toString());
+      history.replaceState({}, document.title, url.toString());
     }
 
-    function dumpLocalStorageKeys(){
-      const keys = [];
-      for (let i=0;i<localStorage.length;i++){
-        keys.push(localStorage.key(i));
-      }
-      keys.sort();
-      return keys;
-    }
+    async function refreshAuth(){
+      const { data } = await supabaseClient.auth.getSession();
+      currentUser = data?.session?.user || null;
 
-    async function refreshAuthUI(){
-      const { data: sessData } = await supabaseClient.auth.getSession();
-      const u = sessData?.session?.user || null;
-      if (u){
-        authStatusEl.textContent = "Logged in ✅ " + (u.email || "");
+      if (currentUser){
+        authStatusEl.textContent = "Logged in ✅";
         logoutBtn.style.display = "inline-block";
       } else {
         authStatusEl.textContent = "Logged out";
@@ -119,122 +144,120 @@
       }
     }
 
-    async function exchangeCodeIfPresent(){
-      const url = new URL(window.location.href);
-      const code = url.searchParams.get("code");
+    async function loadCampaigns(){
+      campaignsStatus.textContent = "Loading campaigns…";
+      campaignsStatus.classList.remove("error");
 
-      dbg({
-        build: BUILD_ID,
-        page: window.location.href,
-        foundCode: !!code,
-        localStorageKeys: dumpLocalStorageKeys()
-      });
+      let q = supabaseClient
+        .from("campaigns")
+        .select("id,title,donation_url,created_at,status,user_id")
+        .order("created_at", { ascending: false })
+        .limit(25);
 
-      if (!code) return;
-
-      authStatusEl.textContent = "Finishing login…";
-
-      // Timeout wrapper so we can detect “hangs”
-      const timeoutMs = 12000;
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Timeout: exchangeCodeForSession did not return within " + timeoutMs + "ms")), timeoutMs)
-      );
-
-      try {
-        dbg({
-          build: BUILD_ID,
-          step: "exchange-start",
-          note: "Attempting exchangeCodeForSession(code). If this hangs, it’s being blocked (extension/privacy) or network failing."
-        });
-
-        const result = await Promise.race([
-          supabaseClient.auth.exchangeCodeForSession(code),
-          timeoutPromise
-        ]);
-
-        // If exchangeCodeForSession returns a normal object
-        const { data, error } = result || {};
-
-        if (error){
-          dbg({
-            build: BUILD_ID,
-            step: "exchange-error",
-            error: { name: error.name, message: error.message, status: error.status }
-          }, true);
-          authStatusEl.textContent = "Logged out";
-          return;
-        }
-
-        cleanUrl();
-        await refreshAuthUI();
-
-        const { data: sessNow } = await supabaseClient.auth.getSession();
-        dbg({
-          build: BUILD_ID,
-          step: "exchange-success",
-          sessionEmail: sessNow?.session?.user?.email || null
-        });
-
-      } catch (e) {
-        dbg({
-          build: BUILD_ID,
-          step: "exchange-threw",
-          message: e?.message || String(e),
-          hint: "Most common cause: an extension (adblock/privacy) or browser setting is blocking requests to supabase.co. Temporarily disable extensions and retry."
-        }, true);
-        authStatusEl.textContent = "Logged out";
+      if (currentUser){
+        q = q.eq("user_id", currentUser.id);
+      } else {
+        q = q.eq("status", "published");
       }
+
+      const { data, error } = await q;
+      if (error){
+        campaignsStatus.textContent = "Error: " + error.message;
+        campaignsStatus.classList.add("error");
+        campaignsBody.innerHTML = "";
+        return;
+      }
+
+      if (!data || data.length === 0){
+        campaignsStatus.textContent = currentUser ? "No campaigns yet." : "No published campaigns.";
+        campaignsBody.innerHTML = "";
+        return;
+      }
+
+      const base = baseUrl();
+      campaignsBody.innerHTML = data.map(c => {
+        const t = c.title || "(Untitled)";
+        const d = c.donation_url ? `<a href="${c.donation_url}" target="_blank" rel="noopener noreferrer">Open</a>` : "—";
+        const created = c.created_at ? new Date(c.created_at).toLocaleString() : "";
+        const view = `${base}campaign.html?id=${encodeURIComponent(c.id)}`;
+        return `<tr><td>${t}</td><td>${d}</td><td>${created}</td><td><a href="${view}">View</a></td></tr>`;
+      }).join("");
+
+      campaignsStatus.textContent = `Showing ${data.length} campaign(s).`;
     }
 
-    resetAuthBtn.addEventListener("click", () => {
-      const keys = dumpLocalStorageKeys();
-      keys.forEach(k => {
-        if (k.includes("supabase") || k.includes("sb-") || k.includes("auth")) {
-          try { localStorage.removeItem(k); } catch {}
-        }
-      });
-      dbg({
-        build: BUILD_ID,
-        reset: true,
-        note: "Auth storage cleared. Now request ONE new email login link and click it once."
-      }, true);
-      authStatusEl.textContent = "Logged out";
-    });
-
     loginBtn.addEventListener("click", async () => {
-      const email = (emailInputEl.value || "").trim();
-      if (!email){ alert("Type your email address first."); return; }
+      const email = (emailEl.value || "").trim();
+      if (!email) { alert("Type your email first."); return; }
+
+      const redirectTo = `${baseUrl()}index.html?v=${Date.now()}`;
 
       authStatusEl.textContent = "Sending link…";
-
-      const redirectTo = `${BASE}index.html?v=${Date.now()}`;
-      dbg({ build: BUILD_ID, action: "signInWithOtp", redirectTo });
-
       const { error } = await supabaseClient.auth.signInWithOtp({
         email,
         options: { emailRedirectTo: redirectTo }
       });
 
       if (error){
-        dbg({ build: BUILD_ID, signInError: error.message }, true);
         authStatusEl.textContent = "Logged out";
         alert("Login error: " + error.message);
         return;
       }
 
-      authStatusEl.textContent = "Check your email (link sent)";
-      alert("Open the newest email and click the login link ONCE.");
+      alert("Login email sent. Open the newest email and click the login link once.");
     });
 
     logoutBtn.addEventListener("click", async () => {
       await supabaseClient.auth.signOut();
-      await refreshAuthUI();
-      dbg({ build: BUILD_ID, signedOut: true });
+      cleanUrl();
+      await refreshAuth();
+      await loadCampaigns();
+    });
+
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+      if (event === "SIGNED_IN" && session) cleanUrl();
+      await refreshAuth();
+      await loadCampaigns();
+    });
+
+    document.getElementById("createForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      createStatus.textContent = "";
+
+      if (!currentUser){
+        createStatus.textContent = "Please log in first.";
+        createStatus.classList.add("error");
+        return;
+      }
+
+      const title = document.getElementById("title").value.trim();
+      const donation_url = document.getElementById("donation_url").value.trim();
+      const description = document.getElementById("description").value.trim() || null;
+
+      createStatus.textContent = "Saving…";
+      createStatus.classList.remove("error");
+
+      const { error } = await supabaseClient.from("campaigns").insert({
+        user_id: currentUser.id,
+        title,
+        donation_url,
+        description,
+        status: "published"
+      });
+
+      if (error){
+        createStatus.textContent = "Error: " + error.message;
+        createStatus.classList.add("error");
+        return;
+      }
+
+      createStatus.textContent = "Saved ✅";
+      await loadCampaigns();
     });
 
     (async function init(){
-      await exchangeCodeIfPresent();
-      await refreshAuthUI();
+      await refreshAuth();
+      await loadCampaigns();
     })();
   </script>
 </body>
