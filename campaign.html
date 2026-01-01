@@ -2,212 +2,122 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>SongRaise Lite — Campaign</title>
+  <title>SongRaise Campaign</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      line-height: 1.6;
-      color: #111827;
-      background: #f9fafb;
+    body{ font-family: system-ui, -apple-system, Segoe UI, sans-serif; background:#f9fafb; color:#111827; }
+    .wrap{ max-width: 980px; margin: 0 auto; padding: 22px 16px 70px; }
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+      padding:12px 14px; background:#fff; border:1px solid #e5e7eb; border-radius:14px;
+      box-shadow: 0 10px 24px rgba(15,23,42,0.06);
+      position: sticky; top: 0; z-index: 50;
+      margin-bottom: 14px;
     }
-    a { color: inherit; }
-    .wrapper { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
-    header {
-      padding: 8px 0 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
+    .btn{ padding:10px 14px; border-radius:999px; border:1px solid #d1d5db; background:#fff; cursor:pointer; font-weight:800; text-decoration:none; }
+    .btn:hover{ background:#f3f4f6; }
+    .card{ background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:16px; box-shadow: 0 8px 18px rgba(15,23,42,0.04); }
+    .muted{ color:#6b7280; }
+    .error{ color:#b91c1c; font-weight:800; }
+    h1{ margin: 0 0 6px; font-size: 1.7rem; }
+    h2{ margin: 0 0 8px; font-size: 1.15rem; }
+    .row{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 900px){ .row{ grid-template-columns:1fr; } }
+    label{ display:block; font-size:.85rem; font-weight:800; color:#374151; margin-top:10px; }
+    input, textarea, select{
+      width:100%; padding:10px 10px; border-radius:12px; border:1px solid #d1d5db; font-size:.95rem;
     }
-    .logo { font-weight: 800; font-size: 1.2rem; }
-    .logo span { color: #2563eb; }
-
-    .btn {
-      display:inline-block;
-      padding: 10px 16px;
-      border-radius: 999px;
-      font-weight: 700;
-      font-size: 0.92rem;
-      border: 1px solid #d1d5db;
-      background: #ffffff;
-      cursor: pointer;
-      text-decoration: none;
-    }
-    .btn:hover { background:#f3f4f6; }
-    .btn-primary { background:#2563eb; color:#ffffff; border-color:#2563eb; }
-    .btn-primary:hover { background:#1d4ed8; border-color:#1d4ed8; }
-
-    .card {
-      background: #ffffff;
-      border-radius: 16px;
-      border: 1px solid #e5e7eb;
-      padding: 20px 18px;
-      margin-bottom: 16px;
-    }
-    .pill {
-      display:inline-block;
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: #e5e7eb;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #4b5563;
-      margin-bottom: 10px;
-    }
-    h1 { font-size: 1.7rem; margin-bottom: 8px; line-height: 1.25; }
-    h2 { font-size: 1.15rem; margin-bottom: 8px; }
-    p { font-size: 0.95rem; color: #4b5563; margin-bottom: 10px; }
-    .meta { font-size: 0.82rem; color: #6b7280; margin-top: 4px; }
-    .grid {
-      display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 14px;
-      margin-top: 10px;
-    }
-    .label { font-weight: 700; font-size: 0.85rem; color: #374151; margin-bottom: 3px; }
-    .value { font-size: 0.95rem; color: #111827; word-break: break-word; }
-    pre {
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 0.9rem;
-      background: #f9fafb;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #e5e7eb;
-      color: #111827;
-      margin-top: 8px;
-    }
-    audio { width: 100%; margin-top: 10px; }
-    #statusMessage { font-size: 0.95rem; color: #6b7280; margin: 10px 0 14px; }
-    .error { color: #b91c1c; font-weight: 700; }
+    textarea{ min-height: 90px; resize: vertical; }
   </style>
 </head>
-
 <body>
-  <div class="wrapper">
-    <header>
-      <div class="logo">SongRaise<span>Lite</span></div>
-      <a class="btn" href="./index.html">← Back to dashboard</a>
-    </header>
+  <div class="wrap">
 
-    <div id="statusMessage">Loading campaign…</div>
+    <div class="topbar">
+      <a class="btn" href="index.html">← Back to dashboard</a>
+      <div class="muted" id="authMini">Checking login…</div>
+    </div>
 
-    <div id="campaignContainer" style="display:none;">
-      <div class="card">
-        <span class="pill" id="campaignStatusPill">Campaign</span>
-        <h1 id="campaignTitle">(Campaign title)</h1>
-        <p id="campaignDescription"></p>
-        <div class="meta" id="campaignMeta"></div>
-
-        <div style="margin-top:14px;">
-          <div class="label">Donation page</div>
-          <div class="value" id="donationLinkCell">—</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Song</h2>
-
-        <div class="grid">
-          <div><div class="label">Cause category</div><div class="value" id="songCauseCategory">—</div></div>
-          <div><div class="label">Condition</div><div class="value" id="songCondition">—</div></div>
-          <div><div class="label">Emotion</div><div class="value" id="songEmotion">—</div></div>
-          <div><div class="label">Genre</div><div class="value" id="songGenre">—</div></div>
-          <div><div class="label">Style</div><div class="value" id="songStyle">—</div></div>
-        </div>
-
-        <div style="margin-top:12px;">
-          <div class="label">Lyrics prompt</div>
-          <div class="value" id="songLyricPrompt">—</div>
-        </div>
-
-        <div style="margin-top:12px;">
-          <div class="label">Audio (MP3)</div>
-          <div id="songAudioBlock" class="value">No audio attached yet.</div>
-        </div>
-
-        <div style="margin-top:12px;">
-          <div class="label">Lyrics (saved draft)</div>
-          <pre id="songLyrics">(No lyrics saved yet)</pre>
-        </div>
-      </div>
-
-      <section id="sr-songjob" style="margin-top:24px; padding:16px; border:1px solid rgba(17,24,39,0.12); border-radius:14px; background:#fff;">
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-          <h2 style="margin:0; font-size:18px;">Song Job (Semi-Automatic)</h2>
-          <div id="sr-songjob-status" style="font-size:12px; padding:6px 10px; border-radius:999px; background:#f3f4f6;">
-            Status: <span id="sr-songjob-status-text">Loading…</span>
-          </div>
-        </div>
-
-        <p style="margin:10px 0 14px; color:#4b5563;">
-          Build a Prompt Pack → paste into Suno → download MP3 → upload here → publish.
+    <div class="card">
+      <div id="statusMessage" class="muted">Loading…</div>
+      <div id="campaignContainer" style="display:none;">
+        <h1 id="campTitle"></h1>
+        <p class="muted" id="campDesc"></p>
+        <p style="margin-top:10px;">
+          <a id="donationLink" class="btn" target="_blank" rel="noopener noreferrer">Open donation page</a>
         </p>
 
-        <div id="sr-songjob-owner-only" style="display:none;">
-          <div style="display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px;">
-            <div>
-              <label style="font-size:12px; color:#374151; font-weight:700;">Song Title</label>
-              <input id="sr-song_title" type="text" style="width:100%; padding:10px; border-radius:10px; border:1px solid #d1d5db;">
+        <div style="margin-top:14px; padding-top:14px; border-top:1px solid #e5e7eb;">
+          <h2>Song Job (Option C)</h2>
+
+          <div class="muted" style="margin-bottom:8px;">
+            Status: <strong id="sr-songjob-status-text">—</strong>
+          </div>
+          <div id="sr-songjob-msg" class="muted" style="margin-bottom:10px;"></div>
+
+          <div id="sr-songjob-owner-only" style="display:none;">
+            <div class="row">
+              <div>
+                <label for="sr-song_title">Song title</label>
+                <input id="sr-song_title" placeholder="Campaign anthem title" />
+              </div>
+              <div>
+                <label for="sr-genre">Genre</label>
+                <input id="sr-genre" placeholder="Pop / Folk / Acoustic..." />
+              </div>
+              <div>
+                <label for="sr-mood">Mood</label>
+                <input id="sr-mood" placeholder="Hopeful / Inspiring..." />
+              </div>
+              <div>
+                <label for="sr-style_tags">Style tags</label>
+                <input id="sr-style_tags" placeholder="Uplifting, modern pop, anthemic chorus..." />
+              </div>
             </div>
-            <div>
-              <label style="font-size:12px; color:#374151; font-weight:700;">Genre</label>
-              <input id="sr-genre" type="text" style="width:100%; padding:10px; border-radius:10px; border:1px solid #d1d5db;">
+
+            <label for="sr-suno_prompt">Prompt Pack</label>
+            <textarea id="sr-suno_prompt" placeholder="Click Build Prompt Pack to generate this."></textarea>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+              <button class="btn" id="sr-btn-save" type="button">Save</button>
+              <button class="btn" id="sr-btn-build" type="button">Build Prompt Pack</button>
+              <button class="btn" id="sr-btn-copy" type="button">Copy Prompt Pack</button>
+              <button class="btn" id="sr-btn-open-suno" type="button">Open Suno</button>
             </div>
-            <div>
-              <label style="font-size:12px; color:#374151; font-weight:700;">Mood</label>
-              <input id="sr-mood" type="text" style="width:100%; padding:10px; border-radius:10px; border:1px solid #d1d5db;">
-            </div>
-            <div>
-              <label style="font-size:12px; color:#374151; font-weight:700;">Style tags</label>
-              <input id="sr-style_tags" type="text" style="width:100%; padding:10px; border-radius:10px; border:1px solid #d1d5db;">
+
+            <div style="margin-top:12px;">
+              <label for="sr-audio-file">Upload MP3 from Suno</label>
+              <input id="sr-audio-file" type="file" accept="audio/*" />
+              <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+                <button class="btn" id="sr-btn-upload" type="button">Upload MP3</button>
+                <button class="btn" id="sr-btn-publish" type="button">Publish</button>
+                <button class="btn" id="sr-btn-unpublish" type="button">Unpublish</button>
+              </div>
+
+              <div style="margin-top:12px;">
+                <div id="sr-audio-wrap" style="display:none; padding:12px; border-radius:12px; border:1px solid #e5e7eb; background:#f9fafb;">
+                  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                    <strong>Audio Preview</strong>
+                    <span id="sr-audio-privacy" style="font-size:12px; color:#6b7280;"></span>
+                  </div>
+                  <audio id="sr-audio" controls style="width:100%; margin-top:10px;"></audio>
+                  <div id="sr-audio-link" style="margin-top:8px; font-size:12px; color:#6b7280;"></div>
+                </div>
+                <div id="sr-songjob-public-note" style="display:none; margin-top:10px; font-size:13px; color:#6b7280;">
+                  This campaign has no published song yet.
+                </div>
+              </div>
             </div>
           </div>
 
-          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
-            <button class="btn" id="sr-btn-save" type="button">Save fields</button>
-            <button class="btn" id="sr-btn-build" type="button">Build Prompt Pack</button>
-            <button class="btn" id="sr-btn-copy" type="button">Copy Prompt Pack</button>
-            <button class="btn" id="sr-btn-open-suno" type="button">Open Suno</button>
+          <div id="sr-nonowner-note" class="muted" style="display:none;">
+            You are viewing as public. Only published audio (if any) will play.
           </div>
 
-          <div style="margin-top:12px;">
-            <label style="font-size:12px; color:#374151; font-weight:700;">Prompt Pack</label>
-            <textarea id="sr-suno_prompt" rows="8" style="width:100%; padding:10px; border-radius:10px; border:1px solid #d1d5db;"></textarea>
-          </div>
-
-          <div style="margin-top:12px; padding:12px; border-radius:12px; border:1px dashed #d1d5db;">
-            <strong>Upload MP3</strong>
-            <input id="sr-audio-file" type="file" accept="audio/mpeg,audio/mp3" style="margin-top:10px;">
-            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
-              <button class="btn" id="sr-btn-upload" type="button">Upload MP3</button>
-              <button class="btn btn-primary" id="sr-btn-publish" type="button">Publish (Public)</button>
-              <button class="btn" id="sr-btn-unpublish" type="button">Unpublish</button>
-            </div>
-            <div id="sr-songjob-msg" style="margin-top:10px; font-size:13px; color:#374151;"></div>
-          </div>
         </div>
-
-        <div style="margin-top:12px;">
-          <div id="sr-audio-wrap" style="display:none; padding:12px; border-radius:12px; border:1px solid #e5e7eb; background:#f9fafb;">
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-              <strong>Audio Preview</strong>
-              <span id="sr-audio-privacy" style="font-size:12px; color:#6b7280;"></span>
-            </div>
-            <audio id="sr-audio" controls style="width:100%; margin-top:10px;"></audio>
-            <div id="sr-audio-link" style="margin-top:8px; font-size:12px; color:#6b7280;"></div>
-          </div>
-          <div id="sr-songjob-public-note" style="display:none; margin-top:10px; font-size:13px; color:#6b7280;">
-            This campaign has no published song yet.
-          </div>
-        </div>
-      </section>
+      </div>
     </div>
+
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -235,41 +145,10 @@
     window.supabaseClient = supabaseClient;
     window.supabase = supabaseClient;
 
-    /************************************************
-     * ✅ FIXED: Exchange ?code=... for a session
-     * - ALWAYS removes ?code=... (even on error)
-     ************************************************/
-    async function handleAuthCodeRedirectIfPresent(){
-      const status = document.getElementById("statusMessage");
-      try {
-        const url = new URL(window.location.href);
-        const code = url.searchParams.get("code");
-        if (!code) return;
-
-        status.textContent = "Finishing login…";
-
-        const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
-
-        // ✅ Always remove code so you never get stuck
-        url.searchParams.delete("code");
-        window.history.replaceState({}, document.title, url.toString());
-
-        if (error) {
-          console.error("exchangeCodeForSession error:", error);
-          status.textContent =
-            "Login failed. Request + click the magic link in the SAME browser (Safari→Safari).";
-          status.classList.add("error");
-        }
-      } catch (e) {
-        console.error("handleAuthCodeRedirectIfPresent failed:", e);
-      }
-    }
-
-    function formatDateTime(str) {
-      if (!str) return "";
-      const d = new Date(str);
-      if (Number.isNaN(d.getTime())) return "";
-      return d.toLocaleString();
+    async function refreshMiniAuth(){
+      const el = document.getElementById("authMini");
+      const { data } = await supabaseClient.auth.getSession();
+      el.textContent = data?.session?.user ? "Logged in ✅" : "Logged out";
     }
 
     function setError(msg) {
@@ -279,6 +158,8 @@
     }
 
     async function loadCampaignPage() {
+      await refreshMiniAuth();
+
       const id = getCampaignIdFromUrl();
       const statusMessage = document.getElementById("statusMessage");
       const container = document.getElementById("campaignContainer");
@@ -289,84 +170,39 @@
       }
 
       statusMessage.textContent = "Loading campaign…";
+      statusMessage.classList.remove("error");
 
-      const { data: campaign, error: campaignError } = await supabaseClient
+      const { data: campaign, error } = await supabaseClient
         .from("campaigns")
-        .select("id, title, description, donation_url, status, created_at, song_id, user_id")
+        .select("*")
         .eq("id", id)
         .single();
 
-      if (campaignError || !campaign) {
-        console.error(campaignError);
-        setError("Could not find a campaign with id: " + id);
+      if (error) {
+        console.error(error);
+        setError("Could not load campaign: " + error.message);
         return;
       }
 
-      document.getElementById("campaignTitle").textContent = campaign.title || "(Untitled campaign)";
-      document.getElementById("campaignDescription").textContent = campaign.description || "";
-      document.getElementById("campaignMeta").textContent = "Created " + formatDateTime(campaign.created_at);
-
-      const statusLabel = (campaign.status || "draft").toUpperCase();
-      document.getElementById("campaignStatusPill").textContent = "Status: " + statusLabel;
-
-      const donationCell = document.getElementById("donationLinkCell");
-      if (campaign.donation_url) {
-        const safeUrl = campaign.donation_url;
-        donationCell.innerHTML = `
-          <a class="btn btn-primary" href="${safeUrl}" target="_blank" rel="noopener noreferrer">Open donation page</a>
-          <div class="meta" style="margin-top:6px;">${safeUrl}</div>
-        `;
-      } else {
-        donationCell.textContent = "No donation URL saved.";
-      }
-
-      if (campaign.song_id) {
-        const { data: song, error: songError } = await supabaseClient
-          .from("songs")
-          .select("cause_category, condition, cause, emotion, genre, style, lyric_prompt, lyrics, audio_url, created_at")
-          .eq("id", campaign.song_id)
-          .single();
-
-        if (songError) {
-          console.error(songError);
-        } else if (song) {
-          document.getElementById("songCauseCategory").textContent = song.cause_category || song.cause || "—";
-          document.getElementById("songCondition").textContent = song.condition || "—";
-          document.getElementById("songEmotion").textContent = song.emotion || "—";
-          document.getElementById("songGenre").textContent = song.genre || "—";
-          document.getElementById("songStyle").textContent = song.style || "—";
-          document.getElementById("songLyricPrompt").textContent = song.lyric_prompt || "—";
-
-          const lyricsEl = document.getElementById("songLyrics");
-          lyricsEl.textContent = (song.lyrics && song.lyrics.trim()) ? song.lyrics : "(No lyrics saved yet)";
-
-          const audioBlock = document.getElementById("songAudioBlock");
-          if (song.audio_url && song.audio_url.trim() !== "") {
-            const url = song.audio_url.trim();
-            audioBlock.innerHTML = `
-              <audio controls preload="metadata" src="${url}"></audio>
-              <div class="meta" style="margin-top:8px;">
-                <a class="btn" href="${url}" target="_blank" rel="noopener noreferrer">Open MP3 in new tab</a>
-              </div>
-            `;
-          } else {
-            audioBlock.textContent = "No audio attached yet.";
-          }
-        }
-      }
+      document.getElementById("campTitle").textContent = campaign.title || "(Untitled)";
+      document.getElementById("campDesc").textContent = campaign.description || "";
+      const donationLink = document.getElementById("donationLink");
+      donationLink.href = campaign.donation_url || "#";
 
       container.style.display = "block";
       statusMessage.textContent = "";
-      statusMessage.classList.remove("error");
     }
 
-    // ✅ IMPORTANT: exchange code first, then load page
-    document.addEventListener("DOMContentLoaded", async () => {
-      await handleAuthCodeRedirectIfPresent();
+    // ✅ THE KEY FIX: when you return to this page (or it’s restored from bfcache), refresh auth + reload
+    window.addEventListener("pageshow", async () => {
       await loadCampaignPage();
+      if (window.__srSongJobInit) window.__srSongJobInit();
     });
+
+    document.addEventListener("DOMContentLoaded", loadCampaignPage);
   </script>
 
+  <!-- OPTION C SCRIPT -->
   <script>
   (function () {
     const $ = (id) => document.getElementById(id);
@@ -397,10 +233,6 @@
 
     async function fetchUser(sb) {
       try {
-        const { data: sess } = await sb.auth.getSession();
-        const u = sess?.session?.user || null;
-        if (u) return u;
-
         const { data, error } = await sb.auth.getUser();
         if (error) return null;
         return data?.user || null;
@@ -463,45 +295,25 @@
     }
 
     function buildPromptPack() {
-      const title = ($("sr-song_title").value || "").trim();
-      const genre = ($("sr-genre").value || "").trim();
-      const mood = ($("sr-mood").value || "").trim();
+      const title = ($("sr-song_title").value || "").trim() || "Fundraising Song";
+      const genre = ($("sr-genre").value || "").trim() || "Pop";
+      const mood = ($("sr-mood").value || "").trim() || "Hopeful";
       const tags = ($("sr-style_tags").value || "").trim();
 
-      const campaign = state.campaign || {};
-      const cause = (campaign.illness || campaign.cause || campaign.condition || "this cause");
-      const charity = (campaign.charity || campaign.charity_name || "the charity");
-      const donationUrl = (campaign.donation_url || campaign.donate_url || campaign.donationUrl || "");
-
-      const safetyDonationLine = donationUrl
-        ? `Call-to-action: Tell listeners to donate at: ${donationUrl}`
-        : `Call-to-action: Tell listeners to donate at the campaign link (do not invent a URL).`;
-
       const pack =
-`TITLE: ${title || "Fundraising Anthem"}
-GENRE: ${genre || "Pop"}
-MOOD: ${mood || "Hopeful"}
-STYLE TAGS: ${tags || "Uplifting, Anthemic, Modern pop"}
+`Write original fundraising song lyrics.
+Title: ${title}
+Genre: ${genre}
+Mood: ${mood}
+Style tags: ${tags}
 
-CONTEXT:
-- This is a fundraising song for: ${cause}
-- Benefiting: ${charity}
-- Tone: respectful, emotionally uplifting, community-oriented
-
-STRUCTURE:
-- Verse 1 (story / empathy)
-- Pre-chorus (build)
-- Chorus (anthemic, memorable)
-- Verse 2 (community support + hope)
-- Bridge (resilience / togetherness)
-- Final chorus with clear donation call
-
-LYRICS REQUIREMENTS:
-- Include empathy and hope
-- Avoid medical misinformation
-- Avoid promising cures
-- Keep it uplifting and respectful
-- ${safetyDonationLine}`;
+Include:
+- empathy and community support
+- hope and resilience
+- a clear call-to-action to donate
+- uplifting, respectful tone
+OPTIONAL:
+- Include one short “tag line” that could be used as a campaign slogan.`;
 
       $("sr-suno_prompt").value = pack;
       return pack;
@@ -516,9 +328,18 @@ LYRICS REQUIREMENTS:
         style_tags: ($("sr-style_tags").value || "").trim() || null,
         suno_prompt: ($("sr-suno_prompt").value || "").trim() || null
       };
-      if (update.suno_prompt && (state.job.status === "draft")) update.status = "prompt_ready";
 
-      const { data, error } = await sb.from("song_jobs").update(update).eq("id", state.job.id).select("*").single();
+      if (update.suno_prompt && (state.job.status === "draft")) {
+        update.status = "prompt_ready";
+      }
+
+      const { data, error } = await sb
+        .from("song_jobs")
+        .update(update)
+        .eq("id", state.job.id)
+        .select("*")
+        .single();
+
       if (error) throw error;
       state.job = data;
       return data;
@@ -528,23 +349,22 @@ LYRICS REQUIREMENTS:
       const text = ($("sr-suno_prompt").value || "").trim();
       if (!text) { msg("No Prompt Pack to copy. Click “Build Prompt Pack” first.", "warn"); return; }
       await navigator.clipboard.writeText(text);
-      msg("Copied Prompt Pack ✅", "ok");
+      msg("Copied Prompt Pack to clipboard ✅", "ok");
     }
 
     function openSuno() {
       window.open("https://suno.com/create", "_blank", "noopener,noreferrer");
-      msg("Opened Suno in a new tab.", "info");
+      msg("Opened Suno in a new tab. Paste the Prompt Pack there.", "info");
     }
 
     async function uploadMp3(sb) {
       if (!state.job) return;
-      const file = $("sr-audio-file")?.files?.[0];
+      const fileInput = $("sr-audio-file");
+      const file = fileInput?.files?.[0];
       if (!file) { msg("Choose an MP3 file first.", "warn"); return; }
-      if (!/audio\/mpeg|audio\/mp3/.test(file.type) && !file.name.toLowerCase().endsWith(".mp3")) {
-        msg("Please upload an MP3 file (.mp3).", "warn"); return;
-      }
 
       await saveJobFields(sb);
+
       const objectName = `${state.user.id}/${state.job.id}.mp3`;
 
       msg("Uploading MP3…", "info");
@@ -617,6 +437,7 @@ LYRICS REQUIREMENTS:
 
     function renderOwnerUI() {
       $("sr-songjob-owner-only").style.display = state.isOwner ? "block" : "none";
+      $("sr-nonowner-note").style.display = state.isOwner ? "none" : "block";
       $("sr-songjob-public-note").style.display = state.isOwner ? "none" : "block";
     }
 
@@ -651,11 +472,14 @@ LYRICS REQUIREMENTS:
       renderStatus();
       if (state.isOwner && state.job) fillFormFromJob(state.job);
       renderAudio();
-      wireButtons(sb);
+      if (state.isOwner) wireButtons(sb);
 
       if (!state.isOwner) msg(state.job ? "Published song loaded." : "No published song yet.","info");
       else msg("Ready: Build → Copy → Suno → Upload → Publish.","info");
     }
+
+    // expose init so pageshow can re-run it
+    window.__srSongJobInit = init;
 
     document.addEventListener("DOMContentLoaded", init);
   })();
