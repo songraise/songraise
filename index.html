@@ -6,166 +6,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body{
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      line-height: 1.6;
-      color: #111827;
-      background: #f9fafb;
-    }
+    body{ font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; line-height:1.6; color:#111827; background:#f9fafb; }
     a{ color: inherit; }
-    .wrapper{ max-width: 1100px; margin: 0 auto; padding: 22px 16px 70px; }
-    header{
-      display:flex; justify-content:space-between; align-items:center;
-      padding: 10px 0 18px;
-    }
-    .logo{ font-weight: 900; font-size: 1.25rem; letter-spacing:-0.02em; }
+    .wrapper{ max-width:1100px; margin:0 auto; padding:22px 16px 70px; }
+    header{ display:flex; justify-content:space-between; align-items:center; padding:10px 0 18px; }
+    .logo{ font-weight:900; font-size:1.25rem; letter-spacing:-0.02em; }
     .logo span{ color:#2563eb; }
-    nav a{
-      margin-left: 16px;
-      font-size: 0.95rem;
-      color:#4b5563;
-      text-decoration:none;
-    }
+    nav a{ margin-left:16px; font-size:0.95rem; color:#4b5563; text-decoration:none; }
     nav a:hover{ color:#111827; }
-    .card{
-      background:#fff;
-      border:1px solid #e5e7eb;
-      border-radius: 16px;
-      padding: 18px 16px;
-      box-shadow: 0 8px 18px rgba(15,23,42,0.04);
-    }
-    .section{ padding: 18px 0; }
-    h1{ font-size: 1.9rem; letter-spacing:-0.02em; margin-bottom: 6px; }
-    h2{ font-size: 1.25rem; margin-bottom: 8px; }
-    .lead{ color:#4b5563; margin-bottom: 14px; max-width: 800px; }
-    .btn{
-      display:inline-block;
-      padding: 10px 16px;
-      border-radius: 999px;
-      border: 1px solid #d1d5db;
-      background: #fff;
-      cursor:pointer;
-      font-weight: 700;
-      font-size: 0.95rem;
-      text-decoration:none;
-    }
-    .btn-primary{
-      background:#2563eb;
-      color:#fff;
-      border-color:#2563eb;
-    }
+    .card{ background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:18px 16px; box-shadow:0 8px 18px rgba(15,23,42,0.04); }
+    .section{ padding:18px 0; }
+    h1{ font-size:1.9rem; letter-spacing:-0.02em; margin-bottom:6px; }
+    h2{ font-size:1.25rem; margin-bottom:8px; }
+    .lead{ color:#4b5563; margin-bottom:14px; max-width:800px; }
+    .btn{ display:inline-block; padding:10px 16px; border-radius:999px; border:1px solid #d1d5db; background:#fff; cursor:pointer; font-weight:700; font-size:0.95rem; text-decoration:none; }
+    .btn-primary{ background:#2563eb; color:#fff; border-color:#2563eb; }
     .btn-primary:hover{ background:#1d4ed8; }
     .btn-ghost:hover{ background:#f3f4f6; }
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-      align-items:start;
-    }
-    @media (max-width: 900px){
-      .grid{ grid-template-columns: 1fr; }
-      nav{ display:none; }
-    }
-    .field-label{
-      display:block;
-      font-size: 0.85rem;
-      color:#374151;
-      font-weight: 700;
-      margin: 10px 0 4px;
-    }
-    .field-input, .field-select, .field-textarea{
-      width:100%;
-      padding: 9px 10px;
-      border-radius: 10px;
-      border: 1px solid #d1d5db;
-      font-size: 0.95rem;
-      background: #fff;
-    }
-    .field-textarea{ min-height: 90px; resize: vertical; }
-    .status{
-      margin-top: 10px;
-      font-size: 0.9rem;
-      color:#6b7280;
-    }
-    table{
-      width:100%;
-      border-collapse: collapse;
-      font-size: 0.92rem;
-      background:#fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 14px;
-      overflow:hidden;
-    }
-    th, td{ padding: 10px 10px; border-bottom: 1px solid #e5e7eb; text-align:left; }
-    th{ background:#f3f4f6; font-size: 0.85rem; color:#374151; }
-    tr:last-child td{ border-bottom: none; }
-
-    .demo-bar{
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      background:#ffffff;
-      border: 1px solid #e5e7eb;
-      border-radius: 14px;
-      padding: 10px 12px;
-      display:flex;
-      gap: 10px;
-      align-items:center;
-      justify-content:space-between;
-      margin-bottom: 14px;
-      box-shadow: 0 10px 24px rgba(15,23,42,0.06);
-    }
-    .demo-left{
-      display:flex;
-      gap: 10px;
-      align-items:center;
-      flex-wrap:wrap;
-    }
-    .demo-note{
-      font-size: 0.85rem;
-      color:#6b7280;
-    }
-    .demo-right{
-      display:flex; gap: 10px; align-items:center; flex-wrap:wrap;
-    }
-    .pill{
-      display:inline-block;
-      padding: 4px 10px;
-      border-radius: 999px;
-      background:#eef2ff;
-      color:#1d4ed8;
-      font-size: 0.75rem;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-    .toggle{
-      display:flex; align-items:center; gap:8px;
-      font-size: 0.9rem; color:#374151;
-      font-weight: 700;
-    }
-    .small{ font-size: 0.85rem; padding: 7px 10px; }
-
-    .authbox{
-      display:flex; gap:8px; align-items:center; flex-wrap:wrap;
-    }
-    .authbox input{
-      width: 220px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      border: 1px solid #d1d5db;
-      font-size: 0.9rem;
-    }
-    .authstatus{
-      font-size: 0.85rem;
-      color:#374151;
-      font-weight: 700;
-    }
+    .grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:start; }
+    @media (max-width:900px){ .grid{ grid-template-columns:1fr; } nav{ display:none; } }
+    .field-label{ display:block; font-size:0.85rem; color:#374151; font-weight:700; margin:10px 0 4px; }
+    .field-input,.field-select,.field-textarea{ width:100%; padding:9px 10px; border-radius:10px; border:1px solid #d1d5db; font-size:0.95rem; background:#fff; }
+    .field-textarea{ min-height:90px; resize:vertical; }
+    .status{ margin-top:10px; font-size:0.9rem; color:#6b7280; }
+    table{ width:100%; border-collapse:collapse; font-size:0.92rem; background:#fff; border:1px solid #e5e7eb; border-radius:14px; overflow:hidden; }
+    th,td{ padding:10px 10px; border-bottom:1px solid #e5e7eb; text-align:left; }
+    th{ background:#f3f4f6; font-size:0.85rem; color:#374151; }
+    tr:last-child td{ border-bottom:none; }
+    .demo-bar{ position:sticky; top:0; z-index:50; background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:10px 12px; display:flex; gap:10px; align-items:center; justify-content:space-between; margin-bottom:14px; box-shadow:0 10px 24px rgba(15,23,42,0.06); }
+    .demo-left{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .demo-note{ font-size:0.85rem; color:#6b7280; }
+    .demo-right{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .pill{ display:inline-block; padding:4px 10px; border-radius:999px; background:#eef2ff; color:#1d4ed8; font-size:0.75rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; }
+    .toggle{ display:flex; align-items:center; gap:8px; font-size:0.9rem; color:#374151; font-weight:700; }
+    .small{ font-size:0.85rem; padding:7px 10px; }
+    .authbox{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .authbox input{ width:220px; padding:8px 10px; border-radius:999px; border:1px solid #d1d5db; font-size:0.9rem; }
+    .authstatus{ font-size:0.85rem; color:#374151; font-weight:700; }
   </style>
 </head>
 <body>
   <div class="wrapper">
-
     <div class="demo-bar">
       <div class="demo-left">
         <span class="pill">Demo Mode</span>
@@ -183,7 +64,6 @@
           <button class="btn btn-ghost small" id="loginBtn" type="button">Email me a login link</button>
           <button class="btn btn-ghost small" id="logoutBtn" type="button" style="display:none;">Log out</button>
         </div>
-
         <button class="btn btn-ghost small" id="demoFillBtn" type="button">Fill Demo Now</button>
         <button class="btn btn-ghost small" id="demoClearBtn" type="button">Clear</button>
       </div>
@@ -199,9 +79,7 @@
 
     <section class="section">
       <h1>Create a fundraising song + campaign</h1>
-      <p class="lead">
-        You must be logged in to create campaigns. “View” opens <code>campaign.html?id=...</code>.
-      </p>
+      <p class="lead">You must be logged in to create campaigns. “View” opens <code>campaign.html?id=...</code>.</p>
 
       <div class="grid">
         <div class="card" id="create">
@@ -269,12 +147,7 @@
           <div style="overflow-x:auto;">
             <table>
               <thead>
-                <tr>
-                  <th>Title</th>
-                  <th>Donation</th>
-                  <th>Created</th>
-                  <th>View</th>
-                </tr>
+                <tr><th>Title</th><th>Donation</th><th>Created</th><th>View</th></tr>
               </thead>
               <tbody id="campaignsBody"></tbody>
             </table>
@@ -305,7 +178,7 @@
         flowType: "pkce",
         persistSession: true,
         autoRefreshToken: true,
-        detectSessionInUrl: true,
+        detectSessionInUrl: false,
         storage: window.localStorage
       }
     });
@@ -317,39 +190,40 @@
 
     let currentUser = null;
 
-    function cleanUrlArtifacts(){
+    function cleanUrl(){
       const url = new URL(window.location.href);
-      let changed = false;
-
       ["code","error","error_code","error_description","type","token","access_token","refresh_token","expires_in","expires_at","token_type"]
-        .forEach(k => {
-          if (url.searchParams.has(k)) { url.searchParams.delete(k); changed = true; }
-        });
+        .forEach(k => url.searchParams.delete(k));
+      url.hash = "";
+      window.history.replaceState({}, document.title, url.toString());
+    }
 
-      if (window.location.hash && window.location.hash.length > 1) {
-        changed = true;
-        url.hash = "";
-      }
+    async function exchangeCodeIfPresent(){
+      const url = new URL(window.location.href);
+      const code = url.searchParams.get("code");
+      if (!code) return;
 
-      if (changed) {
-        window.history.replaceState({}, document.title, url.toString());
+      authStatusEl.textContent = "Finishing login…";
+      const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
+      if (error){
+        authStatusEl.textContent = "Logged out";
+        alert("Login failed: " + error.message + "\n\nRequest a NEW email link and click it once.");
+        return;
       }
+      cleanUrl();
     }
 
     async function refreshAuthUI(){
       const { data: sessData } = await supabaseClient.auth.getSession();
       const u = sessData?.session?.user || null;
-
       if (u){
         currentUser = u;
         authStatusEl.textContent = "Logged in ✅";
         logoutBtn.style.display = "inline-block";
         return;
       }
-
       const { data: userData } = await supabaseClient.auth.getUser();
       currentUser = userData?.user || null;
-
       if (currentUser){
         authStatusEl.textContent = "Logged in ✅";
         logoutBtn.style.display = "inline-block";
@@ -364,7 +238,6 @@
       if (!email){ alert("Type your email address first."); return; }
 
       authStatusEl.textContent = "Sending link…";
-
       const redirectTo = `${BASE}index.html?v=${Date.now()}`;
 
       const { error } = await supabaseClient.auth.signInWithOtp({
@@ -379,7 +252,7 @@
       }
 
       authStatusEl.textContent = "Check your email (login link sent)";
-      alert("Open the newest email and click the login link in the SAME browser.");
+      alert("Open the newest email and click the login link ONCE.");
     });
 
     logoutBtn.addEventListener("click", async () => {
@@ -388,10 +261,7 @@
       await loadCampaigns();
     });
 
-    supabaseClient.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN" && session) {
-        cleanUrlArtifacts();
-      }
+    supabaseClient.auth.onAuthStateChange(async () => {
       await refreshAuthUI();
       await loadCampaigns();
     });
@@ -484,7 +354,7 @@
       document.getElementById("style").value = "uplifting pop";
       document.getElementById("donation_url").value = "https://example.org/donate";
       document.getElementById("campaign_title").value = "You Are Not Alone (Demo)";
-      document.getElementById("campaign_description").value = "Demo campaign showing in-page MP3 playback on campaign.html.";
+      document.getElementById("campaign_description").value = "Demo campaign.";
       lyricPromptEl.value = autoLyricPrompt("Autoimmune & IBD", "Crohn's Disease", "Hopeful", "Pop", "uplifting pop");
     }
 
@@ -598,17 +468,10 @@
 
       campaignsBody.innerHTML = data.map(c => {
         const title = c.title || "(Untitled)";
-        const donation = c.donation_url
-          ? `<a href="${c.donation_url}" target="_blank" rel="noopener noreferrer">Open</a>`
-          : "—";
+        const donation = c.donation_url ? `<a href="${c.donation_url}" target="_blank" rel="noopener noreferrer">Open</a>` : "—";
         const created = formatDateTime(c.created_at);
         const viewHref = `${BASE}campaign.html?id=${encodeURIComponent(c.id)}`;
-        return `<tr>
-          <td>${title}</td>
-          <td>${donation}</td>
-          <td>${created}</td>
-          <td><a href="${viewHref}">View</a></td>
-        </tr>`;
+        return `<tr><td>${title}</td><td>${donation}</td><td>${created}</td><td><a href="${viewHref}">View</a></td></tr>`;
       }).join("");
 
       campaignsStatus.textContent = `Showing ${data.length} campaign(s).`;
@@ -623,7 +486,7 @@
       createStatus.style.color = "#6b7280";
 
       if (!currentUser){
-        createStatus.textContent = "Please log in first (top bar) — then try again.";
+        createStatus.textContent = "Please log in first — then try again.";
         createStatus.style.color = "red";
         return;
       }
@@ -663,15 +526,7 @@
 
       const { error: campErr } = await supabaseClient
         .from("campaigns")
-        .insert({
-          user_id: currentUser.id,
-          song_id: song.id,
-          title,
-          description,
-          donation_url,
-          campaign_slug,
-          status: "published"
-        });
+        .insert({ user_id: currentUser.id, song_id: song.id, title, description, donation_url, campaign_slug, status: "published" });
 
       if (campErr){
         createStatus.textContent = "Error saving campaign: " + campErr.message;
@@ -685,11 +540,9 @@
     });
 
     (async function init(){
+      await exchangeCodeIfPresent();
       await refreshAuthUI();
       await loadCampaigns();
-      if (window.location.hash && window.location.hash.length > 1) {
-        cleanUrlArtifacts();
-      }
     })();
   </script>
 </body>
