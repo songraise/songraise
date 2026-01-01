@@ -32,7 +32,6 @@
 </head>
 <body>
   <div class="wrap">
-
     <div class="topbar">
       <a class="btn" href="index.html">← Back to dashboard</a>
       <div class="muted" id="authMini">Checking login…</div>
@@ -40,6 +39,7 @@
 
     <div class="card">
       <div id="statusMessage" class="muted">Loading…</div>
+
       <div id="campaignContainer" style="display:none;">
         <h1 id="campTitle"></h1>
         <p class="muted" id="campDesc"></p>
@@ -117,13 +117,12 @@
         </div>
       </div>
     </div>
-
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
-    function getCampaignIdFromUrl() {
+    function getCampaignIdFromUrl(){
       const params = new URLSearchParams(window.location.search);
       return params.get("id");
     }
@@ -145,26 +144,43 @@
     window.supabaseClient = supabaseClient;
     window.supabase = supabaseClient;
 
+    function cleanUrlArtifacts(){
+      const url = new URL(window.location.href);
+      let changed = false;
+
+      ["code","error","error_code","error_description","type","token","access_token","refresh_token","expires_in","expires_at","token_type"]
+        .forEach(k => {
+          if (url.searchParams.has(k)) { url.searchParams.delete(k); changed = true; }
+        });
+
+      if (window.location.hash && window.location.hash.length > 1) {
+        changed = true;
+        url.hash = "";
+      }
+
+      if (changed) window.history.replaceState({}, document.title, url.toString());
+    }
+
     async function refreshMiniAuth(){
       const el = document.getElementById("authMini");
       const { data } = await supabaseClient.auth.getSession();
       el.textContent = data?.session?.user ? "Logged in ✅" : "Logged out";
     }
 
-    function setError(msg) {
+    function setError(msg){
       const status = document.getElementById("statusMessage");
       status.textContent = msg;
       status.classList.add("error");
     }
 
-    async function loadCampaignPage() {
+    async function loadCampaignPage(){
       await refreshMiniAuth();
 
       const id = getCampaignIdFromUrl();
       const statusMessage = document.getElementById("statusMessage");
       const container = document.getElementById("campaignContainer");
 
-      if (!id) {
+      if (!id){
         setError("No campaign id found in URL. Example: campaign.html?id=YOUR_CAMPAIGN_ID");
         return;
       }
@@ -178,8 +194,7 @@
         .eq("id", id)
         .single();
 
-      if (error) {
-        console.error(error);
+      if (error){
         setError("Could not load campaign: " + error.message);
         return;
       }
@@ -193,8 +208,13 @@
       statusMessage.textContent = "";
     }
 
-    // ✅ THE KEY FIX: when you return to this page (or it’s restored from bfcache), refresh auth + reload
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+      if (event === "SIGNED_IN" && session) cleanUrlArtifacts();
+      await refreshMiniAuth();
+    });
+
     window.addEventListener("pageshow", async () => {
+      await refreshMiniAuth();
       await loadCampaignPage();
       if (window.__srSongJobInit) window.__srSongJobInit();
     });
@@ -202,11 +222,9 @@
     document.addEventListener("DOMContentLoaded", loadCampaignPage);
   </script>
 
-  <!-- OPTION C SCRIPT -->
   <script>
   (function () {
     const $ = (id) => document.getElementById(id);
-
     const state = { campaignId: null, user: null, job: null, isOwner: false, campaign: null };
 
     function msg(text, type="info") {
@@ -329,9 +347,7 @@ OPTIONAL:
         suno_prompt: ($("sr-suno_prompt").value || "").trim() || null
       };
 
-      if (update.suno_prompt && (state.job.status === "draft")) {
-        update.status = "prompt_ready";
-      }
+      if (update.suno_prompt && (state.job.status === "draft")) update.status = "prompt_ready";
 
       const { data, error } = await sb
         .from("song_jobs")
@@ -347,7 +363,7 @@ OPTIONAL:
 
     async function copyPrompt() {
       const text = ($("sr-suno_prompt").value || "").trim();
-      if (!text) { msg("No Prompt Pack to copy. Click “Build Prompt Pack” first.", "warn"); return; }
+      if (!text) { msg("No Prompt Pack to copy. Click Build Prompt Pack first.", "warn"); return; }
       await navigator.clipboard.writeText(text);
       msg("Copied Prompt Pack to clipboard ✅", "ok");
     }
@@ -395,10 +411,7 @@ OPTIONAL:
 
     async function publish(sb, publish=true) {
       if (!state.job) return;
-      if (publish && (!state.job.audio_url || !state.job.audio_path)) {
-        msg("Upload an MP3 before publishing.", "warn");
-        return;
-      }
+      if (publish && (!state.job.audio_url || !state.job.audio_path)) { msg("Upload an MP3 before publishing.", "warn"); return; }
 
       const newStatus = publish ? "published" : (state.job.audio_url ? "audio_uploaded" : "draft");
       const { data, error } = await sb.from("song_jobs").update({ status: newStatus }).eq("id", state.job.id).select("*").single();
@@ -478,9 +491,7 @@ OPTIONAL:
       else msg("Ready: Build → Copy → Suno → Upload → Publish.","info");
     }
 
-    // expose init so pageshow can re-run it
     window.__srSongJobInit = init;
-
     document.addEventListener("DOMContentLoaded", init);
   })();
   </script>
