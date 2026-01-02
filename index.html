@@ -48,7 +48,7 @@
 
     <div class="hero">
       <h1>Create a fundraising song + campaign</h1>
-      <p class="lead">“View” opens <code>campaign.html?id=...</code>. Login persists.</p>
+      <p class="lead">“View” opens <code>campaign.html?id=...</code>. Login should persist.</p>
     </div>
 
     <div class="grid">
@@ -81,12 +81,29 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const authStatusEl = document.getElementById("authStatus");
+    authStatusEl.textContent = "JS running…";
+  </script>
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    onload="window.__sbLoaded = true"
+    onerror="window.__sbLoaded = false"
+  ></script>
+
   <script>
     const SUPABASE_URL = "https://jvvcxpjmdfeqjdmcemet.supabase.co";
     const SUPABASE_REF = "jvvcxpjmdfeqjdmcemet";
     const SUPABASE_ANON_KEY =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2dmN4cGptZGZlcWpkbWNlbWV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1Nzc3NzYsImV4cCI6MjA3NzE1Mzc3Nn0.LPRIt10bLZYfoOCx7nD4U0PsCURB7YToq4VbByliFi4";
+
+    const emailEl = document.getElementById("emailInput");
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const campaignsBody = document.getElementById("campaignsBody");
+    const campaignsStatus = document.getElementById("campaignsStatus");
+    const createStatus = document.getElementById("createStatus");
 
     function baseUrl(){
       const u = new URL(window.location.href);
@@ -110,7 +127,6 @@
       return {
         access_token: p.get("access_token"),
         refresh_token: p.get("refresh_token"),
-        token_type: p.get("token_type") || "bearer",
         expires_at: p.get("expires_at"),
         expires_in: p.get("expires_in")
       };
@@ -126,73 +142,58 @@
       }catch(e){ return null; }
     }
 
-    // Import magic-link hash tokens into Supabase storage BEFORE creating client
-    let importedUser = null;
-    (function importHash(){
-      const t = readHashTokens();
-      if (!t.access_token || !t.refresh_token) return;
-
+    function saveSessionToStorage(access_token, refresh_token, expires_at, expires_in){
       const now = Math.floor(Date.now()/1000);
       const exp =
-        t.expires_at ? Number(t.expires_at) :
-        t.expires_in ? (now + Number(t.expires_in)) :
+        expires_at ? Number(expires_at) :
+        expires_in ? (now + Number(expires_in)) :
         (now + 3600);
-
-      const payload = decodeJwtPayload(t.access_token);
-      if (payload?.sub){
-        importedUser = { id: payload.sub, email: payload.email || "" };
-      }
 
       const storageKey = `sb-${SUPABASE_REF}-auth-token`;
       const sessionObj = {
-        access_token: t.access_token,
-        refresh_token: t.refresh_token,
-        token_type: t.token_type,
+        access_token,
+        refresh_token,
+        token_type: "bearer",
         expires_in: Math.max(0, exp - now),
         expires_at: exp,
         user: null
       };
       localStorage.setItem(storageKey, JSON.stringify(sessionObj));
-      cleanUrl();
-    })();
+    }
 
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { persistSession: true, autoRefreshToken: true, storage: window.localStorage }
-    });
-
-    const authStatusEl = document.getElementById("authStatus");
-    const emailEl = document.getElementById("emailInput");
-    const loginBtn = document.getElementById("loginBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const campaignsBody = document.getElementById("campaignsBody");
-    const campaignsStatus = document.getElementById("campaignsStatus");
-    const createStatus = document.getElementById("createStatus");
-
-    let currentUser = importedUser;
-
-    async function hydrateUserFast(){
-      // Try normal session read (no hanging auth call)
-      const { data } = await supabaseClient.auth.getSession();
-      const session = data?.session || null;
-
-      if (session?.user){
-        currentUser = { id: session.user.id, email: session.user.email || "" };
-        return;
-      }
-
-      // Fallback: decode stored access token (still counts as logged in for RLS)
+    function loadAccessTokenFromStorage(){
       const storageKey = `sb-${SUPABASE_REF}-auth-token`;
       const raw = localStorage.getItem(storageKey);
-      if (!raw) { currentUser = null; return; }
+      if (!raw) return null;
       try{
         const obj = JSON.parse(raw);
-        const payload = obj?.access_token ? decodeJwtPayload(obj.access_token) : null;
-        if (payload?.sub){
-          currentUser = { id: payload.sub, email: payload.email || "" };
-          return;
-        }
-      }catch(e){}
-      currentUser = null;
+        return obj?.access_token || null;
+      }catch(e){ return null; }
+    }
+
+    function loadUserFromStorageToken(){
+      const token = loadAccessTokenFromStorage();
+      if (!token) return null;
+      const payload = decodeJwtPayload(token);
+      if (!payload?.sub) return null;
+      return { id: payload.sub, email: payload.email || "" };
+    }
+
+    let supabaseClient = null;
+    let currentUser = null;
+
+    function buildClient(){
+      const token = loadAccessTokenFromStorage();
+      if (token){
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storage: window.localStorage },
+          global: { headers: { Authorization: `Bearer ${token}` } }
+        });
+      } else {
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storage: window.localStorage }
+        });
+      }
     }
 
     function renderAuth(){
@@ -219,7 +220,6 @@
       else q = q.eq("status", "published");
 
       const { data, error } = await q;
-
       if (error){
         campaignsStatus.textContent = "Error: " + error.message;
         campaignsStatus.classList.add("error");
@@ -246,80 +246,102 @@
     }
 
     async function refreshAll(){
-      await hydrateUserFast();
+      currentUser = loadUserFromStorageToken();
+      buildClient();
       renderAuth();
       await loadCampaigns();
     }
 
-    loginBtn.addEventListener("click", async () => {
-      const email = (emailEl.value || "").trim();
-      if (!email){ alert("Type your email first."); return; }
-      const redirectTo = `${baseUrl()}index.html?v=${Date.now()}`;
-      authStatusEl.textContent = "Sending link…";
-      const { error } = await supabaseClient.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: redirectTo }
-      });
-      if (error){
-        authStatusEl.textContent = "Logged out";
-        alert("Login error: " + error.message);
-        return;
+    function importFromHashIfPresent(){
+      const t = readHashTokens();
+      if (t.access_token && t.refresh_token){
+        saveSessionToStorage(t.access_token, t.refresh_token, t.expires_at, t.expires_in);
+        cleanUrl();
       }
-      alert("Login email sent. Open the newest email and click the login link once.");
-      authStatusEl.textContent = "Check your email (link sent)";
-    });
+    }
 
-    logoutBtn.addEventListener("click", async () => {
-      await supabaseClient.auth.signOut();
-      currentUser = null;
-      await refreshAll();
-    });
-
-    window.addEventListener("pageshow", async () => {
-      await refreshAll();
-    });
-
-    document.getElementById("createForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      createStatus.textContent = "";
-      createStatus.classList.remove("error");
-
-      await hydrateUserFast();
-      renderAuth();
-
-      if (!currentUser){
-        createStatus.textContent = "Please log in first.";
-        createStatus.classList.add("error");
+    function start(){
+      if (!window.__sbLoaded){
+        authStatusEl.textContent = "Supabase JS failed to load (blocked).";
         return;
       }
 
-      const title = document.getElementById("title").value.trim();
-      const donation_url = document.getElementById("donation_url").value.trim();
-      const description = document.getElementById("description").value.trim() || null;
+      importFromHashIfPresent();
+      refreshAll();
 
-      createStatus.textContent = "Saving…";
+      loginBtn.addEventListener("click", async () => {
+        const email = (emailEl.value || "").trim();
+        if (!email){ alert("Type your email first."); return; }
 
-      const { error } = await supabaseClient.from("campaigns").insert({
-        user_id: currentUser.id,
-        title,
-        donation_url,
-        description,
-        status: "published"
+        const redirectTo = `${baseUrl()}index.html?v=${Date.now()}`;
+
+        authStatusEl.textContent = "Sending link…";
+        const { error } = await supabaseClient.auth.signInWithOtp({
+          email,
+          options: { emailRedirectTo: redirectTo }
+        });
+
+        if (error){
+          authStatusEl.textContent = "Logged out";
+          alert("Login error: " + error.message);
+          return;
+        }
+
+        alert("Login email sent. Open the newest email and click the login link once.");
+        authStatusEl.textContent = "Check your email (link sent)";
       });
 
-      if (error){
-        createStatus.textContent = "Error: " + error.message;
-        createStatus.classList.add("error");
-        return;
-      }
+      logoutBtn.addEventListener("click", async () => {
+        const storageKey = `sb-${SUPABASE_REF}-auth-token`;
+        localStorage.removeItem(storageKey);
+        currentUser = null;
+        buildClient();
+        await refreshAll();
+      });
 
-      createStatus.textContent = "Saved ✅";
-      await loadCampaigns();
-    });
+      window.addEventListener("pageshow", async () => {
+        await refreshAll();
+      });
 
-    (async function init(){
-      await refreshAll();
-    })();
+      document.getElementById("createForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        createStatus.textContent = "";
+        createStatus.classList.remove("error");
+
+        await refreshAll();
+
+        if (!currentUser){
+          createStatus.textContent = "Please log in first.";
+          createStatus.classList.add("error");
+          return;
+        }
+
+        const title = document.getElementById("title").value.trim();
+        const donation_url = document.getElementById("donation_url").value.trim();
+        const description = document.getElementById("description").value.trim() || null;
+
+        createStatus.textContent = "Saving…";
+
+        const { error } = await supabaseClient.from("campaigns").insert({
+          user_id: currentUser.id,
+          title,
+          donation_url,
+          description,
+          status: "published"
+        });
+
+        if (error){
+          createStatus.textContent = "Error: " + error.message;
+          createStatus.classList.add("error");
+          return;
+        }
+
+        createStatus.textContent = "Saved ✅";
+        await loadCampaigns();
+      });
+    }
+
+    setTimeout(start, 0);
   </script>
 </body>
 </html>
