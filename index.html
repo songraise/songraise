@@ -48,7 +48,7 @@
 
     <div class="hero">
       <h1>Create a fundraising song + campaign</h1>
-      <p class="lead">“View” opens <code>campaign.html?id=...</code>. Login should persist.</p>
+      <p class="lead">“View” opens <code>campaign.html?id=...</code>. Login persists.</p>
     </div>
 
     <div class="grid">
@@ -84,6 +84,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const SUPABASE_URL = "https://jvvcxpjmdfeqjdmcemet.supabase.co";
+    const SUPABASE_REF = "jvvcxpjmdfeqjdmcemet";
     const SUPABASE_ANON_KEY =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2dmN4cGptZGZlcWpkbWNlbWV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1Nzc3NzYsImV4cCI6MjA3NzE1Mzc3Nn0.LPRIt10bLZYfoOCx7nD4U0PsCURB7YToq4VbByliFi4";
 
@@ -106,10 +107,54 @@
     function readHashTokens(){
       const hash = (window.location.hash || "").replace(/^#/, "");
       const p = new URLSearchParams(hash);
-      const access_token = p.get("access_token");
-      const refresh_token = p.get("refresh_token");
-      return { access_token, refresh_token };
+      return {
+        access_token: p.get("access_token"),
+        refresh_token: p.get("refresh_token"),
+        token_type: p.get("token_type") || "bearer",
+        expires_at: p.get("expires_at"),
+        expires_in: p.get("expires_in")
+      };
     }
+
+    function decodeJwtPayload(jwt){
+      try{
+        const parts = jwt.split(".");
+        if (parts.length < 2) return null;
+        const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+        const json = decodeURIComponent(atob(b64).split("").map(c => "%" + c.charCodeAt(0).toString(16).padStart(2,"0")).join(""));
+        return JSON.parse(json);
+      }catch(e){ return null; }
+    }
+
+    // Import magic-link hash tokens into Supabase storage BEFORE creating client
+    let importedUser = null;
+    (function importHash(){
+      const t = readHashTokens();
+      if (!t.access_token || !t.refresh_token) return;
+
+      const now = Math.floor(Date.now()/1000);
+      const exp =
+        t.expires_at ? Number(t.expires_at) :
+        t.expires_in ? (now + Number(t.expires_in)) :
+        (now + 3600);
+
+      const payload = decodeJwtPayload(t.access_token);
+      if (payload?.sub){
+        importedUser = { id: payload.sub, email: payload.email || "" };
+      }
+
+      const storageKey = `sb-${SUPABASE_REF}-auth-token`;
+      const sessionObj = {
+        access_token: t.access_token,
+        refresh_token: t.refresh_token,
+        token_type: t.token_type,
+        expires_in: Math.max(0, exp - now),
+        expires_at: exp,
+        user: null
+      };
+      localStorage.setItem(storageKey, JSON.stringify(sessionObj));
+      cleanUrl();
+    })();
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: { persistSession: true, autoRefreshToken: true, storage: window.localStorage }
@@ -123,27 +168,31 @@
     const campaignsStatus = document.getElementById("campaignsStatus");
     const createStatus = document.getElementById("createStatus");
 
-    let currentUser = null;
+    let currentUser = importedUser;
 
-    async function finishLoginFromHashIfPresent(){
-      const { access_token, refresh_token } = readHashTokens();
-      if (!access_token || !refresh_token) return;
+    async function hydrateUserFast(){
+      // Try normal session read (no hanging auth call)
+      const { data } = await supabaseClient.auth.getSession();
+      const session = data?.session || null;
 
-      authStatusEl.textContent = "Finishing login…";
+      if (session?.user){
+        currentUser = { id: session.user.id, email: session.user.email || "" };
+        return;
+      }
 
-      // This is the key: make Supabase store the session from the hash.
-      await supabaseClient.auth.setSession({ access_token, refresh_token });
-
-      cleanUrl();
-    }
-
-    async function hydrateUser(){
-      const { data: sess } = await supabaseClient.auth.getSession();
-      const session = sess?.session || null;
-      if (!session){ currentUser = null; return; }
-
-      const { data: u } = await supabaseClient.auth.getUser();
-      currentUser = u?.user || session.user || null;
+      // Fallback: decode stored access token (still counts as logged in for RLS)
+      const storageKey = `sb-${SUPABASE_REF}-auth-token`;
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) { currentUser = null; return; }
+      try{
+        const obj = JSON.parse(raw);
+        const payload = obj?.access_token ? decodeJwtPayload(obj.access_token) : null;
+        if (payload?.sub){
+          currentUser = { id: payload.sub, email: payload.email || "" };
+          return;
+        }
+      }catch(e){}
+      currentUser = null;
     }
 
     function renderAuth(){
@@ -170,6 +219,7 @@
       else q = q.eq("status", "published");
 
       const { data, error } = await q;
+
       if (error){
         campaignsStatus.textContent = "Error: " + error.message;
         campaignsStatus.classList.add("error");
@@ -196,8 +246,7 @@
     }
 
     async function refreshAll(){
-      await finishLoginFromHashIfPresent();
-      await hydrateUser();
+      await hydrateUserFast();
       renderAuth();
       await loadCampaigns();
     }
@@ -222,10 +271,7 @@
 
     logoutBtn.addEventListener("click", async () => {
       await supabaseClient.auth.signOut();
-      await refreshAll();
-    });
-
-    supabaseClient.auth.onAuthStateChange(async () => {
+      currentUser = null;
       await refreshAll();
     });
 
@@ -238,7 +284,7 @@
       createStatus.textContent = "";
       createStatus.classList.remove("error");
 
-      await hydrateUser();
+      await hydrateUserFast();
       renderAuth();
 
       if (!currentUser){
