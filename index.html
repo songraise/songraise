@@ -74,7 +74,7 @@
       <h1>Option C (Semi-automatic): Create → Suno → Drag MP3</h1>
       <p class="lead">
         Create a campaign first, then click <b>Generate in Suno</b> (prompt copied to clipboard), then drag the MP3 back here.
-        SongRaise uploads to <code>songs-audio</code>, creates a <code>songs</code> row, and attaches it to the campaign via <code>song_id</code>.
+        SongRaise uploads to your public Storage bucket, creates a <code>songs</code> row, and attaches it to the campaign via <code>song_id</code>.
       </p>
     </div>
 
@@ -153,7 +153,7 @@
           <div class="muted mini">Or choose a file:</div>
           <input id="mp3File" type="file" accept="audio/mpeg,audio/mp3" />
           <button class="btn" id="uploadBtn" type="button" disabled>Upload & attach</button>
-          <div class="muted mini">Bucket: <b>songs-audio</b> (public)</div>
+          <div class="muted mini" id="bucketLabel">Bucket: detecting…</div>
         </div>
         <div id="uploadStatus" class="status"></div>
       </div>
@@ -198,7 +198,7 @@
     const SUPABASE_ANON_KEY =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2dmN4cGptZGZlcWpkbWNlbWV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1Nzc3NzYsImV4cCI6MjA3NzE1Mzc3Nn0.LPRIt10bLZYfoOCx7nD4U0PsCURB7YToq4VbByliFi4";
 
-    const BUCKET_AUDIO = "songs-audio";
+    let BUCKET_AUDIO = "songs-audio";
     const SUNO_URL = "https://suno.com";
 
     const CATEGORY_TO_CONDITIONS = {
@@ -246,6 +246,7 @@
     const mp3FileEl = document.getElementById("mp3File");
     const uploadBtn = document.getElementById("uploadBtn");
     const uploadStatus = document.getElementById("uploadStatus");
+    const bucketLabel = document.getElementById("bucketLabel");
 
     const overlay = document.getElementById("overlay");
     const promptPreview = document.getElementById("promptPreview");
@@ -457,6 +458,23 @@
         .replace(/^-|-$/g, "");
     }
 
+    async function detectAudioBucket(client){
+      try{
+        const { data, error } = await client.storage.listBuckets();
+        if (error) return;
+        const names = (data || []).map(b => b.name);
+        if (names.includes("songs-audio")) BUCKET_AUDIO = "songs-audio";
+        else if (names.includes("songs_audio")) BUCKET_AUDIO = "songs_audio";
+        else if (names.includes("song-audio")) BUCKET_AUDIO = "song-audio";
+        else if (names.includes("audio")) BUCKET_AUDIO = "audio";
+        else if (names.includes("songs")) BUCKET_AUDIO = "songs";
+        else if (names.length === 1) BUCKET_AUDIO = names[0];
+        bucketLabel.textContent = `Bucket: ${BUCKET_AUDIO}`;
+      } catch(e){
+        bucketLabel.textContent = `Bucket: ${BUCKET_AUDIO}`;
+      }
+    }
+
     async function loadCampaigns(client, user){
       campaignsStatus.textContent = "Loading…";
       campaignsBody.innerHTML = "";
@@ -490,15 +508,15 @@
       await refreshIfExpired();
       const user = currentUserFromStorage();
       const client = buildClient();
+
+      await detectAudioBucket(client);
+
       setAuthPill(user ? "Logged in ✅" : "Logged out", !!user);
       await loadCampaigns(client, user);
 
       const curId = getCurrentCampaignId();
-      if (curId){
-        renderCurrentCampaignBadge(curId, "current");
-      } else {
-        renderCurrentCampaignBadge("", "");
-      }
+      if (curId) renderCurrentCampaignBadge(curId, "current");
+      else renderCurrentCampaignBadge("", "");
 
       return { user, client };
     }
@@ -610,7 +628,7 @@
 
     copyAgainBtn.addEventListener("click", async () => {
       const ok = await copyToClipboard(promptPreview.textContent || "");
-      alert(ok ? "Copied ✅" : "Could not copy (browser blocked). Select and copy manually.");
+      alert(ok ? "Copied ✅" : "Could not copy. Select and copy manually.");
     });
 
     openSunoBtn.addEventListener("click", () => {
@@ -688,7 +706,7 @@
 
       uploadBtn.disabled = true;
       generateBtn.disabled = true;
-      uploadStatus.textContent = "Uploading MP3…";
+      uploadStatus.textContent = `Uploading MP3 to ${BUCKET_AUDIO}…`;
 
       const path = `${user.id}/${curId}/${Date.now()}-${safeFileName(file.name)}`;
 
