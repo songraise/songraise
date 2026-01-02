@@ -48,9 +48,7 @@
 
     <div class="hero">
       <h1>Create a fundraising song + campaign</h1>
-      <p class="lead">
-        “View” opens <code>campaign.html?id=...</code>. Login persists across View → Back.
-      </p>
+      <p class="lead">“View” opens <code>campaign.html?id=...</code>. Login should persist.</p>
     </div>
 
     <div class="grid">
@@ -59,13 +57,10 @@
         <form id="createForm">
           <label for="title">Title</label>
           <input id="title" required placeholder="e.g., You Are Not Alone" />
-
           <label for="donation_url">Donation URL</label>
           <input id="donation_url" type="url" required placeholder="https://..." />
-
           <label for="description">Description</label>
           <textarea id="description" placeholder="Short description…"></textarea>
-
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
             <button class="btn" type="submit">Create</button>
           </div>
@@ -77,9 +72,7 @@
         <h2 style="margin-bottom:8px;">Campaigns</h2>
         <div style="overflow-x:auto;">
           <table>
-            <thead>
-              <tr><th>Title</th><th>Donation</th><th>Created</th><th>View</th></tr>
-            </thead>
+            <thead><tr><th>Title</th><th>Donation</th><th>Created</th><th>View</th></tr></thead>
             <tbody id="campaignsBody"></tbody>
           </table>
         </div>
@@ -110,6 +103,14 @@
       history.replaceState({}, document.title, url.toString());
     }
 
+    function readHashTokens(){
+      const hash = (window.location.hash || "").replace(/^#/, "");
+      const p = new URLSearchParams(hash);
+      const access_token = p.get("access_token");
+      const refresh_token = p.get("refresh_token");
+      return { access_token, refresh_token };
+    }
+
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: { persistSession: true, autoRefreshToken: true, storage: window.localStorage }
     });
@@ -124,25 +125,28 @@
 
     let currentUser = null;
 
-    async function hydrateUser(){
-      const { data: sessData } = await supabaseClient.auth.getSession();
-      const session = sessData?.session || null;
+    async function finishLoginFromHashIfPresent(){
+      const { access_token, refresh_token } = readHashTokens();
+      if (!access_token || !refresh_token) return;
 
-      if (!session){
-        currentUser = null;
-        return;
-      }
+      authStatusEl.textContent = "Finishing login…";
 
-      const { data: userData, error } = await supabaseClient.auth.getUser();
-      if (!error && userData?.user){
-        currentUser = userData.user;
-        return;
-      }
+      // This is the key: make Supabase store the session from the hash.
+      await supabaseClient.auth.setSession({ access_token, refresh_token });
 
-      currentUser = session.user || null;
+      cleanUrl();
     }
 
-    async function renderAuthUI(){
+    async function hydrateUser(){
+      const { data: sess } = await supabaseClient.auth.getSession();
+      const session = sess?.session || null;
+      if (!session){ currentUser = null; return; }
+
+      const { data: u } = await supabaseClient.auth.getUser();
+      currentUser = u?.user || session.user || null;
+    }
+
+    function renderAuth(){
       if (currentUser){
         authStatusEl.textContent = "Logged in ✅";
         logoutBtn.style.display = "inline-block";
@@ -162,11 +166,8 @@
         .order("created_at", { ascending: false })
         .limit(25);
 
-      if (currentUser){
-        q = q.eq("user_id", currentUser.id);
-      } else {
-        q = q.eq("status", "published");
-      }
+      if (currentUser) q = q.eq("user_id", currentUser.id);
+      else q = q.eq("status", "published");
 
       const { data, error } = await q;
       if (error){
@@ -195,30 +196,26 @@
     }
 
     async function refreshAll(){
-      cleanUrl();
+      await finishLoginFromHashIfPresent();
       await hydrateUser();
-      await renderAuthUI();
+      renderAuth();
       await loadCampaigns();
     }
 
     loginBtn.addEventListener("click", async () => {
       const email = (emailEl.value || "").trim();
-      if (!email) { alert("Type your email first."); return; }
-
+      if (!email){ alert("Type your email first."); return; }
       const redirectTo = `${baseUrl()}index.html?v=${Date.now()}`;
-
       authStatusEl.textContent = "Sending link…";
       const { error } = await supabaseClient.auth.signInWithOtp({
         email,
         options: { emailRedirectTo: redirectTo }
       });
-
       if (error){
         authStatusEl.textContent = "Logged out";
         alert("Login error: " + error.message);
         return;
       }
-
       alert("Login email sent. Open the newest email and click the login link once.");
       authStatusEl.textContent = "Check your email (link sent)";
     });
@@ -242,7 +239,7 @@
       createStatus.classList.remove("error");
 
       await hydrateUser();
-      await renderAuthUI();
+      renderAuth();
 
       if (!currentUser){
         createStatus.textContent = "Please log in first.";
