@@ -6,8 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f9fafb;color:#111827;line-height:1.6}
-    .wrap{max-width:1120px;margin:0 auto;padding:18px 14px 70px}
+    body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f9fafb;color:#111827;line-height:1.55}
+    .wrap{max-width:1140px;margin:0 auto;padding:18px 14px 70px}
     .top{position:sticky;top:0;z-index:50;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:10px 12px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:0 10px 24px rgba(15,23,42,.06)}
     .logo{font-weight:900;font-size:1.15rem;letter-spacing:-.02em}
     .logo span{color:#2563eb}
@@ -19,7 +19,7 @@
     .btn:disabled{opacity:.55;cursor:not-allowed}
     .hero{padding:18px 0}
     h1{font-size:2.0rem;letter-spacing:-.02em;margin-bottom:6px}
-    .lead{color:#4b5563;max-width:950px}
+    .lead{color:#4b5563;max-width:980px}
     .grid{display:grid;grid-template-columns:1.05fr .95fr;gap:16px;align-items:start}
     @media(max-width:980px){.grid{grid-template-columns:1fr}}
     .card{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:16px;box-shadow:0 8px 18px rgba(15,23,42,.04)}
@@ -44,12 +44,12 @@
     code{background:#f3f4f6;padding:2px 6px;border-radius:8px}
     .stack{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
     .badge{display:inline-flex;gap:8px;align-items:center;padding:6px 10px;border:1px solid #e5e7eb;border-radius:999px;background:#f9fafb;font-weight:900;font-size:.86rem;color:#374151}
-    .drop{border:2px dashed #d1d5db;border-radius:16px;padding:14px;background:#fafafa;display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;text-align:center}
+    .drop{border:2px dashed #d1d5db;border-radius:16px;padding:14px;background:#fafafa;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;text-align:center}
     .drop.drag{border-color:#2563eb;background:#eff6ff}
     .drop .big{font-weight:900}
-    .drop input{max-width:100%}
+    .fileline{font-weight:900;color:#111827}
     .overlay{position:fixed;inset:0;background:rgba(17,24,39,.58);display:none;align-items:center;justify-content:center;padding:16px;z-index:9999}
-    .modal{max-width:820px;width:100%;background:#fff;border-radius:18px;border:1px solid #e5e7eb;box-shadow:0 20px 60px rgba(0,0,0,.18);padding:16px}
+    .modal{max-width:900px;width:100%;background:#fff;border-radius:18px;border:1px solid #e5e7eb;box-shadow:0 20px 60px rgba(0,0,0,.18);padding:16px}
     .modal h3{font-size:1.1rem;margin-bottom:6px}
     .steps{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
     .step{border:1px solid #e5e7eb;border-radius:14px;padding:12px;background:#f9fafb}
@@ -71,16 +71,16 @@
     </div>
 
     <div class="hero">
-      <h1>Option C: Create → Suno → Upload MP3 → Auto Attach</h1>
+      <h1>Create → Suno → Upload MP3 → Auto Attach</h1>
       <p class="lead">
-        Create a campaign first, then click <b>Generate in Suno</b> (prompt copied to clipboard), then upload the MP3.
-        SongRaise uploads to Storage bucket <code>song-audio</code>, creates a <code>songs</code> row, and attaches it to the campaign via <code>song_id</code>.
+        Click <b>Generate in Suno</b> to open Suno + copy your Prompt Pack. After download, upload the MP3 and it will
+        <b>replace</b> the campaign’s current song automatically. Storage bucket: <code>song-audio</code>.
       </p>
     </div>
 
     <div class="grid">
       <div class="card">
-        <h2>1) Create campaign</h2>
+        <h2>Create campaign</h2>
 
         <div class="stack" style="margin-bottom:10px;">
           <span class="badge" id="currentBadge">No active campaign</span>
@@ -90,7 +90,7 @@
 
         <form id="createForm">
           <label for="title">Campaign title</label>
-          <input id="title" required placeholder="e.g., You Are Not Alone" />
+          <input id="title" required placeholder="e.g., Arrhythmias Climbathon" />
 
           <div class="row2">
             <div>
@@ -99,7 +99,7 @@
             </div>
             <div>
               <label for="campaign_slug">Campaign slug (optional)</label>
-              <input id="campaign_slug" placeholder="e.g., you-are-not-alone" />
+              <input id="campaign_slug" placeholder="e.g., arrhythmias-climbathon" />
             </div>
           </div>
 
@@ -108,8 +108,8 @@
 
           <div class="hr"></div>
 
-          <h2 style="margin:0 0 6px;font-size:1.05rem;">2) Prompt Pack (prompt-only)</h2>
-          <p class="muted mini">Pick category + condition, add genre/vibe/hook if you want. This pack is copied to clipboard.</p>
+          <h2 style="margin:0 0 6px;font-size:1.05rem;">Song settings (Prompt-only)</h2>
+          <p class="muted mini">These settings build the Prompt Pack. Lyrics are optional (you can paste them later).</p>
 
           <div class="row2">
             <div>
@@ -124,17 +124,39 @@
 
           <div class="row2">
             <div>
-              <label for="genre">Genre (optional)</label>
-              <input id="genre" placeholder="e.g., Pop, Rock, Indie, Hip-hop" />
+              <label for="emotion_select">Emotion</label>
+              <select id="emotion_select">
+                <option value="Hopeful">Hopeful</option>
+                <option value="Uplifting">Uplifting</option>
+                <option value="Inspirational">Inspirational</option>
+                <option value="Empathetic">Empathetic</option>
+                <option value="Funny">Funny</option>
+                <option value="Anthemic">Anthemic</option>
+              </select>
             </div>
             <div>
-              <label for="vibe">Vibe (optional)</label>
-              <input id="vibe" placeholder="e.g., Hopeful, Uplifting, Funny, Anthemic" />
+              <label for="genre_select">Genre</label>
+              <select id="genre_select">
+                <option value="Pop">Pop</option>
+                <option value="Rock">Rock</option>
+                <option value="Indie Pop">Indie Pop</option>
+                <option value="Hip-hop">Hip-hop</option>
+                <option value="Country">Country</option>
+                <option value="EDM">EDM</option>
+                <option value="Folk">Folk</option>
+                <option value="R&B">R&B</option>
+              </select>
             </div>
           </div>
 
+          <label for="artist_style">Artist style (optional)</label>
+          <input id="artist_style" placeholder="e.g., uplifting pop, stadium rock, cinematic" />
+
           <label for="hook">Hook idea (optional)</label>
-          <input id="hook" placeholder="e.g., ‘You are not alone’ call-and-response chorus" />
+          <input id="hook" placeholder='e.g., “You are not alone” call-and-response chorus' />
+
+          <label for="lyrics">Lyrics (optional)</label>
+          <textarea id="lyrics" placeholder="Paste lyrics here (optional)…"></textarea>
 
           <div class="stack" style="margin-top:12px;">
             <button class="btn" type="submit" id="createBtn">Create campaign</button>
@@ -147,11 +169,12 @@
 
         <div class="hr"></div>
 
-        <h2>3) Upload MP3 & attach to current campaign</h2>
+        <h2>Upload MP3 & attach (REPLACE)</h2>
         <div class="drop" id="dropzone">
           <div class="big">Drop MP3 or choose file</div>
-          <div class="muted mini">Then click Upload & attach.</div>
+          <div class="muted mini">This will replace the campaign’s current song.</div>
           <input id="mp3File" type="file" accept="audio/mpeg,audio/mp3" />
+          <div class="fileline" id="fileLine">No file selected</div>
           <button class="btn" id="uploadBtn" type="button" disabled>Upload & attach</button>
           <div class="muted mini" id="bucketLabel">Bucket: song-audio</div>
         </div>
@@ -176,7 +199,7 @@
   <div class="overlay" id="overlay">
     <div class="modal">
       <h3>Generate in Suno (Prompt-only)</h3>
-      <div class="muted mini">Prompt Pack is copied to your clipboard. Paste it into Suno.</div>
+      <div class="muted mini">Your Prompt Pack is copied to clipboard. Paste it into Suno.</div>
       <div class="steps">
         <div class="step"><b>Step 1</b> Suno opens in a new tab.</div>
         <div class="step"><b>Step 2</b> Paste the Prompt Pack below into Suno and generate.</div>
@@ -237,6 +260,8 @@
 
     const catSelect = document.getElementById("cause_category_select");
     const condSelect = document.getElementById("cause_condition_select");
+    const emotionSelect = document.getElementById("emotion_select");
+    const genreSelect = document.getElementById("genre_select");
 
     const currentBadge = document.getElementById("currentBadge");
     const viewCurrentBtn = document.getElementById("viewCurrentBtn");
@@ -244,6 +269,7 @@
 
     const dropzone = document.getElementById("dropzone");
     const mp3FileEl = document.getElementById("mp3File");
+    const fileLine = document.getElementById("fileLine");
     const uploadBtn = document.getElementById("uploadBtn");
     const uploadStatus = document.getElementById("uploadStatus");
 
@@ -416,8 +442,9 @@
       const title = document.getElementById("title").value.trim();
       const cat = catSelect.value || "";
       const cond = condSelect.value || "";
-      const genre = document.getElementById("genre").value.trim();
-      const vibe = document.getElementById("vibe").value.trim();
+      const emotion = emotionSelect.value || "";
+      const genre = genreSelect.value || "";
+      const style = document.getElementById("artist_style").value.trim();
       const hook = document.getElementById("hook").value.trim();
 
       const lines = [];
@@ -425,28 +452,29 @@
       if (title) lines.push(`Campaign Title: ${title}`);
       if (cat) lines.push(`Category: ${cat}`);
       if (cond) lines.push(`Condition: ${cond}`);
+      if (emotion) lines.push(`Emotion: ${emotion}`);
       if (genre) lines.push(`Genre: ${genre}`);
-      if (vibe) lines.push(`Vibe: ${vibe}`);
-      if (hook) lines.push(`Hook Idea: ${hook}`);
+      if (style) lines.push(`Artist style: ${style}`);
+      if (hook) lines.push(`Hook idea: ${hook}`);
       lines.push("");
       lines.push("PROMPT (paste into Suno):");
+
       const promptParts = [];
       if (cat || cond) promptParts.push(`Fundraising song about ${cond ? cond : "this cause"}${cat ? ` (${cat})` : ""}.`);
-      if (vibe) promptParts.push(`Mood: ${vibe}.`);
+      if (emotion) promptParts.push(`Emotion: ${emotion}.`);
       if (genre) promptParts.push(`Genre: ${genre}.`);
+      if (style) promptParts.push(`Style: ${style}.`);
       promptParts.push("Uplifting, empathetic, community-focused, clear call-to-action to donate.");
       if (hook) promptParts.push(`Include hook: "${hook}".`);
+      promptParts.push("Keep it catchy and respectful. Provide a memorable chorus.");
+
       lines.push(promptParts.join(" "));
       return lines.join("\n");
     }
 
     async function copyToClipboard(text){
-      try{
-        await navigator.clipboard.writeText(text);
-        return true;
-      } catch(e){
-        return false;
-      }
+      try{ await navigator.clipboard.writeText(text); return true; }
+      catch(e){ return false; }
     }
 
     function safeFileName(name){
@@ -457,11 +485,29 @@
         .replace(/^-|-$/g, "");
     }
 
+    async function getAudioDurationSeconds(file){
+      return new Promise((resolve) => {
+        try{
+          const url = URL.createObjectURL(file);
+          const audio = new Audio();
+          audio.preload = "metadata";
+          audio.src = url;
+          const cleanup = () => { try{ URL.revokeObjectURL(url); }catch(e){} };
+          audio.onloadedmetadata = () => {
+            const d = Number.isFinite(audio.duration) ? audio.duration : null;
+            cleanup();
+            resolve(d ? Math.round(d) : null);
+          };
+          audio.onerror = () => { cleanup(); resolve(null); };
+        }catch(e){ resolve(null); }
+      });
+    }
+
     async function loadCampaigns(client, user){
       campaignsStatus.textContent = "Loading…";
       campaignsBody.innerHTML = "";
 
-      let q = client.from("campaigns").select("id,title,donation_url,created_at,status,user_id").order("created_at",{ascending:false}).limit(30);
+      let q = client.from("campaigns").select("id,title,donation_url,created_at,status,user_id").order("created_at",{ascending:false}).limit(50);
       if (user) q = q.eq("user_id", user.id);
       else q = q.eq("status","published");
 
@@ -524,6 +570,8 @@
       setCurrentCampaign("", "");
       uploadStatus.textContent = "";
       uploadStatus.classList.remove("error","ok");
+      fileLine.textContent = "No file selected";
+      mp3FileEl.value = "";
     });
 
     resetFormBtn.addEventListener("click", () => {
@@ -589,18 +637,13 @@
 
     generateBtn.addEventListener("click", async () => {
       const curId = getCurrentCampaignId();
-      if (!curId){
-        alert("Create a campaign first.");
-        return;
-      }
+      if (!curId){ alert("Create a campaign first."); return; }
 
       const pack = buildPromptPack();
       promptPreview.textContent = pack;
 
       const ok = await copyToClipboard(pack);
-      if (!ok){
-        alert("Clipboard blocked by the browser. I’ll show the prompt; copy it manually.");
-      }
+      if (!ok){ alert("Clipboard blocked by the browser. Copy manually from the box."); }
 
       overlay.style.display = "flex";
       window.open(SUNO_URL, "_blank", "noopener,noreferrer");
@@ -642,51 +685,46 @@
       const files = e.dataTransfer?.files;
       if (files && files.length){
         mp3FileEl.files = files;
+        fileLine.textContent = files[0].name || "Selected file";
       }
     });
 
-    async function uploadAndAttach(file){
-      uploadStatus.textContent = "";
+    mp3FileEl.addEventListener("change", () => {
+      const f = mp3FileEl.files && mp3FileEl.files[0];
+      fileLine.textContent = f ? (f.name || "Selected file") : "No file selected";
+    });
+
+    function setUploadStatus(text, kind){
+      uploadStatus.textContent = text || "";
       uploadStatus.classList.remove("error","ok");
+      if (kind) uploadStatus.classList.add(kind);
+    }
+
+    async function uploadAndAttach(file){
+      setUploadStatus("", null);
 
       const curId = getCurrentCampaignId();
-      if (!curId){
-        uploadStatus.textContent = "No active campaign. Create a campaign first.";
-        uploadStatus.classList.add("error");
-        return;
-      }
+      if (!curId){ setUploadStatus("No active campaign. Create a campaign first.", "error"); return; }
 
       const { user, client } = await refreshAll();
-      if (!user){
-        uploadStatus.textContent = "Please log in first.";
-        uploadStatus.classList.add("error");
-        return;
-      }
+      if (!user){ setUploadStatus("Please log in first.", "error"); return; }
 
-      if (!file){
-        uploadStatus.textContent = "Choose or drop an MP3 file first.";
-        uploadStatus.classList.add("error");
-        return;
-      }
+      if (!file){ setUploadStatus("Choose or drop an MP3 file first.", "error"); return; }
 
       const isMp3 = (file.type === "audio/mpeg") || /\.mp3$/i.test(file.name || "");
-      if (!isMp3){
-        uploadStatus.textContent = "Please upload an MP3 file.";
-        uploadStatus.classList.add("error");
-        return;
-      }
+      if (!isMp3){ setUploadStatus("Please upload an MP3 file.", "error"); return; }
 
       const maxMB = 25;
       const sizeMB = file.size / (1024*1024);
-      if (sizeMB > maxMB){
-        uploadStatus.textContent = `File too large (${sizeMB.toFixed(1)}MB). Max ${maxMB}MB.`;
-        uploadStatus.classList.add("error");
-        return;
-      }
+      if (sizeMB > maxMB){ setUploadStatus(`File too large (${sizeMB.toFixed(1)}MB). Max ${maxMB}MB.`, "error"); return; }
 
       uploadBtn.disabled = true;
       generateBtn.disabled = true;
-      uploadStatus.textContent = `Uploading MP3 to ${BUCKET_AUDIO}…`;
+
+      setUploadStatus(`Reading duration…`, null);
+      const durationSeconds = await getAudioDurationSeconds(file);
+
+      setUploadStatus(`Uploading MP3 to ${BUCKET_AUDIO}…`, null);
 
       const path = `${user.id}/${curId}/${Date.now()}-${safeFileName(file.name)}`;
 
@@ -696,8 +734,7 @@
       });
 
       if (upErr){
-        uploadStatus.textContent = "Upload failed: " + upErr.message;
-        uploadStatus.classList.add("error");
+        setUploadStatus("Upload failed: " + upErr.message, "error");
         uploadBtn.disabled = false;
         generateBtn.disabled = false;
         return;
@@ -706,17 +743,21 @@
       const { data: pub } = client.storage.from(BUCKET_AUDIO).getPublicUrl(path);
       const publicUrl = pub?.publicUrl || "";
       if (!publicUrl){
-        uploadStatus.textContent = "Upload succeeded, but public URL could not be generated.";
-        uploadStatus.classList.add("error");
+        setUploadStatus("Upload succeeded, but public URL could not be generated.", "error");
         uploadBtn.disabled = false;
         generateBtn.disabled = false;
         return;
       }
 
-      uploadStatus.textContent = "Creating song record…";
+      setUploadStatus("Creating song record…", null);
 
       const cat = catSelect.value || null;
       const cond = condSelect.value || null;
+      const emotion = emotionSelect.value || null;
+      const genre = genreSelect.value || null;
+      const style = document.getElementById("artist_style").value.trim() || null;
+      const hook = document.getElementById("hook").value.trim() || null;
+      const lyrics = document.getElementById("lyrics").value.trim() || null;
 
       const { data: songRow, error: songErr } = await client
         .from("songs")
@@ -725,20 +766,23 @@
           cause_category: cat,
           cause_condition: cond,
           condition: cond,
-          status: "ready"
+          lyrics: lyrics,
+          duration_seconds: durationSeconds,
+          status: "ready",
+          song_url: null,
+          cover_url: null
         })
         .select("id")
         .single();
 
       if (songErr){
-        uploadStatus.textContent = "Error creating song: " + songErr.message;
-        uploadStatus.classList.add("error");
+        setUploadStatus("Error creating song: " + songErr.message, "error");
         uploadBtn.disabled = false;
         generateBtn.disabled = false;
         return;
       }
 
-      uploadStatus.textContent = "Attaching song to campaign…";
+      setUploadStatus("Attaching song to campaign (REPLACE)…", null);
 
       const { error: upCampErr } = await client
         .from("campaigns")
@@ -746,15 +790,13 @@
         .eq("id", curId);
 
       if (upCampErr){
-        uploadStatus.textContent = "Upload ok, but attach failed: " + upCampErr.message;
-        uploadStatus.classList.add("error");
+        setUploadStatus("Upload ok, but attach failed: " + upCampErr.message, "error");
         uploadBtn.disabled = false;
         generateBtn.disabled = false;
         return;
       }
 
-      uploadStatus.textContent = "Attached ✅ Campaign can now play the song.";
-      uploadStatus.classList.add("ok");
+      setUploadStatus(`Attached ✅ (duration: ${durationSeconds ? durationSeconds + "s" : "unknown"})`, "ok");
       uploadBtn.disabled = false;
       generateBtn.disabled = false;
 
