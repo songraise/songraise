@@ -71,10 +71,10 @@
     </div>
 
     <div class="hero">
-      <h1>Option C (Semi-automatic): Create → Suno → Drag MP3</h1>
+      <h1>Option C: Create → Suno → Upload MP3 → Auto Attach</h1>
       <p class="lead">
-        Create a campaign first, then click <b>Generate in Suno</b> (prompt copied to clipboard), then drag the MP3 back here.
-        SongRaise uploads to your public Storage bucket, creates a <code>songs</code> row, and attaches it to the campaign via <code>song_id</code>.
+        Create a campaign first, then click <b>Generate in Suno</b> (prompt copied to clipboard), then upload the MP3.
+        SongRaise uploads to Storage bucket <code>song-audio</code>, creates a <code>songs</code> row, and attaches it to the campaign via <code>song_id</code>.
       </p>
     </div>
 
@@ -108,8 +108,8 @@
 
           <div class="hr"></div>
 
-          <h2 style="margin:0 0 6px;font-size:1.05rem;">2) Prompt-only “Suno pack”</h2>
-          <p class="muted mini">Pick category + condition. Add a short “hook idea” if you want. This will be copied to your clipboard.</p>
+          <h2 style="margin:0 0 6px;font-size:1.05rem;">2) Prompt Pack (prompt-only)</h2>
+          <p class="muted mini">Pick category + condition, add genre/vibe/hook if you want. This pack is copied to clipboard.</p>
 
           <div class="row2">
             <div>
@@ -147,13 +147,13 @@
 
         <div class="hr"></div>
 
-        <h2>3) Drag MP3 here to attach to current campaign</h2>
+        <h2>3) Upload MP3 & attach to current campaign</h2>
         <div class="drop" id="dropzone">
-          <div class="big">Drop MP3 to upload + attach</div>
-          <div class="muted mini">Or choose a file:</div>
+          <div class="big">Drop MP3 or choose file</div>
+          <div class="muted mini">Then click Upload & attach.</div>
           <input id="mp3File" type="file" accept="audio/mpeg,audio/mp3" />
           <button class="btn" id="uploadBtn" type="button" disabled>Upload & attach</button>
-          <div class="muted mini" id="bucketLabel">Bucket: detecting…</div>
+          <div class="muted mini" id="bucketLabel">Bucket: song-audio</div>
         </div>
         <div id="uploadStatus" class="status"></div>
       </div>
@@ -176,11 +176,11 @@
   <div class="overlay" id="overlay">
     <div class="modal">
       <h3>Generate in Suno (Prompt-only)</h3>
-      <div class="muted mini">I copied this Prompt Pack to your clipboard. Paste it into Suno.</div>
+      <div class="muted mini">Prompt Pack is copied to your clipboard. Paste it into Suno.</div>
       <div class="steps">
         <div class="step"><b>Step 1</b> Suno opens in a new tab.</div>
         <div class="step"><b>Step 2</b> Paste the Prompt Pack below into Suno and generate.</div>
-        <div class="step"><b>Step 3</b> Download the MP3 and drag it onto the dropzone in SongRaise to attach.</div>
+        <div class="step"><b>Step 3</b> Download the MP3 and upload it here to attach.</div>
       </div>
       <pre id="promptPreview"></pre>
       <div class="actions">
@@ -198,7 +198,7 @@
     const SUPABASE_ANON_KEY =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2dmN4cGptZGZlcWpkbWNlbWV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1Nzc3NzYsImV4cCI6MjA3NzE1Mzc3Nn0.LPRIt10bLZYfoOCx7nD4U0PsCURB7YToq4VbByliFi4";
 
-    let BUCKET_AUDIO = "songs-audio";
+    const BUCKET_AUDIO = "song-audio";
     const SUNO_URL = "https://suno.com";
 
     const CATEGORY_TO_CONDITIONS = {
@@ -246,7 +246,6 @@
     const mp3FileEl = document.getElementById("mp3File");
     const uploadBtn = document.getElementById("uploadBtn");
     const uploadStatus = document.getElementById("uploadStatus");
-    const bucketLabel = document.getElementById("bucketLabel");
 
     const overlay = document.getElementById("overlay");
     const promptPreview = document.getElementById("promptPreview");
@@ -458,23 +457,6 @@
         .replace(/^-|-$/g, "");
     }
 
-    async function detectAudioBucket(client){
-      try{
-        const { data, error } = await client.storage.listBuckets();
-        if (error) return;
-        const names = (data || []).map(b => b.name);
-        if (names.includes("songs-audio")) BUCKET_AUDIO = "songs-audio";
-        else if (names.includes("songs_audio")) BUCKET_AUDIO = "songs_audio";
-        else if (names.includes("song-audio")) BUCKET_AUDIO = "song-audio";
-        else if (names.includes("audio")) BUCKET_AUDIO = "audio";
-        else if (names.includes("songs")) BUCKET_AUDIO = "songs";
-        else if (names.length === 1) BUCKET_AUDIO = names[0];
-        bucketLabel.textContent = `Bucket: ${BUCKET_AUDIO}`;
-      } catch(e){
-        bucketLabel.textContent = `Bucket: ${BUCKET_AUDIO}`;
-      }
-    }
-
     async function loadCampaigns(client, user){
       campaignsStatus.textContent = "Loading…";
       campaignsBody.innerHTML = "";
@@ -508,8 +490,6 @@
       await refreshIfExpired();
       const user = currentUserFromStorage();
       const client = buildClient();
-
-      await detectAudioBucket(client);
 
       setAuthPill(user ? "Logged in ✅" : "Logged out", !!user);
       await loadCampaigns(client, user);
@@ -602,7 +582,7 @@
       }
 
       setCurrentCampaign(camp.id, camp.title);
-      createStatus.textContent = "Campaign created ✅ Now click “Generate in Suno”, then upload the MP3.";
+      createStatus.textContent = "Campaign created ✅ Click “Generate in Suno”, then upload the MP3.";
       createStatus.classList.add("ok");
       createBtn.disabled = false;
     });
@@ -790,11 +770,6 @@
       fillSelect(catSelect, Object.keys(CATEGORY_TO_CONDITIONS), "Select a category…");
       fillSelect(condSelect, [], "Select a condition…");
       condSelect.disabled = true;
-
-      const curId = getCurrentCampaignId();
-      if (curId) renderCurrentCampaignBadge(curId, "current");
-      else renderCurrentCampaignBadge("", "");
-
       refreshAll();
     })();
 
