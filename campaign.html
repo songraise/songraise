@@ -7,22 +7,28 @@
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f9fafb;color:#111827;line-height:1.6}
-    .wrap{max-width:980px;margin:0 auto;padding:18px 14px 70px}
-    .top{position:sticky;top:0;z-index:50;background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:10px 12px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:0 10px 24px rgba(15,23,42,.06)}
+    .wrap{max-width:1020px;margin:0 auto;padding:18px 14px 70px}
+    .top{position:sticky;top:0;z-index:50;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:10px 12px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:0 10px 24px rgba(15,23,42,.06)}
     .logo{font-weight:900;font-size:1.1rem;letter-spacing:-.02em}
     .logo span{color:#2563eb}
     .right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    .status{font-size:.9rem;font-weight:800;color:#374151}
-    .btn{padding:8px 12px;border-radius:999px;border:1px solid #d1d5db;background:#fff;cursor:pointer;font-weight:800;text-decoration:none;color:#111827;display:inline-block}
+    .pill{font-size:.9rem;font-weight:900;color:#374151;padding:6px 10px;border:1px solid #e5e7eb;border-radius:999px;background:#f9fafb}
+    .btn{padding:8px 12px;border-radius:999px;border:1px solid #d1d5db;background:#fff;cursor:pointer;font-weight:900;text-decoration:none;color:#111827;display:inline-block}
     .btn:hover{background:#f3f4f6}
-    .card{margin-top:14px;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;box-shadow:0 8px 18px rgba(15,23,42,.04)}
-    h1{font-size:1.7rem;letter-spacing:-.02em;margin-bottom:6px}
+    .card{margin-top:14px;background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:16px;box-shadow:0 8px 18px rgba(15,23,42,.04)}
+    h1{font-size:1.75rem;letter-spacing:-.02em;margin-bottom:6px}
     .muted{color:#6b7280}
-    .row{margin-top:10px}
-    .label{font-size:.85rem;font-weight:900;color:#374151;margin-bottom:4px}
-    .box{padding:10px 12px;border:1px solid #e5e7eb;border-radius:12px;background:#f9fafb}
     .error{color:#b91c1c;font-weight:900}
-    audio{width:100%;margin-top:8px}
+    .grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:10px}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:820px){.row2{grid-template-columns:1fr}}
+    .box{padding:10px 12px;border:1px solid #e5e7eb;border-radius:14px;background:#f9fafb}
+    .label{font-size:.85rem;font-weight:900;color:#374151;margin-bottom:4px}
+    audio{width:100%}
+    img{max-width:100%;border-radius:14px;border:1px solid #e5e7eb}
+    pre{white-space:pre-wrap;word-wrap:break-word;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:.92rem}
+    .link{color:#2563eb;text-decoration:none;font-weight:900}
+    .link:hover{text-decoration:underline}
   </style>
 </head>
 <body>
@@ -30,36 +36,57 @@
     <div class="top">
       <div class="logo">SongRaise<span>Lite</span></div>
       <div class="right">
-        <span class="status" id="authStatus">Checking login…</span>
+        <span class="pill" id="authStatus">Checking login…</span>
         <a class="btn" href="index.html">Back to Dashboard</a>
       </div>
     </div>
 
     <div class="card">
-      <div class="muted" id="loadingText">Loading campaign…</div>
+      <div class="muted" id="loadingText">Loading…</div>
 
-      <h1 id="title" style="display:none;"></h1>
-
-      <div class="row" id="descRow" style="display:none;">
-        <div class="label">Description</div>
-        <div class="box" id="description"></div>
-      </div>
-
-      <div class="row" id="donRow" style="display:none;">
-        <div class="label">Donation link</div>
-        <div class="box"><a id="donationLink" href="#" target="_blank" rel="noopener noreferrer">Open donation page</a></div>
-      </div>
-
-      <div class="row" id="songRow" style="display:none;">
-        <div class="label">Song</div>
-        <div class="box">
-          <div id="songMeta" class="muted"></div>
-          <audio id="audio" controls style="display:none;"></audio>
-        </div>
-      </div>
-
-      <div class="row" id="errRow" style="display:none;">
+      <div id="errRow" style="display:none;margin-top:10px;">
         <div class="error" id="errText"></div>
+      </div>
+
+      <div id="content" style="display:none;">
+        <h1 id="campaignTitle"></h1>
+        <div class="muted" id="campaignMeta"></div>
+
+        <div class="grid">
+          <div class="box" id="descBox" style="display:none;">
+            <div class="label">Campaign description</div>
+            <div id="campaignDescription"></div>
+          </div>
+
+          <div class="row2">
+            <div class="box" id="donBox" style="display:none;">
+              <div class="label">Donation link</div>
+              <a class="link" id="donationLink" href="#" target="_blank" rel="noopener noreferrer">Open donation page</a>
+            </div>
+            <div class="box" id="causeBox" style="display:none;">
+              <div class="label">Cause</div>
+              <div id="causeText"></div>
+            </div>
+          </div>
+
+          <div class="box" id="songBox" style="display:none;">
+            <div class="label">Song</div>
+            <div class="muted" id="songMeta" style="margin-bottom:8px;"></div>
+            <audio id="audio" controls style="display:none;"></audio>
+            <div id="noAudio" class="muted" style="display:none;margin-top:8px;">No audio_url found for this song.</div>
+          </div>
+
+          <div class="row2">
+            <div class="box" id="coverBox" style="display:none;">
+              <div class="label">Cover</div>
+              <img id="coverImg" alt="Cover image" />
+            </div>
+            <div class="box" id="lyricsBox" style="display:none;">
+              <div class="label">Lyrics</div>
+              <pre id="lyrics"></pre>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -73,26 +100,33 @@
 
     const authStatusEl = document.getElementById("authStatus");
     const loadingText = document.getElementById("loadingText");
-    const titleEl = document.getElementById("title");
-    const descRow = document.getElementById("descRow");
-    const donRow = document.getElementById("donRow");
-    const songRow = document.getElementById("songRow");
-    const descEl = document.getElementById("description");
-    const donationLink = document.getElementById("donationLink");
-    const songMeta = document.getElementById("songMeta");
-    const audioEl = document.getElementById("audio");
     const errRow = document.getElementById("errRow");
     const errText = document.getElementById("errText");
+    const content = document.getElementById("content");
+
+    const campaignTitle = document.getElementById("campaignTitle");
+    const campaignMeta = document.getElementById("campaignMeta");
+    const descBox = document.getElementById("descBox");
+    const campaignDescription = document.getElementById("campaignDescription");
+    const donBox = document.getElementById("donBox");
+    const donationLink = document.getElementById("donationLink");
+    const causeBox = document.getElementById("causeBox");
+    const causeText = document.getElementById("causeText");
+
+    const songBox = document.getElementById("songBox");
+    const songMeta = document.getElementById("songMeta");
+    const audioEl = document.getElementById("audio");
+    const noAudio = document.getElementById("noAudio");
+
+    const coverBox = document.getElementById("coverBox");
+    const coverImg = document.getElementById("coverImg");
+    const lyricsBox = document.getElementById("lyricsBox");
+    const lyricsEl = document.getElementById("lyrics");
 
     function showError(msg){
       errText.textContent = msg;
       errRow.style.display = "block";
       loadingText.textContent = "";
-    }
-
-    function getCampaignId(){
-      const u = new URL(window.location.href);
-      return u.searchParams.get("id");
     }
 
     function decodeJwtPayload(jwt){
@@ -105,104 +139,167 @@
       } catch(e){ return null; }
     }
 
-    function loadAccessTokenFromStorage(){
-      const key = `sb-${SUPABASE_REF}-auth-token`;
-      const raw = localStorage.getItem(key);
+    function storageKey(){ return `sb-${SUPABASE_REF}-auth-token`; }
+
+    function getStoredSession(){
+      const raw = localStorage.getItem(storageKey());
       if (!raw) return null;
-      try { return JSON.parse(raw)?.access_token || null; } catch(e){ return null; }
+      try { return JSON.parse(raw); } catch(e){ return null; }
     }
 
-    function loadUserFromToken(){
-      const token = loadAccessTokenFromStorage();
-      if (!token) return null;
-      const p = decodeJwtPayload(token);
+    async function refreshIfExpired(){
+      const sess = getStoredSession();
+      if (!sess?.access_token || !sess?.refresh_token) return;
+
+      const payload = decodeJwtPayload(sess.access_token);
+      const now = Math.floor(Date.now()/1000);
+      if (!payload?.exp || payload.exp > (now + 60)) return;
+
+      authStatusEl.textContent = "Refreshing…";
+      const resp = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY },
+        body: JSON.stringify({ refresh_token: sess.refresh_token })
+      });
+
+      if (!resp.ok){
+        localStorage.removeItem(storageKey());
+        return;
+      }
+
+      const data = await resp.json();
+      if (data?.access_token && data?.refresh_token){
+        const now2 = Math.floor(Date.now()/1000);
+        const exp2 = now2 + Number(data.expires_in || 3600);
+        localStorage.setItem(storageKey(), JSON.stringify({
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+          token_type: "bearer",
+          expires_in: Math.max(0, exp2 - now2),
+          expires_at: exp2,
+          user: null
+        }));
+      }
+    }
+
+    function currentUserFromStorage(){
+      const sess = getStoredSession();
+      if (!sess?.access_token) return null;
+      const p = decodeJwtPayload(sess.access_token);
       if (!p?.sub) return null;
       return { id: p.sub, email: p.email || "" };
     }
 
     function buildClient(){
-      const token = loadAccessTokenFromStorage();
+      const sess = getStoredSession();
+      const token = sess?.access_token || null;
+
       if (token){
         return supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
           auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storage: window.localStorage },
           global: { headers: { Authorization: `Bearer ${token}` } }
         });
       }
+
       return supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
         auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storage: window.localStorage }
       });
     }
 
-    async function loadCampaign(){
+    function getCampaignId(){
+      const u = new URL(window.location.href);
+      return u.searchParams.get("id");
+    }
+
+    async function load(){
+      await refreshIfExpired();
+
+      const user = currentUserFromStorage();
+      authStatusEl.textContent = user ? "Logged in ✅" : "Logged out";
+
       const id = getCampaignId();
       if (!id){
-        showError("Missing campaign id in URL. Expected: campaign.html?id=...");
+        showError("Missing campaign id. Expected campaign.html?id=...");
         return;
       }
-
-      const user = loadUserFromToken();
-      authStatusEl.textContent = user ? "Logged in ✅" : "Logged out";
 
       const client = buildClient();
 
-      // Try to load the campaign (works if RLS allows: either public published or your own)
-      const { data: c, error } = await client
+      const { data: c, error: cErr } = await client
         .from("campaigns")
-        .select("id,title,description,donation_url,status,created_at,user_id,song_id")
+        .select("id,title,description,donation_url,status,created_at,published_at,user_id,song_id,campaign_slug")
         .eq("id", id)
         .maybeSingle();
 
-      if (error){
-        showError("Error loading campaign: " + error.message);
-        return;
-      }
-      if (!c){
-        showError("Campaign not found (or not permitted by RLS).");
-        return;
-      }
+      if (cErr){ showError("Error loading campaign: " + cErr.message); return; }
+      if (!c){ showError("Campaign not found (or blocked by RLS)."); return; }
 
-      loadingText.style.display = "none";
-      titleEl.style.display = "block";
-      titleEl.textContent = c.title || "(Untitled campaign)";
+      campaignTitle.textContent = c.title || "(Untitled)";
+      const created = c.created_at ? new Date(c.created_at).toLocaleString() : "";
+      campaignMeta.textContent = created ? `Created: ${created}` : "";
 
       if (c.description){
-        descRow.style.display = "block";
-        descEl.textContent = c.description;
+        descBox.style.display = "block";
+        campaignDescription.textContent = c.description;
       }
 
       if (c.donation_url){
-        donRow.style.display = "block";
+        donBox.style.display = "block";
         donationLink.href = c.donation_url;
       }
 
-      // Optional song display:
-      // If your table has song fields directly (e.g., audio_url on campaigns), switch this logic accordingly.
-      // If you have a public.songs table, this will try to load it by song_id.
       if (c.song_id){
         const { data: s, error: sErr } = await client
           .from("songs")
-          .select("id,title,audio_url")
+          .select("id,audio_url,song_url,cover_url,lyrics,duration_seconds,status,cause_category,cause_condition,condition,created_at")
           .eq("id", c.song_id)
           .maybeSingle();
 
         if (!sErr && s){
-          songRow.style.display = "block";
-          songMeta.textContent = s.title ? `Title: ${s.title}` : "Song attached";
-          if (s.audio_url){
+          songBox.style.display = "block";
+
+          const parts = [];
+          if (s.status) parts.push(`status: ${s.status}`);
+          if (typeof s.duration_seconds === "number" && s.duration_seconds > 0) parts.push(`duration: ${s.duration_seconds}s`);
+          songMeta.textContent = parts.length ? parts.join(" • ") : "";
+
+          const causeParts = [];
+          if (s.cause_category) causeParts.push(s.cause_category);
+          if (s.cause_condition) causeParts.push(s.cause_condition);
+          if (!s.cause_condition && s.condition) causeParts.push(s.condition);
+          if (causeParts.length){
+            causeBox.style.display = "block";
+            causeText.textContent = causeParts.join(" — ");
+          }
+
+          const audioSrc = s.audio_url || s.song_url || "";
+          if (audioSrc){
             audioEl.style.display = "block";
-            audioEl.src = s.audio_url;
+            audioEl.src = audioSrc;
+            noAudio.style.display = "none";
           } else {
             audioEl.style.display = "none";
+            noAudio.style.display = "block";
+          }
+
+          if (s.cover_url){
+            coverBox.style.display = "block";
+            coverImg.src = s.cover_url;
+          }
+
+          if (s.lyrics){
+            lyricsBox.style.display = "block";
+            lyricsEl.textContent = s.lyrics;
           }
         }
       }
+
+      loadingText.style.display = "none";
+      content.style.display = "block";
     }
 
-    window.addEventListener("pageshow", () => {
-      loadCampaign();
-    });
-
-    loadCampaign();
+    window.addEventListener("pageshow", () => { load(); });
+    load();
   </script>
 </body>
 </html>
