@@ -2,498 +2,207 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>SongRaise Campaign</title>
+  <title>SongRaise — Campaign</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body{ font-family: system-ui, -apple-system, Segoe UI, sans-serif; background:#f9fafb; color:#111827; }
-    .wrap{ max-width: 980px; margin: 0 auto; padding: 22px 16px 70px; }
-    .topbar{
-      display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
-      padding:12px 14px; background:#fff; border:1px solid #e5e7eb; border-radius:14px;
-      box-shadow: 0 10px 24px rgba(15,23,42,0.06);
-      position: sticky; top: 0; z-index: 50;
-      margin-bottom: 14px;
-    }
-    .btn{ padding:10px 14px; border-radius:999px; border:1px solid #d1d5db; background:#fff; cursor:pointer; font-weight:800; text-decoration:none; }
-    .btn:hover{ background:#f3f4f6; }
-    .card{ background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:16px; box-shadow: 0 8px 18px rgba(15,23,42,0.04); }
-    .muted{ color:#6b7280; }
-    .error{ color:#b91c1c; font-weight:800; }
-    h1{ margin: 0 0 6px; font-size: 1.7rem; }
-    h2{ margin: 0 0 8px; font-size: 1.15rem; }
-    .row{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    @media (max-width: 900px){ .row{ grid-template-columns:1fr; } }
-    label{ display:block; font-size:.85rem; font-weight:800; color:#374151; margin-top:10px; }
-    input, textarea, select{
-      width:100%; padding:10px 10px; border-radius:12px; border:1px solid #d1d5db; font-size:.95rem;
-    }
-    textarea{ min-height: 90px; resize: vertical; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f9fafb;color:#111827;line-height:1.6}
+    .wrap{max-width:980px;margin:0 auto;padding:18px 14px 70px}
+    .top{position:sticky;top:0;z-index:50;background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:10px 12px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:0 10px 24px rgba(15,23,42,.06)}
+    .logo{font-weight:900;font-size:1.1rem;letter-spacing:-.02em}
+    .logo span{color:#2563eb}
+    .right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .status{font-size:.9rem;font-weight:800;color:#374151}
+    .btn{padding:8px 12px;border-radius:999px;border:1px solid #d1d5db;background:#fff;cursor:pointer;font-weight:800;text-decoration:none;color:#111827;display:inline-block}
+    .btn:hover{background:#f3f4f6}
+    .card{margin-top:14px;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;box-shadow:0 8px 18px rgba(15,23,42,.04)}
+    h1{font-size:1.7rem;letter-spacing:-.02em;margin-bottom:6px}
+    .muted{color:#6b7280}
+    .row{margin-top:10px}
+    .label{font-size:.85rem;font-weight:900;color:#374151;margin-bottom:4px}
+    .box{padding:10px 12px;border:1px solid #e5e7eb;border-radius:12px;background:#f9fafb}
+    .error{color:#b91c1c;font-weight:900}
+    audio{width:100%;margin-top:8px}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="topbar">
-      <a class="btn" href="index.html">← Back to dashboard</a>
-      <div class="muted" id="authMini">Checking login…</div>
+    <div class="top">
+      <div class="logo">SongRaise<span>Lite</span></div>
+      <div class="right">
+        <span class="status" id="authStatus">Checking login…</span>
+        <a class="btn" href="index.html">Back to Dashboard</a>
+      </div>
     </div>
 
     <div class="card">
-      <div id="statusMessage" class="muted">Loading…</div>
+      <div class="muted" id="loadingText">Loading campaign…</div>
 
-      <div id="campaignContainer" style="display:none;">
-        <h1 id="campTitle"></h1>
-        <p class="muted" id="campDesc"></p>
-        <p style="margin-top:10px;">
-          <a id="donationLink" class="btn" target="_blank" rel="noopener noreferrer">Open donation page</a>
-        </p>
+      <h1 id="title" style="display:none;"></h1>
 
-        <div style="margin-top:14px; padding-top:14px; border-top:1px solid #e5e7eb;">
-          <h2>Song Job (Option C)</h2>
+      <div class="row" id="descRow" style="display:none;">
+        <div class="label">Description</div>
+        <div class="box" id="description"></div>
+      </div>
 
-          <div class="muted" style="margin-bottom:8px;">
-            Status: <strong id="sr-songjob-status-text">—</strong>
-          </div>
-          <div id="sr-songjob-msg" class="muted" style="margin-bottom:10px;"></div>
+      <div class="row" id="donRow" style="display:none;">
+        <div class="label">Donation link</div>
+        <div class="box"><a id="donationLink" href="#" target="_blank" rel="noopener noreferrer">Open donation page</a></div>
+      </div>
 
-          <div id="sr-songjob-owner-only" style="display:none;">
-            <div class="row">
-              <div>
-                <label for="sr-song_title">Song title</label>
-                <input id="sr-song_title" placeholder="Campaign anthem title" />
-              </div>
-              <div>
-                <label for="sr-genre">Genre</label>
-                <input id="sr-genre" placeholder="Pop / Folk / Acoustic..." />
-              </div>
-              <div>
-                <label for="sr-mood">Mood</label>
-                <input id="sr-mood" placeholder="Hopeful / Inspiring..." />
-              </div>
-              <div>
-                <label for="sr-style_tags">Style tags</label>
-                <input id="sr-style_tags" placeholder="Uplifting, modern pop, anthemic chorus..." />
-              </div>
-            </div>
-
-            <label for="sr-suno_prompt">Prompt Pack</label>
-            <textarea id="sr-suno_prompt" placeholder="Click Build Prompt Pack to generate this."></textarea>
-
-            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
-              <button class="btn" id="sr-btn-save" type="button">Save</button>
-              <button class="btn" id="sr-btn-build" type="button">Build Prompt Pack</button>
-              <button class="btn" id="sr-btn-copy" type="button">Copy Prompt Pack</button>
-              <button class="btn" id="sr-btn-open-suno" type="button">Open Suno</button>
-            </div>
-
-            <div style="margin-top:12px;">
-              <label for="sr-audio-file">Upload MP3 from Suno</label>
-              <input id="sr-audio-file" type="file" accept="audio/*" />
-              <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
-                <button class="btn" id="sr-btn-upload" type="button">Upload MP3</button>
-                <button class="btn" id="sr-btn-publish" type="button">Publish</button>
-                <button class="btn" id="sr-btn-unpublish" type="button">Unpublish</button>
-              </div>
-
-              <div style="margin-top:12px;">
-                <div id="sr-audio-wrap" style="display:none; padding:12px; border-radius:12px; border:1px solid #e5e7eb; background:#f9fafb;">
-                  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-                    <strong>Audio Preview</strong>
-                    <span id="sr-audio-privacy" style="font-size:12px; color:#6b7280;"></span>
-                  </div>
-                  <audio id="sr-audio" controls style="width:100%; margin-top:10px;"></audio>
-                  <div id="sr-audio-link" style="margin-top:8px; font-size:12px; color:#6b7280;"></div>
-                </div>
-                <div id="sr-songjob-public-note" style="display:none; margin-top:10px; font-size:13px; color:#6b7280;">
-                  This campaign has no published song yet.
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div id="sr-nonowner-note" class="muted" style="display:none;">
-            You are viewing as public. Only published audio (if any) will play.
-          </div>
-
+      <div class="row" id="songRow" style="display:none;">
+        <div class="label">Song</div>
+        <div class="box">
+          <div id="songMeta" class="muted"></div>
+          <audio id="audio" controls style="display:none;"></audio>
         </div>
+      </div>
+
+      <div class="row" id="errRow" style="display:none;">
+        <div class="error" id="errText"></div>
       </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <script>
-    function getCampaignIdFromUrl(){
-      const params = new URLSearchParams(window.location.search);
-      return params.get("id");
-    }
-
     const SUPABASE_URL = "https://jvvcxpjmdfeqjdmcemet.supabase.co";
+    const SUPABASE_REF = "jvvcxpjmdfeqjdmcemet";
     const SUPABASE_ANON_KEY =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2dmN4cGptZGZlcWpkbWNlbWV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1Nzc3NzYsImV4cCI6MjA3NzE1Mzc3Nn0.LPRIt10bLZYfoOCx7nD4U0PsCURB7YToq4VbByliFi4";
 
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: {
-        flowType: "pkce",
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-        storage: window.localStorage
-      }
-    });
+    const authStatusEl = document.getElementById("authStatus");
+    const loadingText = document.getElementById("loadingText");
+    const titleEl = document.getElementById("title");
+    const descRow = document.getElementById("descRow");
+    const donRow = document.getElementById("donRow");
+    const songRow = document.getElementById("songRow");
+    const descEl = document.getElementById("description");
+    const donationLink = document.getElementById("donationLink");
+    const songMeta = document.getElementById("songMeta");
+    const audioEl = document.getElementById("audio");
+    const errRow = document.getElementById("errRow");
+    const errText = document.getElementById("errText");
 
-    window.supabaseClient = supabaseClient;
-    window.supabase = supabaseClient;
+    function showError(msg){
+      errText.textContent = msg;
+      errRow.style.display = "block";
+      loadingText.textContent = "";
+    }
 
-    function cleanUrlArtifacts(){
-      const url = new URL(window.location.href);
-      let changed = false;
+    function getCampaignId(){
+      const u = new URL(window.location.href);
+      return u.searchParams.get("id");
+    }
 
-      ["code","error","error_code","error_description","type","token","access_token","refresh_token","expires_in","expires_at","token_type"]
-        .forEach(k => {
-          if (url.searchParams.has(k)) { url.searchParams.delete(k); changed = true; }
+    function decodeJwtPayload(jwt){
+      try{
+        const parts = jwt.split(".");
+        if (parts.length < 2) return null;
+        const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+        const json = decodeURIComponent(atob(b64).split("").map(c => "%" + c.charCodeAt(0).toString(16).padStart(2,"0")).join(""));
+        return JSON.parse(json);
+      } catch(e){ return null; }
+    }
+
+    function loadAccessTokenFromStorage(){
+      const key = `sb-${SUPABASE_REF}-auth-token`;
+      const raw = localStorage.getItem(key);
+      if (!raw) return null;
+      try { return JSON.parse(raw)?.access_token || null; } catch(e){ return null; }
+    }
+
+    function loadUserFromToken(){
+      const token = loadAccessTokenFromStorage();
+      if (!token) return null;
+      const p = decodeJwtPayload(token);
+      if (!p?.sub) return null;
+      return { id: p.sub, email: p.email || "" };
+    }
+
+    function buildClient(){
+      const token = loadAccessTokenFromStorage();
+      if (token){
+        return supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storage: window.localStorage },
+          global: { headers: { Authorization: `Bearer ${token}` } }
         });
-
-      if (window.location.hash && window.location.hash.length > 1) {
-        changed = true;
-        url.hash = "";
       }
-
-      if (changed) window.history.replaceState({}, document.title, url.toString());
+      return supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storage: window.localStorage }
+      });
     }
 
-    async function refreshMiniAuth(){
-      const el = document.getElementById("authMini");
-      const { data } = await supabaseClient.auth.getSession();
-      el.textContent = data?.session?.user ? "Logged in ✅" : "Logged out";
-    }
-
-    function setError(msg){
-      const status = document.getElementById("statusMessage");
-      status.textContent = msg;
-      status.classList.add("error");
-    }
-
-    async function loadCampaignPage(){
-      await refreshMiniAuth();
-
-      const id = getCampaignIdFromUrl();
-      const statusMessage = document.getElementById("statusMessage");
-      const container = document.getElementById("campaignContainer");
-
+    async function loadCampaign(){
+      const id = getCampaignId();
       if (!id){
-        setError("No campaign id found in URL. Example: campaign.html?id=YOUR_CAMPAIGN_ID");
+        showError("Missing campaign id in URL. Expected: campaign.html?id=...");
         return;
       }
 
-      statusMessage.textContent = "Loading campaign…";
-      statusMessage.classList.remove("error");
+      const user = loadUserFromToken();
+      authStatusEl.textContent = user ? "Logged in ✅" : "Logged out";
 
-      const { data: campaign, error } = await supabaseClient
+      const client = buildClient();
+
+      // Try to load the campaign (works if RLS allows: either public published or your own)
+      const { data: c, error } = await client
         .from("campaigns")
-        .select("*")
+        .select("id,title,description,donation_url,status,created_at,user_id,song_id")
         .eq("id", id)
-        .single();
+        .maybeSingle();
 
       if (error){
-        setError("Could not load campaign: " + error.message);
+        showError("Error loading campaign: " + error.message);
+        return;
+      }
+      if (!c){
+        showError("Campaign not found (or not permitted by RLS).");
         return;
       }
 
-      document.getElementById("campTitle").textContent = campaign.title || "(Untitled)";
-      document.getElementById("campDesc").textContent = campaign.description || "";
-      const donationLink = document.getElementById("donationLink");
-      donationLink.href = campaign.donation_url || "#";
+      loadingText.style.display = "none";
+      titleEl.style.display = "block";
+      titleEl.textContent = c.title || "(Untitled campaign)";
 
-      container.style.display = "block";
-      statusMessage.textContent = "";
+      if (c.description){
+        descRow.style.display = "block";
+        descEl.textContent = c.description;
+      }
+
+      if (c.donation_url){
+        donRow.style.display = "block";
+        donationLink.href = c.donation_url;
+      }
+
+      // Optional song display:
+      // If your table has song fields directly (e.g., audio_url on campaigns), switch this logic accordingly.
+      // If you have a public.songs table, this will try to load it by song_id.
+      if (c.song_id){
+        const { data: s, error: sErr } = await client
+          .from("songs")
+          .select("id,title,audio_url")
+          .eq("id", c.song_id)
+          .maybeSingle();
+
+        if (!sErr && s){
+          songRow.style.display = "block";
+          songMeta.textContent = s.title ? `Title: ${s.title}` : "Song attached";
+          if (s.audio_url){
+            audioEl.style.display = "block";
+            audioEl.src = s.audio_url;
+          } else {
+            audioEl.style.display = "none";
+          }
+        }
+      }
     }
 
-    supabaseClient.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN" && session) cleanUrlArtifacts();
-      await refreshMiniAuth();
+    window.addEventListener("pageshow", () => {
+      loadCampaign();
     });
 
-    window.addEventListener("pageshow", async () => {
-      await refreshMiniAuth();
-      await loadCampaignPage();
-      if (window.__srSongJobInit) window.__srSongJobInit();
-    });
-
-    document.addEventListener("DOMContentLoaded", loadCampaignPage);
-  </script>
-
-  <script>
-  (function () {
-    const $ = (id) => document.getElementById(id);
-    const state = { campaignId: null, user: null, job: null, isOwner: false, campaign: null };
-
-    function msg(text, type="info") {
-      const el = $("sr-songjob-msg");
-      if (!el) return;
-      const colors = { info:"#374151", ok:"#166534", warn:"#92400e", err:"#b91c1c" };
-      el.style.color = colors[type] || "#374151";
-      el.textContent = text;
-    }
-
-    function setStatus(text) {
-      const el = $("sr-songjob-status-text");
-      if (el) el.textContent = text;
-    }
-
-    function getCampaignIdFromUrl() {
-      const url = new URL(window.location.href);
-      return url.searchParams.get("id");
-    }
-
-    function getSupabaseClient() {
-      return window.supabaseClient || window.supabase || null;
-    }
-
-    async function fetchUser(sb) {
-      try {
-        const { data, error } = await sb.auth.getUser();
-        if (error) return null;
-        return data?.user || null;
-      } catch {
-        return null;
-      }
-    }
-
-    async function fetchCampaign(sb, campaignId) {
-      const { data, error } = await sb.from("campaigns").select("*").eq("id", campaignId).single();
-      if (error) throw error;
-      return data;
-    }
-
-    async function getOrCreateJob(sb) {
-      if (!state.isOwner) {
-        const { data, error } = await sb
-          .from("song_jobs")
-          .select("*")
-          .eq("campaign_id", state.campaignId)
-          .eq("status", "published")
-          .order("created_at", { ascending: false })
-          .limit(1);
-        if (error) throw error;
-        return data?.[0] || null;
-      }
-
-      const { data: existing, error: e1 } = await sb
-        .from("song_jobs")
-        .select("*")
-        .eq("campaign_id", state.campaignId)
-        .order("created_at", { ascending: false })
-        .limit(1);
-
-      if (e1) throw e1;
-      if (existing && existing[0]) return existing[0];
-
-      const payload = {
-        campaign_id: state.campaignId,
-        created_by: state.user.id,
-        status: "draft",
-        song_title: state.campaign?.title ? (state.campaign.title + " (Fundraiser)") : null,
-        genre: "Pop",
-        mood: "Hopeful",
-        style_tags: "Uplifting, Anthemic chorus, Modern pop",
-        suno_prompt: null
-      };
-
-      const { data: created, error: e2 } = await sb.from("song_jobs").insert(payload).select("*").single();
-      if (e2) throw e2;
-      return created;
-    }
-
-    function fillFormFromJob(job) {
-      $("sr-song_title").value = job.song_title || "";
-      $("sr-genre").value = job.genre || "";
-      $("sr-mood").value = job.mood || "";
-      $("sr-style_tags").value = job.style_tags || "";
-      $("sr-suno_prompt").value = job.suno_prompt || "";
-    }
-
-    function buildPromptPack() {
-      const title = ($("sr-song_title").value || "").trim() || "Fundraising Song";
-      const genre = ($("sr-genre").value || "").trim() || "Pop";
-      const mood = ($("sr-mood").value || "").trim() || "Hopeful";
-      const tags = ($("sr-style_tags").value || "").trim();
-
-      const pack =
-`Write original fundraising song lyrics.
-Title: ${title}
-Genre: ${genre}
-Mood: ${mood}
-Style tags: ${tags}
-
-Include:
-- empathy and community support
-- hope and resilience
-- a clear call-to-action to donate
-- uplifting, respectful tone
-OPTIONAL:
-- Include one short “tag line” that could be used as a campaign slogan.`;
-
-      $("sr-suno_prompt").value = pack;
-      return pack;
-    }
-
-    async function saveJobFields(sb) {
-      if (!state.job) return;
-      const update = {
-        song_title: ($("sr-song_title").value || "").trim() || null,
-        genre: ($("sr-genre").value || "").trim() || null,
-        mood: ($("sr-mood").value || "").trim() || null,
-        style_tags: ($("sr-style_tags").value || "").trim() || null,
-        suno_prompt: ($("sr-suno_prompt").value || "").trim() || null
-      };
-
-      if (update.suno_prompt && (state.job.status === "draft")) update.status = "prompt_ready";
-
-      const { data, error } = await sb
-        .from("song_jobs")
-        .update(update)
-        .eq("id", state.job.id)
-        .select("*")
-        .single();
-
-      if (error) throw error;
-      state.job = data;
-      return data;
-    }
-
-    async function copyPrompt() {
-      const text = ($("sr-suno_prompt").value || "").trim();
-      if (!text) { msg("No Prompt Pack to copy. Click Build Prompt Pack first.", "warn"); return; }
-      await navigator.clipboard.writeText(text);
-      msg("Copied Prompt Pack to clipboard ✅", "ok");
-    }
-
-    function openSuno() {
-      window.open("https://suno.com/create", "_blank", "noopener,noreferrer");
-      msg("Opened Suno in a new tab. Paste the Prompt Pack there.", "info");
-    }
-
-    async function uploadMp3(sb) {
-      if (!state.job) return;
-      const fileInput = $("sr-audio-file");
-      const file = fileInput?.files?.[0];
-      if (!file) { msg("Choose an MP3 file first.", "warn"); return; }
-
-      await saveJobFields(sb);
-
-      const objectName = `${state.user.id}/${state.job.id}.mp3`;
-
-      msg("Uploading MP3…", "info");
-      const { error: upErr } = await sb.storage.from("song-audio").upload(objectName, file, {
-        cacheControl: "3600",
-        upsert: true,
-        contentType: "audio/mpeg"
-      });
-      if (upErr) throw upErr;
-
-      const { data: pub } = sb.storage.from("song-audio").getPublicUrl(objectName);
-      const audioUrl = pub?.publicUrl || null;
-
-      const { data: updated, error: uErr } = await sb
-        .from("song_jobs")
-        .update({ audio_path: objectName, audio_url: audioUrl, status: (state.job.status === "published") ? "published" : "audio_uploaded" })
-        .eq("id", state.job.id)
-        .select("*")
-        .single();
-
-      if (uErr) throw uErr;
-
-      state.job = updated;
-      msg("MP3 uploaded ✅", "ok");
-      renderAudio();
-      renderStatus();
-    }
-
-    async function publish(sb, publish=true) {
-      if (!state.job) return;
-      if (publish && (!state.job.audio_url || !state.job.audio_path)) { msg("Upload an MP3 before publishing.", "warn"); return; }
-
-      const newStatus = publish ? "published" : (state.job.audio_url ? "audio_uploaded" : "draft");
-      const { data, error } = await sb.from("song_jobs").update({ status: newStatus }).eq("id", state.job.id).select("*").single();
-      if (error) throw error;
-      state.job = data;
-      msg(publish ? "Published ✅" : "Unpublished ✅", "ok");
-      renderAudio();
-      renderStatus();
-    }
-
-    function renderAudio() {
-      const wrap = $("sr-audio-wrap");
-      const audio = $("sr-audio");
-      const privacy = $("sr-audio-privacy");
-      const link = $("sr-audio-link");
-      const publicNote = $("sr-songjob-public-note");
-
-      const hasAudio = !!(state.job && state.job.audio_url);
-      if (hasAudio) {
-        wrap.style.display = "block";
-        audio.src = state.job.audio_url;
-        const isPub = (state.job.status === "published");
-        privacy.textContent = isPub ? "Public (published)" : "Private (not published)";
-        link.textContent = state.job.audio_url;
-        publicNote.style.display = "none";
-      } else {
-        wrap.style.display = "none";
-        publicNote.style.display = state.isOwner ? "none" : "block";
-      }
-    }
-
-    function renderStatus() {
-      if (!state.job) { setStatus(state.isOwner ? "No job yet" : "No published song"); return; }
-      setStatus(state.job.status || "unknown");
-    }
-
-    function renderOwnerUI() {
-      $("sr-songjob-owner-only").style.display = state.isOwner ? "block" : "none";
-      $("sr-nonowner-note").style.display = state.isOwner ? "none" : "block";
-      $("sr-songjob-public-note").style.display = state.isOwner ? "none" : "block";
-    }
-
-    function wireButtons(sb) {
-      $("sr-btn-save").onclick = async () => { try { msg("Saving…"); await saveJobFields(sb); msg("Saved ✅","ok"); renderStatus(); } catch(e){ msg("Save failed: "+(e?.message||e),"err"); } };
-      $("sr-btn-build").onclick = async () => { try { buildPromptPack(); await saveJobFields(sb); msg("Built Prompt Pack ✅","ok"); renderStatus(); } catch(e){ msg("Build failed: "+(e?.message||e),"err"); } };
-      $("sr-btn-copy").onclick = async () => { try { await copyPrompt(); } catch(e){ msg("Copy failed: "+(e?.message||e),"err"); } };
-      $("sr-btn-open-suno").onclick = () => openSuno();
-      $("sr-btn-upload").onclick = async () => { try { await uploadMp3(sb); } catch(e){ msg("Upload failed: "+(e?.message||e),"err"); } };
-      $("sr-btn-publish").onclick = async () => { try { await publish(sb,true); } catch(e){ msg("Publish failed: "+(e?.message||e),"err"); } };
-      $("sr-btn-unpublish").onclick = async () => { try { await publish(sb,false); } catch(e){ msg("Unpublish failed: "+(e?.message||e),"err"); } };
-    }
-
-    async function init() {
-      const sb = getSupabaseClient();
-      if (!sb) { setStatus("Error"); msg("Supabase client not found.","err"); return; }
-
-      state.campaignId = getCampaignIdFromUrl();
-      if (!state.campaignId) { setStatus("Error"); msg("No campaign id in URL.","err"); return; }
-
-      setStatus("Loading…");
-      state.user = await fetchUser(sb);
-
-      try { state.campaign = await fetchCampaign(sb, state.campaignId); }
-      catch(e){ setStatus("Error"); msg("Could not load campaign for Song Job.","err"); return; }
-
-      state.isOwner = !!(state.user && state.campaign && state.campaign.user_id === state.user.id);
-      renderOwnerUI();
-
-      try { state.job = await getOrCreateJob(sb); } catch { state.job = null; }
-
-      renderStatus();
-      if (state.isOwner && state.job) fillFormFromJob(state.job);
-      renderAudio();
-      if (state.isOwner) wireButtons(sb);
-
-      if (!state.isOwner) msg(state.job ? "Published song loaded." : "No published song yet.","info");
-      else msg("Ready: Build → Copy → Suno → Upload → Publish.","info");
-    }
-
-    window.__srSongJobInit = init;
-    document.addEventListener("DOMContentLoaded", init);
-  })();
+    loadCampaign();
   </script>
 </body>
 </html>
