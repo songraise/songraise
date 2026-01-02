@@ -37,8 +37,7 @@
 <body>
   <div class="wrap">
     <div class="top">
-      <div class="logo">SongRaise<span>Lite</span> — BUILD 2026-01-02-A</div>
-
+      <div class="logo">SongRaise<span>Lite</span> — BUILD 2026-01-02-REFRESH</div>
       <div class="auth">
         <span id="authStatus">Checking login…</span>
         <input id="emailInput" type="email" placeholder="you@email.com" />
@@ -49,7 +48,7 @@
 
     <div class="hero">
       <h1>Create a fundraising song + campaign</h1>
-      <p class="lead">“View” opens <code>campaign.html?id=...</code>. Login should persist.</p>
+      <p class="lead">“View” opens <code>campaign.html?id=...</code>. Login persists and refreshes.</p>
     </div>
 
     <div class="grid">
@@ -82,23 +81,14 @@
     </div>
   </div>
 
-  <script>
-    const authStatusEl = document.getElementById("authStatus");
-    authStatusEl.textContent = "JS running…";
-  </script>
-
-  <script
-    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
-    onload="window.__sbLoaded = true"
-    onerror="window.__sbLoaded = false"
-  ></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const SUPABASE_URL = "https://jvvcxpjmdfeqjdmcemet.supabase.co";
     const SUPABASE_REF = "jvvcxpjmdfeqjdmcemet";
     const SUPABASE_ANON_KEY =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2dmN4cGptZGZlcWpkbWNlbWV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1Nzc3NzYsImV4cCI6MjA3NzE1Mzc3Nn0.LPRIt10bLZYfoOCx7nD4U0PsCURB7YToq4VbByliFi4";
 
+    const authStatusEl = document.getElementById("authStatus");
     const emailEl = document.getElementById("emailInput");
     const loginBtn = document.getElementById("loginBtn");
     const logoutBtn = document.getElementById("logoutBtn");
@@ -140,8 +130,10 @@
         const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
         const json = decodeURIComponent(atob(b64).split("").map(c => "%" + c.charCodeAt(0).toString(16).padStart(2,"0")).join(""));
         return JSON.parse(json);
-      }catch(e){ return null; }
+      } catch(e){ return null; }
     }
+
+    function storageKey(){ return `sb-${SUPABASE_REF}-auth-token`; }
 
     function saveSessionToStorage(access_token, refresh_token, expires_at, expires_in){
       const now = Math.floor(Date.now()/1000);
@@ -150,7 +142,6 @@
         expires_in ? (now + Number(expires_in)) :
         (now + 3600);
 
-      const storageKey = `sb-${SUPABASE_REF}-auth-token`;
       const sessionObj = {
         access_token,
         refresh_token,
@@ -159,46 +150,83 @@
         expires_at: exp,
         user: null
       };
-      localStorage.setItem(storageKey, JSON.stringify(sessionObj));
+      localStorage.setItem(storageKey(), JSON.stringify(sessionObj));
     }
 
-    function loadAccessTokenFromStorage(){
-      const storageKey = `sb-${SUPABASE_REF}-auth-token`;
-      const raw = localStorage.getItem(storageKey);
+    function getStoredSession(){
+      const raw = localStorage.getItem(storageKey());
       if (!raw) return null;
-      try{
-        const obj = JSON.parse(raw);
-        return obj?.access_token || null;
-      }catch(e){ return null; }
+      try { return JSON.parse(raw); } catch(e){ return null; }
     }
 
-    function loadUserFromStorageToken(){
-      const token = loadAccessTokenFromStorage();
-      if (!token) return null;
-      const payload = decodeJwtPayload(token);
-      if (!payload?.sub) return null;
-      return { id: payload.sub, email: payload.email || "" };
-    }
-
-    let supabaseClient = null;
-    let currentUser = null;
-
-    function buildClient(){
-      const token = loadAccessTokenFromStorage();
-      if (token){
-        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-          auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storage: window.localStorage },
-          global: { headers: { Authorization: `Bearer ${token}` } }
-        });
-      } else {
-        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-          auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storage: window.localStorage }
-        });
+    function importFromHashIfPresent(){
+      const t = readHashTokens();
+      if (t.access_token && t.refresh_token){
+        saveSessionToStorage(t.access_token, t.refresh_token, t.expires_at, t.expires_in);
+        cleanUrl();
       }
     }
 
-    function renderAuth(){
-      if (currentUser){
+    async function refreshIfExpired(){
+      const sess = getStoredSession();
+      if (!sess?.access_token || !sess?.refresh_token) return;
+
+      const payload = decodeJwtPayload(sess.access_token);
+      const now = Math.floor(Date.now()/1000);
+
+      // Refresh if token expires within 60 seconds (or already expired)
+      if (!payload?.exp || payload.exp > (now + 60)) return;
+
+      authStatusEl.textContent = "Refreshing session…";
+
+      const resp = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_ANON_KEY
+        },
+        body: JSON.stringify({ refresh_token: sess.refresh_token })
+      });
+
+      if (!resp.ok){
+        // If refresh fails, force logout so you can re-login cleanly
+        localStorage.removeItem(storageKey());
+        return;
+      }
+
+      const data = await resp.json();
+      if (data?.access_token && data?.refresh_token){
+        // data.expires_in is seconds
+        saveSessionToStorage(data.access_token, data.refresh_token, null, data.expires_in);
+      }
+    }
+
+    function currentUserFromStorage(){
+      const sess = getStoredSession();
+      if (!sess?.access_token) return null;
+      const p = decodeJwtPayload(sess.access_token);
+      if (!p?.sub) return null;
+      return { id: p.sub, email: p.email || "" };
+    }
+
+    function buildClient(){
+      const sess = getStoredSession();
+      const token = sess?.access_token || null;
+
+      if (token){
+        return supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storage: window.localStorage },
+          global: { headers: { Authorization: `Bearer ${token}` } }
+        });
+      }
+
+      return supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storage: window.localStorage }
+      });
+    }
+
+    function renderAuth(user){
+      if (user){
         authStatusEl.textContent = "Logged in ✅";
         logoutBtn.style.display = "inline-block";
       } else {
@@ -207,20 +235,21 @@
       }
     }
 
-    async function loadCampaigns(){
+    async function loadCampaigns(client, user){
       campaignsStatus.textContent = "Loading campaigns…";
       campaignsStatus.classList.remove("error");
 
-      let q = supabaseClient
+      let q = client
         .from("campaigns")
         .select("id,title,donation_url,created_at,status,user_id")
         .order("created_at", { ascending: false })
         .limit(25);
 
-      if (currentUser) q = q.eq("user_id", currentUser.id);
+      if (user) q = q.eq("user_id", user.id);
       else q = q.eq("status", "published");
 
       const { data, error } = await q;
+
       if (error){
         campaignsStatus.textContent = "Error: " + error.message;
         campaignsStatus.classList.add("error");
@@ -229,7 +258,7 @@
       }
 
       if (!data || data.length === 0){
-        campaignsStatus.textContent = currentUser ? "No campaigns yet." : "No published campaigns.";
+        campaignsStatus.textContent = user ? "No campaigns yet." : "No published campaigns.";
         campaignsBody.innerHTML = "";
         return;
       }
@@ -247,102 +276,85 @@
     }
 
     async function refreshAll(){
-      currentUser = loadUserFromStorageToken();
-      buildClient();
-      renderAuth();
-      await loadCampaigns();
+      importFromHashIfPresent();
+      await refreshIfExpired();
+
+      const user = currentUserFromStorage();
+      const client = buildClient();
+
+      renderAuth(user);
+      await loadCampaigns(client, user);
+      return { user, client };
     }
 
-    function importFromHashIfPresent(){
-      const t = readHashTokens();
-      if (t.access_token && t.refresh_token){
-        saveSessionToStorage(t.access_token, t.refresh_token, t.expires_at, t.expires_in);
-        cleanUrl();
-      }
-    }
+    let clientForAuth = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    function start(){
-      if (!window.__sbLoaded){
-        authStatusEl.textContent = "Supabase JS failed to load (blocked).";
+    loginBtn.addEventListener("click", async () => {
+      const email = (emailEl.value || "").trim();
+      if (!email){ alert("Type your email first."); return; }
+
+      const redirectTo = `${baseUrl()}index.html?v=${Date.now()}`;
+
+      authStatusEl.textContent = "Sending link…";
+      const { error } = await clientForAuth.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: redirectTo }
+      });
+
+      if (error){
+        authStatusEl.textContent = "Logged out";
+        alert("Login error: " + error.message);
         return;
       }
 
-      importFromHashIfPresent();
-      refreshAll();
+      alert("Login email sent. Open the newest email and click the login link once.");
+      authStatusEl.textContent = "Check your email (link sent)";
+    });
 
-      loginBtn.addEventListener("click", async () => {
-        const email = (emailEl.value || "").trim();
-        if (!email){ alert("Type your email first."); return; }
+    logoutBtn.addEventListener("click", async () => {
+      localStorage.removeItem(storageKey());
+      await refreshAll();
+    });
 
-        const redirectTo = `${baseUrl()}index.html?v=${Date.now()}`;
+    document.getElementById("createForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      createStatus.textContent = "";
+      createStatus.classList.remove("error");
 
-        authStatusEl.textContent = "Sending link…";
-        const { error } = await supabaseClient.auth.signInWithOtp({
-          email,
-          options: { emailRedirectTo: redirectTo }
-        });
+      const { user, client } = await refreshAll();
 
-        if (error){
-          authStatusEl.textContent = "Logged out";
-          alert("Login error: " + error.message);
-          return;
-        }
+      if (!user){
+        createStatus.textContent = "Please log in first.";
+        createStatus.classList.add("error");
+        return;
+      }
 
-        alert("Login email sent. Open the newest email and click the login link once.");
-        authStatusEl.textContent = "Check your email (link sent)";
+      const title = document.getElementById("title").value.trim();
+      const donation_url = document.getElementById("donation_url").value.trim();
+      const description = document.getElementById("description").value.trim() || null;
+
+      createStatus.textContent = "Saving…";
+
+      const { error } = await client.from("campaigns").insert({
+        user_id: user.id,
+        title,
+        donation_url,
+        description,
+        status: "published"
       });
 
-      logoutBtn.addEventListener("click", async () => {
-        const storageKey = `sb-${SUPABASE_REF}-auth-token`;
-        localStorage.removeItem(storageKey);
-        currentUser = null;
-        buildClient();
-        await refreshAll();
-      });
+      if (error){
+        createStatus.textContent = "Error: " + error.message;
+        createStatus.classList.add("error");
+        return;
+      }
 
-      window.addEventListener("pageshow", async () => {
-        await refreshAll();
-      });
+      createStatus.textContent = "Saved ✅";
+      await refreshAll();
+    });
 
-      document.getElementById("createForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        createStatus.textContent = "";
-        createStatus.classList.remove("error");
-
-        await refreshAll();
-
-        if (!currentUser){
-          createStatus.textContent = "Please log in first.";
-          createStatus.classList.add("error");
-          return;
-        }
-
-        const title = document.getElementById("title").value.trim();
-        const donation_url = document.getElementById("donation_url").value.trim();
-        const description = document.getElementById("description").value.trim() || null;
-
-        createStatus.textContent = "Saving…";
-
-        const { error } = await supabaseClient.from("campaigns").insert({
-          user_id: currentUser.id,
-          title,
-          donation_url,
-          description,
-          status: "published"
-        });
-
-        if (error){
-          createStatus.textContent = "Error: " + error.message;
-          createStatus.classList.add("error");
-          return;
-        }
-
-        createStatus.textContent = "Saved ✅";
-        await loadCampaigns();
-      });
-    }
-
-    setTimeout(start, 0);
+    window.addEventListener("pageshow", () => { refreshAll(); });
+    refreshAll();
   </script>
 </body>
 </html>
