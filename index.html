@@ -7,39 +7,46 @@
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f9fafb;color:#111827;line-height:1.6}
-    .wrap{max-width:1100px;margin:0 auto;padding:18px 14px 70px}
-    .top{position:sticky;top:0;z-index:50;background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:10px 12px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:0 10px 24px rgba(15,23,42,.06)}
+    .wrap{max-width:1120px;margin:0 auto;padding:18px 14px 70px}
+    .top{position:sticky;top:0;z-index:50;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:10px 12px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:0 10px 24px rgba(15,23,42,.06)}
     .logo{font-weight:900;font-size:1.15rem;letter-spacing:-.02em}
     .logo span{color:#2563eb}
     .auth{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .auth span{font-size:.9rem;font-weight:800;color:#374151}
+    .pill{font-size:.9rem;font-weight:900;color:#374151;padding:6px 10px;border:1px solid #e5e7eb;border-radius:999px;background:#f9fafb}
     .auth input{width:240px;padding:8px 10px;border-radius:999px;border:1px solid #d1d5db}
-    .btn{padding:8px 12px;border-radius:999px;border:1px solid #d1d5db;background:#fff;cursor:pointer;font-weight:800}
+    .btn{padding:8px 12px;border-radius:999px;border:1px solid #d1d5db;background:#fff;cursor:pointer;font-weight:900}
     .btn:hover{background:#f3f4f6}
     .hero{padding:18px 0}
-    h1{font-size:1.9rem;letter-spacing:-.02em;margin-bottom:6px}
-    .lead{color:#4b5563;margin-bottom:14px;max-width:820px}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-    @media(max-width:900px){.grid{grid-template-columns:1fr}}
-    .card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;box-shadow:0 8px 18px rgba(15,23,42,.04)}
+    h1{font-size:2.0rem;letter-spacing:-.02em;margin-bottom:6px}
+    .lead{color:#4b5563;max-width:900px}
+    .grid{display:grid;grid-template-columns:1.05fr .95fr;gap:16px;align-items:start}
+    @media(max-width:980px){.grid{grid-template-columns:1fr}}
+    .card{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:16px;box-shadow:0 8px 18px rgba(15,23,42,.04)}
+    .card h2{font-size:1.15rem;margin-bottom:10px}
     label{display:block;margin:10px 0 4px;font-size:.85rem;font-weight:900;color:#374151}
-    input,textarea{width:100%;padding:9px 10px;border-radius:12px;border:1px solid #d1d5db;font-size:.95rem;background:#fff}
-    textarea{min-height:90px;resize:vertical}
+    input,textarea,select{width:100%;padding:9px 10px;border-radius:12px;border:1px solid #d1d5db;font-size:.95rem;background:#fff}
+    textarea{min-height:92px;resize:vertical}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media(max-width:680px){.row2{grid-template-columns:1fr}}
+    .status{margin-top:10px;font-size:.92rem;color:#6b7280}
+    .error{color:#b91c1c;font-weight:900}
+    .ok{color:#047857;font-weight:900}
     table{width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden}
     th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:.92rem}
     th{background:#f3f4f6;font-size:.85rem;color:#374151}
     tr:last-child td{border-bottom:none}
-    .status{margin-top:10px;font-size:.9rem;color:#6b7280}
-    .error{color:#b91c1c;font-weight:900}
-    code{background:#f3f4f6;padding:2px 6px;border-radius:8px}
+    .muted{color:#6b7280}
+    .link{color:#2563eb;text-decoration:none;font-weight:900}
+    .link:hover{text-decoration:underline}
+    .mini{font-size:.86rem}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="top">
-      <div class="logo">SongRaise<span>Lite</span> — BUILD 2026-01-02-REFRESH</div>
+      <div class="logo">SongRaise<span>Lite</span></div>
       <div class="auth">
-        <span id="authStatus">Checking login…</span>
+        <span class="pill" id="authStatus">Checking login…</span>
         <input id="emailInput" type="email" placeholder="you@email.com" />
         <button class="btn" id="loginBtn" type="button">Email me a login link</button>
         <button class="btn" id="logoutBtn" type="button" style="display:none;">Log out</button>
@@ -48,35 +55,102 @@
 
     <div class="hero">
       <h1>Create a fundraising song + campaign</h1>
-      <p class="lead">“View” opens <code>campaign.html?id=...</code>. Login persists and refreshes.</p>
+      <p class="lead">
+        This creates both a <b>Song</b> (audio + lyrics + cause tags) and a <b>Campaign</b> that points to it via <code>song_id</code>.
+        “View” opens <code>campaign.html?id=...</code>.
+      </p>
     </div>
 
     <div class="grid">
       <div class="card">
-        <h2 style="margin-bottom:8px;">Create campaign</h2>
+        <h2>Create campaign</h2>
         <form id="createForm">
-          <label for="title">Title</label>
+          <label for="title">Campaign title</label>
           <input id="title" required placeholder="e.g., You Are Not Alone" />
-          <label for="donation_url">Donation URL</label>
-          <input id="donation_url" type="url" required placeholder="https://..." />
-          <label for="description">Description</label>
+
+          <div class="row2">
+            <div>
+              <label for="donation_url">Donation URL</label>
+              <input id="donation_url" type="url" required placeholder="https://..." />
+            </div>
+            <div>
+              <label for="campaign_slug">Campaign slug (optional)</label>
+              <input id="campaign_slug" placeholder="e.g., you-are-not-alone" />
+            </div>
+          </div>
+
+          <label for="description">Campaign description</label>
           <textarea id="description" placeholder="Short description…"></textarea>
+
+          <hr style="border:none;border-top:1px solid #e5e7eb;margin:14px 0;">
+
+          <h2 style="margin:0 0 6px;font-size:1.05rem;">Song details</h2>
+          <p class="muted mini">Use your Song URL (MP3) from Supabase Storage (public URL) or any publicly accessible MP3 link.</p>
+
+          <label for="audio_url">Song audio_url (MP3 URL)</label>
+          <input id="audio_url" required placeholder="https://.../song.mp3" />
+
+          <div class="row2">
+            <div>
+              <label for="cover_url">cover_url (optional)</label>
+              <input id="cover_url" placeholder="https://.../cover.jpg" />
+            </div>
+            <div>
+              <label for="duration_seconds">duration_seconds (optional)</label>
+              <input id="duration_seconds" type="number" min="0" placeholder="e.g., 145" />
+            </div>
+          </div>
+
+          <div class="row2">
+            <div>
+              <label for="cause_category">cause_category</label>
+              <input id="cause_category" placeholder="e.g., Autoimmune & IBD" />
+            </div>
+            <div>
+              <label for="cause_condition">cause_condition</label>
+              <input id="cause_condition" placeholder="e.g., Crohn's Disease" />
+            </div>
+          </div>
+
+          <div class="row2">
+            <div>
+              <label for="condition">condition (optional)</label>
+              <input id="condition" placeholder="e.g., Crohn's Disease" />
+            </div>
+            <div>
+              <label for="song_status">song status</label>
+              <select id="song_status">
+                <option value="ready" selected>ready</option>
+                <option value="draft">draft</option>
+                <option value="published">published</option>
+              </select>
+            </div>
+          </div>
+
+          <label for="lyrics">Lyrics (optional)</label>
+          <textarea id="lyrics" placeholder="Paste lyrics here…"></textarea>
+
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
             <button class="btn" type="submit">Create</button>
+            <button class="btn" type="button" id="fillDemoBtn">Fill demo</button>
+            <button class="btn" type="button" id="clearBtn">Clear</button>
           </div>
+
           <div id="createStatus" class="status"></div>
         </form>
       </div>
 
       <div class="card">
-        <h2 style="margin-bottom:8px;">Campaigns</h2>
+        <h2>My campaigns</h2>
         <div style="overflow-x:auto;">
           <table>
-            <thead><tr><th>Title</th><th>Donation</th><th>Created</th><th>View</th></tr></thead>
+            <thead>
+              <tr><th>Title</th><th>Donation</th><th>Created</th><th>View</th></tr>
+            </thead>
             <tbody id="campaignsBody"></tbody>
           </table>
         </div>
-        <div id="campaignsStatus" class="status">Loading campaigns…</div>
+        <div id="campaignsStatus" class="status">Loading…</div>
       </div>
     </div>
   </div>
@@ -95,6 +169,8 @@
     const campaignsBody = document.getElementById("campaignsBody");
     const campaignsStatus = document.getElementById("campaignsStatus");
     const createStatus = document.getElementById("createStatus");
+
+    const clientForAuth = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     function baseUrl(){
       const u = new URL(window.location.href);
@@ -173,30 +249,22 @@
 
       const payload = decodeJwtPayload(sess.access_token);
       const now = Math.floor(Date.now()/1000);
-
-      // Refresh if token expires within 60 seconds (or already expired)
       if (!payload?.exp || payload.exp > (now + 60)) return;
 
-      authStatusEl.textContent = "Refreshing session…";
-
+      authStatusEl.textContent = "Refreshing…";
       const resp = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": SUPABASE_ANON_KEY
-        },
+        headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY },
         body: JSON.stringify({ refresh_token: sess.refresh_token })
       });
 
       if (!resp.ok){
-        // If refresh fails, force logout so you can re-login cleanly
         localStorage.removeItem(storageKey());
         return;
       }
 
       const data = await resp.json();
       if (data?.access_token && data?.refresh_token){
-        // data.expires_in is seconds
         saveSessionToStorage(data.access_token, data.refresh_token, null, data.expires_in);
       }
     }
@@ -225,25 +293,23 @@
       });
     }
 
-    function renderAuth(user){
-      if (user){
-        authStatusEl.textContent = "Logged in ✅";
-        logoutBtn.style.display = "inline-block";
-      } else {
-        authStatusEl.textContent = "Logged out";
-        logoutBtn.style.display = "none";
-      }
+    function setAuthPill(text, kind){
+      authStatusEl.textContent = text;
+      authStatusEl.classList.remove("ok","error");
+      if (kind) authStatusEl.classList.add(kind);
+      logoutBtn.style.display = (kind === "ok") ? "inline-block" : "none";
     }
 
     async function loadCampaigns(client, user){
-      campaignsStatus.textContent = "Loading campaigns…";
+      campaignsStatus.textContent = "Loading…";
       campaignsStatus.classList.remove("error");
+      campaignsBody.innerHTML = "";
 
       let q = client
         .from("campaigns")
         .select("id,title,donation_url,created_at,status,user_id")
         .order("created_at", { ascending: false })
-        .limit(25);
+        .limit(30);
 
       if (user) q = q.eq("user_id", user.id);
       else q = q.eq("status", "published");
@@ -253,23 +319,21 @@
       if (error){
         campaignsStatus.textContent = "Error: " + error.message;
         campaignsStatus.classList.add("error");
-        campaignsBody.innerHTML = "";
         return;
       }
 
       if (!data || data.length === 0){
         campaignsStatus.textContent = user ? "No campaigns yet." : "No published campaigns.";
-        campaignsBody.innerHTML = "";
         return;
       }
 
       const base = baseUrl();
       campaignsBody.innerHTML = data.map(c => {
         const t = c.title || "(Untitled)";
-        const d = c.donation_url ? `<a href="${c.donation_url}" target="_blank" rel="noopener noreferrer">Open</a>` : "—";
+        const d = c.donation_url ? `<a class="link" href="${c.donation_url}" target="_blank" rel="noopener noreferrer">Open</a>` : "—";
         const created = c.created_at ? new Date(c.created_at).toLocaleString() : "";
         const view = `${base}campaign.html?id=${encodeURIComponent(c.id)}`;
-        return `<tr><td>${t}</td><td>${d}</td><td>${created}</td><td><a href="${view}">View</a></td></tr>`;
+        return `<tr><td>${t}</td><td>${d}</td><td>${created}</td><td><a class="link" href="${view}">View</a></td></tr>`;
       }).join("");
 
       campaignsStatus.textContent = `Showing ${data.length} campaign(s).`;
@@ -278,42 +342,50 @@
     async function refreshAll(){
       importFromHashIfPresent();
       await refreshIfExpired();
-
       const user = currentUserFromStorage();
       const client = buildClient();
-
-      renderAuth(user);
+      setAuthPill(user ? "Logged in ✅" : "Logged out", user ? "ok" : null);
       await loadCampaigns(client, user);
       return { user, client };
     }
 
-    let clientForAuth = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     loginBtn.addEventListener("click", async () => {
       const email = (emailEl.value || "").trim();
       if (!email){ alert("Type your email first."); return; }
-
       const redirectTo = `${baseUrl()}index.html?v=${Date.now()}`;
-
-      authStatusEl.textContent = "Sending link…";
-      const { error } = await clientForAuth.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: redirectTo }
-      });
-
-      if (error){
-        authStatusEl.textContent = "Logged out";
-        alert("Login error: " + error.message);
-        return;
-      }
-
+      setAuthPill("Sending link…");
+      const { error } = await clientForAuth.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo } });
+      if (error){ setAuthPill("Logged out"); alert("Login error: " + error.message); return; }
       alert("Login email sent. Open the newest email and click the login link once.");
-      authStatusEl.textContent = "Check your email (link sent)";
+      setAuthPill("Check your email (link sent)");
     });
 
     logoutBtn.addEventListener("click", async () => {
       localStorage.removeItem(storageKey());
       await refreshAll();
+    });
+
+    document.getElementById("fillDemoBtn").addEventListener("click", () => {
+      document.getElementById("title").value = "You Are Not Alone";
+      document.getElementById("donation_url").value = "https://example.org/donate";
+      document.getElementById("campaign_slug").value = "you-are-not-alone";
+      document.getElementById("description").value = "A hopeful fundraising song campaign to support people living with chronic illness.";
+      document.getElementById("audio_url").value = "https://example.org/demo.mp3";
+      document.getElementById("cover_url").value = "";
+      document.getElementById("duration_seconds").value = "145";
+      document.getElementById("cause_category").value = "Autoimmune & IBD";
+      document.getElementById("cause_condition").value = "Crohn's Disease";
+      document.getElementById("condition").value = "Crohn's Disease";
+      document.getElementById("song_status").value = "ready";
+      document.getElementById("lyrics").value = "Verse 1...\nChorus...\nVerse 2...";
+      createStatus.textContent = "Demo filled.";
+      createStatus.classList.remove("error");
+    });
+
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      document.getElementById("createForm").reset();
+      createStatus.textContent = "";
+      createStatus.classList.remove("error");
     });
 
     document.getElementById("createForm").addEventListener("submit", async (e) => {
@@ -322,35 +394,80 @@
       createStatus.classList.remove("error");
 
       const { user, client } = await refreshAll();
-
       if (!user){
         createStatus.textContent = "Please log in first.";
         createStatus.classList.add("error");
         return;
       }
 
-      const title = document.getElementById("title").value.trim();
+      const campaignTitle = document.getElementById("title").value.trim();
       const donation_url = document.getElementById("donation_url").value.trim();
+      const campaign_slug = document.getElementById("campaign_slug").value.trim() || null;
       const description = document.getElementById("description").value.trim() || null;
 
-      createStatus.textContent = "Saving…";
+      const audio_url = document.getElementById("audio_url").value.trim();
+      const cover_url = document.getElementById("cover_url").value.trim() || null;
+      const duration_seconds_raw = document.getElementById("duration_seconds").value.trim();
+      const duration_seconds = duration_seconds_raw ? Number(duration_seconds_raw) : null;
 
-      const { error } = await client.from("campaigns").insert({
-        user_id: user.id,
-        title,
-        donation_url,
-        description,
-        status: "published"
-      });
+      const cause_category = document.getElementById("cause_category").value.trim() || null;
+      const cause_condition = document.getElementById("cause_condition").value.trim() || null;
+      const condition = document.getElementById("condition").value.trim() || null;
+      const song_status = document.getElementById("song_status").value.trim() || "ready";
+      const lyrics = document.getElementById("lyrics").value.trim() || null;
 
-      if (error){
-        createStatus.textContent = "Error: " + error.message;
+      if (!campaignTitle || !donation_url || !audio_url){
+        createStatus.textContent = "Please fill Campaign title, Donation URL, and Song audio_url.";
         createStatus.classList.add("error");
         return;
       }
 
-      createStatus.textContent = "Saved ✅";
+      createStatus.textContent = "Creating song…";
+
+      const { data: songRow, error: songErr } = await client
+        .from("songs")
+        .insert({
+          audio_url,
+          cover_url,
+          duration_seconds,
+          lyrics,
+          cause_category,
+          cause_condition,
+          condition,
+          status: song_status
+        })
+        .select("id")
+        .single();
+
+      if (songErr){
+        createStatus.textContent = "Error creating song: " + songErr.message;
+        createStatus.classList.add("error");
+        return;
+      }
+
+      createStatus.textContent = "Creating campaign…";
+
+      const { error: campErr } = await client
+        .from("campaigns")
+        .insert({
+          user_id: user.id,
+          song_id: songRow.id,
+          title: campaignTitle,
+          description,
+          donation_url,
+          campaign_slug,
+          status: "published"
+        });
+
+      if (campErr){
+        createStatus.textContent = "Error creating campaign: " + campErr.message;
+        createStatus.classList.add("error");
+        return;
+      }
+
+      createStatus.textContent = "Created ✅";
       await refreshAll();
+      document.getElementById("createForm").reset();
     });
 
     window.addEventListener("pageshow", () => { refreshAll(); });
