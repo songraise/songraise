@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>How SongRaise Works for Charities</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="How SongRaise helps charities create fundraising campaigns powered by music." />
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f9fafb;color:#111827;line-height:1.6}
@@ -40,15 +41,16 @@
     <div class="top">
       <div class="logo">SongRaise<span>Lite</span></div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <a class="btn" href="index.html">Back to Dashboard</a>
-        <a class="btn btn-primary" href="index.html">Create a Campaign</a>
+        <a class="btn" href="index.html">Home</a>
+        <a class="btn" href="dashboard.html">Dashboard</a>
+        <a class="btn btn-primary" href="dashboard.html">Create a Campaign</a>
       </div>
     </div>
 
     <h1>How SongRaise Works for Charities</h1>
     <p class="lead">
       SongRaise helps nonprofits launch fundraising campaigns powered by music.
-      You get a campaign page (with a song + a donate button) that you can share anywhere.
+      Each campaign gets a shareable page with a song and a donate button.
     </p>
 
     <div class="card">
@@ -56,107 +58,82 @@
         <div>
           <h2>What you get</h2>
           <ul>
-            <li><b>A shareable campaign page</b> with a built-in audio player and a donate button.</li>
-            <li><b>A fundraising song</b> tailored to your cause (genre/emotion/style).</li>
-            <li><b>Optional lyrics</b> you can include for transparency and storytelling.</li>
-            <li><b>Simple workflow</b> designed to reduce mistakes and admin time.</li>
+            <li><b>A public campaign page</b> with a built-in audio player and donate button.</li>
+            <li><b>A fundraising song</b> tailored to your cause, condition, and tone.</li>
+            <li><b>Optional lyrics</b> for transparency and accessibility.</li>
+            <li><b>A simple workflow</b> designed to reduce mistakes and admin time.</li>
           </ul>
         </div>
         <div>
           <h2>What you control</h2>
           <ul>
-            <li><b>Your donation link</b> — SongRaise always points donors to your chosen page.</li>
-            <li><b>Your cause framing</b> — pick the category + condition and your description.</li>
-            <li><b>Song style</b> — upbeat, hopeful, funny, anthem-like, etc.</li>
-            <li><b>What gets published</b> — only campaigns you choose to share.</li>
+            <li><b>Your donation link</b> — donors always go to your official page.</li>
+            <li><b>Your story</b> — description, cause category, and condition.</li>
+            <li><b>Song style</b> — genre, emotion, and vibe.</li>
+            <li><b>What gets shared</b> — only campaigns you choose to distribute.</li>
           </ul>
         </div>
       </div>
     </div>
 
     <div class="card">
-      <h2>The simple 3-step process (Option C++)</h2>
+      <h2>The simple 3-step process</h2>
       <p class="muted mini">
-        Today, most music generators do not offer stable public APIs. SongRaise uses a safe “human-in-the-loop” flow:
-        automated where it matters, but without brittle browser automation.
+        SongRaise uses a safe “human-in-the-loop” approach — automated where it helps,
+        without fragile AI scraping or complex tools.
       </p>
 
       <div class="steps">
         <div class="step">
           <b>1) Create your campaign</b>
-          Choose your cause category + condition, write a short description, and paste your donation link.
-          SongRaise creates the campaign page and generates a <b>Prompt Pack</b>.
+          Enter your campaign title, description, cause category, and donation link.
         </div>
 
         <div class="step">
           <b>2) Generate the song (guided)</b>
           Click <b>Generate in Suno</b>.
-          SongRaise opens Suno in a new tab and automatically copies the Prompt Pack to your clipboard.
-          You paste it into Suno, generate, and download the MP3.
+          SongRaise opens Suno in a new tab and copies a Prompt Pack for you to paste.
         </div>
 
         <div class="step">
-          <b>3) Upload & attach (automatic)</b>
-          Drag-and-drop the MP3 back into SongRaise.
-          SongRaise uploads it, validates it, detects duration, saves lyrics (optional), and attaches it to the right campaign.
+          <b>3) Upload & attach</b>
+          Drag the MP3 back into SongRaise.
+          The system uploads it, validates it, detects duration, and attaches it to your campaign.
         </div>
       </div>
 
       <div class="hr"></div>
 
       <div class="pill">✅ Reduces human error</div>
-      <div class="pill">✅ No complex tech required</div>
-      <div class="pill">✅ Campaign page ready to share</div>
+      <div class="pill">✅ No technical expertise required</div>
+      <div class="pill">✅ Campaign ready to share immediately</div>
     </div>
 
     <div class="card">
       <h2>Sharing your campaign</h2>
-      <p class="muted">
-        Every campaign has its own page you can share on social media, email newsletters, websites, or QR codes.
-        Donors can listen and click donate immediately.
-      </p>
       <ul>
-        <li><b>Social posts:</b> Share the campaign link (TikTok/Instagram bio, X, Facebook, LinkedIn).</li>
-        <li><b>Email:</b> Add the campaign link to your newsletter.</li>
-        <li><b>Website:</b> Embed the link or add a “Listen & Donate” button.</li>
-        <li><b>Events:</b> Print a QR code to the campaign page.</li>
+        <li><b>Social media:</b> Share the campaign link anywhere.</li>
+        <li><b>Email:</b> Add it to newsletters or supporter updates.</li>
+        <li><b>Website:</b> Link or embed the campaign page.</li>
+        <li><b>Events:</b> Use QR codes to drive listens and donations.</li>
       </ul>
     </div>
 
     <div class="card">
       <h2>Trust & transparency</h2>
       <ul>
-        <li><b>Donation link is yours</b> — donors are always directed to the official donation page you provide.</li>
-        <li><b>Campaign page is simple</b> — song, story, and donate button. Minimal confusion.</li>
-        <li><b>Optional lyrics display</b> — helpful for accessibility and trust.</li>
+        <li><b>Donation links are yours</b> — SongRaise never intercepts funds.</li>
+        <li><b>Clear, focused campaign pages</b> — song, story, donate.</li>
+        <li><b>Optional lyrics display</b> — helps build donor confidence.</li>
       </ul>
-      <p class="muted mini">
-        Note: SongRaise Lite is an early version. Features like automated social posting and deeper analytics can be added as the platform grows.
-      </p>
     </div>
 
     <div class="card">
-      <h2>FAQ</h2>
-
-      <h3>Do we need a music team?</h3>
-      <p class="muted">No. You only provide the cause details and donation link. The generation step is guided.</p>
-
-      <h3>How long does it take?</h3>
-      <p class="muted">Typically 5–15 minutes to create a campaign and attach a song.</p>
-
-      <h3>Can we replace the song later?</h3>
-      <p class="muted">Yes. Uploading a new MP3 can replace the attached song for the campaign.</p>
-
-      <h3>Can the song be public?</h3>
-      <p class="muted">Yes. Campaign pages are designed to be shareable and public-facing when you choose to share them.</p>
-    </div>
-
-    <div class="card">
-      <h2>Ready to try it?</h2>
-      <p class="muted">Create your first campaign and generate your first fundraising song.</p>
+      <h2>Ready to get started?</h2>
+      <p class="muted">Create your first SongRaise campaign in minutes.</p>
       <div class="cta">
-        <a class="btn btn-primary" href="index.html">Create a Campaign</a>
-        <a class="btn" href="index.html">Go to Dashboard</a>
+        <a class="btn btn-primary" href="dashboard.html">Create a Campaign</a>
+        <a class="btn" href="dashboard.html">Go to Dashboard</a>
       </div>
     </div>
   </div>
