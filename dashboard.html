@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>SongRaise Lite</title>
+  <title>SongRaise Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
@@ -14,9 +14,11 @@
     .auth{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .pill{font-size:.9rem;font-weight:900;color:#374151;padding:6px 10px;border:1px solid #e5e7eb;border-radius:999px;background:#f9fafb}
     .auth input{width:240px;padding:8px 10px;border-radius:999px;border:1px solid #d1d5db}
-    .btn{padding:8px 12px;border-radius:999px;border:1px solid #d1d5db;background:#fff;cursor:pointer;font-weight:900}
+    .btn{padding:8px 12px;border-radius:999px;border:1px solid #d1d5db;background:#fff;cursor:pointer;font-weight:900;text-decoration:none;color:#111827;display:inline-block}
     .btn:hover{background:#f3f4f6}
     .btn:disabled{opacity:.55;cursor:not-allowed}
+    .btn-primary{background:#2563eb;border-color:#2563eb;color:#fff}
+    .btn-primary:hover{background:#1d4ed8}
     .hero{padding:18px 0}
     h1{font-size:2.0rem;letter-spacing:-.02em;margin-bottom:6px}
     .lead{color:#4b5563;max-width:980px}
@@ -36,7 +38,7 @@
     .mini{font-size:.86rem}
     .hr{border:none;border-top:1px solid #e5e7eb;margin:14px 0}
     table{width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden}
-    th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:.92rem}
+    th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:.92rem;vertical-align:top}
     th{background:#f3f4f6;font-size:.85rem;color:#374151}
     tr:last-child td{border-bottom:none}
     .link{color:#2563eb;text-decoration:none;font-weight:900}
@@ -56,42 +58,44 @@
     .step b{display:block;margin-bottom:4px}
     .modal pre{white-space:pre-wrap;word-wrap:break-word;background:#111827;color:#f9fafb;border-radius:14px;padding:12px;font-size:.9rem;line-height:1.45}
     .modal .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .checklist{border:1px solid #e5e7eb;border-radius:16px;padding:12px;background:#f9fafb}
+    .checklist .item{display:flex;gap:10px;align-items:flex-start;margin:8px 0}
+    .checklist .item b{min-width:18px}
+    .checklist .item .go{margin-left:auto}
   </style>
 </head>
 <body>
   <div class="wrap">
-   <div class="top">
-  <div class="logo">SongRaise<span>Lite</span></div>
-
-  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-    <a class="btn" href="how-it-works.html">How It Works</a>
-
-    <div class="auth">
-      <span class="pill" id="authStatus">Checking login…</span>
-      <input id="emailInput" type="email" placeholder="you@email.com" />
-      <button class="btn" id="loginBtn" type="button">Email me a login link</button>
-      <button class="btn" id="logoutBtn" type="button" style="display:none;">Log out</button>
+    <div class="top">
+      <div class="logo">SongRaise<span>Lite</span></div>
+      <div class="stack">
+        <a class="btn" href="index.html">Public Home</a>
+        <a class="btn" href="how-it-works.html">How It Works</a>
+        <div class="auth">
+          <span class="pill" id="authStatus">Checking login…</span>
+          <input id="emailInput" type="email" placeholder="you@email.com" />
+          <button class="btn" id="loginBtn" type="button">Email me a login link</button>
+          <button class="btn" id="logoutBtn" type="button" style="display:none;">Log out</button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-
 
     <div class="hero">
-      <h1>Create → Suno → Upload MP3 → Auto Attach</h1>
+      <h1>Dashboard</h1>
       <p class="lead">
-        Click <b>Generate in Suno</b> to open Suno + copy your Prompt Pack. After download, upload the MP3 and it will
-        <b>replace</b> the campaign’s current song automatically. Storage bucket: <code>song-audio</code>.
+        Charities create campaigns. SongRaise (admin) generates and attaches the song. Campaign pages are public and shareable.
       </p>
     </div>
 
     <div class="grid">
       <div class="card">
-        <h2>Create campaign</h2>
+        <h2>Create campaign (Charity)</h2>
 
         <div class="stack" style="margin-bottom:10px;">
           <span class="badge" id="currentBadge">No active campaign</span>
           <a class="btn" id="viewCurrentBtn" href="#" style="display:none;">View current</a>
           <button class="btn" id="clearCurrentBtn" type="button" style="display:none;">Clear current</button>
+          <span class="badge" id="roleBadge" style="display:none;"></span>
         </div>
 
         <form id="createForm">
@@ -114,8 +118,8 @@
 
           <div class="hr"></div>
 
-          <h2 style="margin:0 0 6px;font-size:1.05rem;">Song settings (Prompt-only)</h2>
-          <p class="muted mini">These settings build the Prompt Pack. Lyrics are optional (you can paste them later).</p>
+          <h2 style="margin:0 0 6px;font-size:1.05rem;">Cause details</h2>
+          <p class="muted mini">These fields help SongRaise generate a great fundraising song for your campaign.</p>
 
           <div class="row2">
             <div>
@@ -162,11 +166,10 @@
           <input id="hook" placeholder='e.g., “You are not alone” call-and-response chorus' />
 
           <label for="lyrics">Lyrics (optional)</label>
-          <textarea id="lyrics" placeholder="Paste lyrics here (optional)…"></textarea>
+          <textarea id="lyrics" placeholder="If you already have lyrics, paste them here (optional)…"></textarea>
 
           <div class="stack" style="margin-top:12px;">
-            <button class="btn" type="submit" id="createBtn">Create campaign</button>
-            <button class="btn" type="button" id="generateBtn" disabled>Generate in Suno</button>
+            <button class="btn btn-primary" type="submit" id="createBtn">Create campaign</button>
             <button class="btn" type="button" id="resetFormBtn">Reset form</button>
           </div>
 
@@ -175,16 +178,47 @@
 
         <div class="hr"></div>
 
-        <h2>Upload MP3 & attach (REPLACE)</h2>
-        <div class="drop" id="dropzone">
-          <div class="big">Drop MP3 or choose file</div>
-          <div class="muted mini">This will replace the campaign’s current song.</div>
-          <input id="mp3File" type="file" accept="audio/mpeg,audio/mp3" />
-          <div class="fileline" id="fileLine">No file selected</div>
-          <button class="btn" id="uploadBtn" type="button" disabled>Upload & attach</button>
-          <div class="muted mini" id="bucketLabel">Bucket: song-audio</div>
+        <div id="readinessBlock" class="checklist" style="display:none;">
+          <div class="stack" style="justify-content:space-between;">
+            <div style="font-weight:900;">Campaign readiness</div>
+            <span class="badge" id="readinessSummary">—</span>
+          </div>
+
+          <div class="item"><b id="r1">⏳</b><div>Campaign created</div></div>
+          <div class="item"><b id="r2">⏳</b><div>Donation link added</div></div>
+          <div class="item"><b id="r3">⏳</b><div>Song in production (SongRaise)</div></div>
+          <div class="item"><b id="r4">⏳</b><div>Ready to share</div></div>
+
+          <div class="muted mini" id="charityNote" style="margin-top:8px; display:none;">
+            SongRaise is generating your song. You’ll be able to share the campaign once the song is attached.
+          </div>
         </div>
-        <div id="uploadStatus" class="status"></div>
+
+        <div id="adminBlock" style="display:none;margin-top:14px;">
+          <div class="hr"></div>
+          <h2>Admin production</h2>
+          <p class="muted mini">Only visible to the SongRaise administrator. Charities do not see Suno or uploads.</p>
+
+          <div class="stack" style="margin-top:10px;">
+            <button class="btn" type="button" id="generateBtn" disabled>Generate in Suno</button>
+            <button class="btn" type="button" id="scrollUploadBtn" disabled>Jump to Upload</button>
+          </div>
+
+          <div id="adminStatus" class="status"></div>
+
+          <div class="hr"></div>
+
+          <h2>Upload MP3 & attach (REPLACE)</h2>
+          <div class="drop" id="dropzone">
+            <div class="big">Drop MP3 or choose file</div>
+            <div class="muted mini">This replaces the campaign’s current song.</div>
+            <input id="mp3File" type="file" accept="audio/mpeg,audio/mp3" />
+            <div class="fileline" id="fileLine">No file selected</div>
+            <button class="btn btn-primary" id="uploadBtn" type="button" disabled>Upload & attach</button>
+            <div class="muted mini" id="bucketLabel">Bucket: <code>song-audio</code></div>
+          </div>
+          <div id="uploadStatus" class="status"></div>
+        </div>
       </div>
 
       <div class="card">
@@ -192,7 +226,7 @@
         <div style="overflow-x:auto;">
           <table>
             <thead>
-              <tr><th>Title</th><th>Donation</th><th>Created</th><th>View</th></tr>
+              <tr><th>Title</th><th>Status</th><th>Created</th><th>View</th></tr>
             </thead>
             <tbody id="campaignsBody"></tbody>
           </table>
@@ -204,12 +238,12 @@
 
   <div class="overlay" id="overlay">
     <div class="modal">
-      <h3>Generate in Suno (Prompt-only)</h3>
-      <div class="muted mini">Your Prompt Pack is copied to clipboard. Paste it into Suno.</div>
+      <h3>Generate in Suno (Admin)</h3>
+      <div class="muted mini">Prompt Pack copied to clipboard. Paste into Suno and generate.</div>
       <div class="steps">
         <div class="step"><b>Step 1</b> Suno opens in a new tab.</div>
-        <div class="step"><b>Step 2</b> Paste the Prompt Pack below into Suno and generate.</div>
-        <div class="step"><b>Step 3</b> Download the MP3 and upload it here to attach.</div>
+        <div class="step"><b>Step 2</b> Paste Prompt Pack below into Suno and generate.</div>
+        <div class="step"><b>Step 3</b> Download MP3 and upload it here to attach.</div>
       </div>
       <pre id="promptPreview"></pre>
       <div class="actions">
@@ -227,6 +261,7 @@
     const SUPABASE_ANON_KEY =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2dmN4cGptZGZlcWpkbWNlbWV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1Nzc3NzYsImV4cCI6MjA3NzE1Mzc3Nn0.LPRIt10bLZYfoOCx7nD4U0PsCURB7YToq4VbByliFi4";
 
+    const ADMIN_EMAIL = "jason.susnick@gmail.com";
     const BUCKET_AUDIO = "song-audio";
     const SUNO_URL = "https://suno.com";
 
@@ -254,13 +289,13 @@
     const emailEl = document.getElementById("emailInput");
     const loginBtn = document.getElementById("loginBtn");
     const logoutBtn = document.getElementById("logoutBtn");
+    const roleBadge = document.getElementById("roleBadge");
 
     const campaignsBody = document.getElementById("campaignsBody");
     const campaignsStatus = document.getElementById("campaignsStatus");
 
     const createForm = document.getElementById("createForm");
     const createBtn = document.getElementById("createBtn");
-    const generateBtn = document.getElementById("generateBtn");
     const resetFormBtn = document.getElementById("resetFormBtn");
     const createStatus = document.getElementById("createStatus");
 
@@ -272,6 +307,19 @@
     const currentBadge = document.getElementById("currentBadge");
     const viewCurrentBtn = document.getElementById("viewCurrentBtn");
     const clearCurrentBtn = document.getElementById("clearCurrentBtn");
+
+    const readinessBlock = document.getElementById("readinessBlock");
+    const readinessSummary = document.getElementById("readinessSummary");
+    const charityNote = document.getElementById("charityNote");
+    const r1 = document.getElementById("r1");
+    const r2 = document.getElementById("r2");
+    const r3 = document.getElementById("r3");
+    const r4 = document.getElementById("r4");
+
+    const adminBlock = document.getElementById("adminBlock");
+    const adminStatus = document.getElementById("adminStatus");
+    const generateBtn = document.getElementById("generateBtn");
+    const scrollUploadBtn = document.getElementById("scrollUploadBtn");
 
     const dropzone = document.getElementById("dropzone");
     const mp3FileEl = document.getElementById("mp3File");
@@ -365,7 +413,7 @@
       if (!sess?.access_token) return null;
       const p = decodeJwtPayload(sess.access_token);
       if (!p?.sub) return null;
-      return { id: p.sub, email: p.email || "" };
+      return { id: p.sub, email: (p.email || "").toLowerCase() };
     }
 
     function buildClient(){
@@ -415,16 +463,12 @@
     }
 
     function currentCampaignKey(){ return "songraise_current_campaign_id"; }
-
     function setCurrentCampaign(id, title){
       if (id) localStorage.setItem(currentCampaignKey(), id);
       else localStorage.removeItem(currentCampaignKey());
       renderCurrentCampaignBadge(id, title);
     }
-
-    function getCurrentCampaignId(){
-      return localStorage.getItem(currentCampaignKey()) || "";
-    }
+    function getCurrentCampaignId(){ return localStorage.getItem(currentCampaignKey()) || ""; }
 
     function renderCurrentCampaignBadge(id, title){
       const base = baseUrl();
@@ -433,15 +477,27 @@
         viewCurrentBtn.style.display = "inline-block";
         viewCurrentBtn.href = `${base}campaign.html?id=${encodeURIComponent(id)}`;
         clearCurrentBtn.style.display = "inline-block";
-        generateBtn.disabled = false;
-        uploadBtn.disabled = false;
       } else {
         currentBadge.textContent = "No active campaign";
         viewCurrentBtn.style.display = "none";
         clearCurrentBtn.style.display = "none";
-        generateBtn.disabled = true;
-        uploadBtn.disabled = true;
       }
+    }
+
+    function setReadiness(campaign){
+      if (!campaign){ readinessBlock.style.display = "none"; return; }
+      readinessBlock.style.display = "block";
+
+      const hasCampaign = true;
+      const hasDonation = !!(campaign.donation_url);
+      const hasSong = !!(campaign.song_id);
+
+      r1.textContent = hasCampaign ? "✅" : "⏳";
+      r2.textContent = hasDonation ? "✅" : "⏳";
+      r3.textContent = hasSong ? "✅" : "⏳";
+      r4.textContent = hasSong ? "✅" : "⏳";
+
+      readinessSummary.textContent = hasSong ? "Ready to share" : "Song in production";
     }
 
     function buildPromptPack(){
@@ -454,7 +510,7 @@
       const hook = document.getElementById("hook").value.trim();
 
       const lines = [];
-      lines.push("SONGRAISE PROMPT PACK (Prompt-only)");
+      lines.push("SONGRAISE PROMPT PACK (Admin)");
       if (title) lines.push(`Campaign Title: ${title}`);
       if (cat) lines.push(`Category: ${cat}`);
       if (cond) lines.push(`Condition: ${cond}`);
@@ -472,7 +528,7 @@
       if (style) promptParts.push(`Style: ${style}.`);
       promptParts.push("Uplifting, empathetic, community-focused, clear call-to-action to donate.");
       if (hook) promptParts.push(`Include hook: "${hook}".`);
-      promptParts.push("Keep it catchy and respectful. Provide a memorable chorus.");
+      promptParts.push("Catchy and respectful. Memorable chorus.");
 
       lines.push(promptParts.join(" "));
       return lines.join("\n");
@@ -509,29 +565,35 @@
       });
     }
 
-    async function loadCampaigns(client, user){
+    async function loadCampaigns(client, user, isAdmin){
       campaignsStatus.textContent = "Loading…";
       campaignsBody.innerHTML = "";
 
-      let q = client.from("campaigns").select("id,title,donation_url,created_at,status,user_id").order("created_at",{ascending:false}).limit(50);
-      if (user) q = q.eq("user_id", user.id);
-      else q = q.eq("status","published");
+      // IMPORTANT: If your RLS only allows users to see their own campaigns,
+      // then even admin cannot see others from the browser. That's OK for now.
+      let q = client.from("campaigns").select("id,title,donation_url,created_at,status,user_id,song_id").order("created_at",{ascending:false}).limit(50);
+      q = isAdmin ? q : q.eq("user_id", user.id);
 
       const { data, error } = await q;
       if (error){ campaignsStatus.textContent = "Error: " + error.message; campaignsStatus.classList.add("error"); return; }
 
       if (!data || data.length === 0){
-        campaignsStatus.textContent = user ? "No campaigns yet." : "No published campaigns.";
+        campaignsStatus.textContent = "No campaigns yet.";
         return;
       }
 
       const base = baseUrl();
       campaignsBody.innerHTML = data.map(c => {
         const t = c.title || "(Untitled)";
-        const d = c.donation_url ? `<a class="link" href="${c.donation_url}" target="_blank" rel="noopener noreferrer">Open</a>` : "—";
         const created = c.created_at ? new Date(c.created_at).toLocaleString() : "";
         const view = `${base}campaign.html?id=${encodeURIComponent(c.id)}`;
-        return `<tr><td>${t}</td><td>${d}</td><td>${created}</td><td><a class="link" href="${view}">View</a></td></tr>`;
+        const st = c.song_id ? "Ready to share" : "Song in production";
+        return `<tr>
+          <td>${t}</td>
+          <td><span class="badge">${st}</span></td>
+          <td>${created}</td>
+          <td><a class="link" href="${view}">View</a></td>
+        </tr>`;
       }).join("");
 
       campaignsStatus.textContent = `Showing ${data.length} campaign(s).`;
@@ -540,23 +602,49 @@
     async function refreshAll(){
       importFromHashIfPresent();
       await refreshIfExpired();
+
       const user = currentUserFromStorage();
       const client = buildClient();
 
-      setAuthPill(user ? "Logged in ✅" : "Logged out", !!user);
-      await loadCampaigns(client, user);
+      const loggedIn = !!user;
+      const isAdmin = loggedIn && user.email === ADMIN_EMAIL;
 
+      setAuthPill(loggedIn ? "Logged in ✅" : "Logged out", loggedIn);
+
+      roleBadge.style.display = loggedIn ? "inline-flex" : "none";
+      if (loggedIn){
+        roleBadge.textContent = isAdmin ? "Admin" : "Charity";
+      }
+
+      // Admin-only blocks
+      adminBlock.style.display = isAdmin ? "block" : "none";
+      charityNote.style.display = loggedIn && !isAdmin ? "block" : "none";
+
+      if (loggedIn){
+        await loadCampaigns(client, user, isAdmin);
+      } else {
+        campaignsBody.innerHTML = "";
+        campaignsStatus.textContent = "Please log in to see campaigns.";
+      }
+
+      // current campaign badge
       const curId = getCurrentCampaignId();
       if (curId) renderCurrentCampaignBadge(curId, "current");
       else renderCurrentCampaignBadge("", "");
 
-      return { user, client };
+      // enable admin buttons only if admin + active campaign
+      const hasActive = !!curId;
+      generateBtn.disabled = !(isAdmin && hasActive);
+      uploadBtn.disabled = !(isAdmin && hasActive);
+      scrollUploadBtn.disabled = !(isAdmin && hasActive);
+
+      return { user, client, isAdmin };
     }
 
     loginBtn.addEventListener("click", async () => {
       const email = (emailEl.value || "").trim();
       if (!email){ alert("Type your email first."); return; }
-      const redirectTo = `${baseUrl()}index.html?v=${Date.now()}`;
+      const redirectTo = `${baseUrl()}dashboard.html?v=${Date.now()}`;
       setAuthPill("Sending link…", false);
       const { error } = await clientForAuth.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo } });
       if (error){ setAuthPill("Logged out", false); alert("Login error: " + error.message); return; }
@@ -574,6 +662,7 @@
 
     clearCurrentBtn.addEventListener("click", () => {
       setCurrentCampaign("", "");
+      readinessBlock.style.display = "none";
       uploadStatus.textContent = "";
       uploadStatus.classList.remove("error","ok");
       fileLine.textContent = "No file selected";
@@ -586,6 +675,7 @@
       fillSelect(condSelect, [], "Select a condition…");
       createStatus.textContent = "";
       createStatus.classList.remove("error","ok");
+      readinessBlock.style.display = "none";
     });
 
     createForm.addEventListener("submit", async (e) => {
@@ -593,7 +683,7 @@
       createStatus.textContent = "";
       createStatus.classList.remove("error","ok");
 
-      const { user, client } = await refreshAll();
+      const { user, client, isAdmin } = await refreshAll();
       if (!user){
         createStatus.textContent = "Please log in first.";
         createStatus.classList.add("error");
@@ -625,7 +715,7 @@
           status: "published",
           song_id: null
         })
-        .select("id,title")
+        .select("id,title,donation_url,song_id")
         .single();
 
       if (campErr){
@@ -636,20 +726,30 @@
       }
 
       setCurrentCampaign(camp.id, camp.title);
-      createStatus.textContent = "Campaign created ✅ Click “Generate in Suno”, then upload the MP3.";
+      setReadiness(camp);
+
+      if (isAdmin){
+        createStatus.textContent = "Campaign created ✅ Now generate the song (admin) and upload the MP3.";
+      } else {
+        createStatus.textContent = "Campaign submitted ✅ SongRaise is generating your song. You can share once it’s ready.";
+      }
       createStatus.classList.add("ok");
       createBtn.disabled = false;
+
+      await refreshAll();
     });
 
     generateBtn.addEventListener("click", async () => {
+      const { user, isAdmin } = await refreshAll();
+      if (!user || !isAdmin){ return; }
+
       const curId = getCurrentCampaignId();
-      if (!curId){ alert("Create a campaign first."); return; }
+      if (!curId){ alert("Select/create a campaign first."); return; }
 
       const pack = buildPromptPack();
       promptPreview.textContent = pack;
-
       const ok = await copyToClipboard(pack);
-      if (!ok){ alert("Clipboard blocked by the browser. Copy manually from the box."); }
+      if (!ok){ alert("Clipboard blocked. Copy manually from the box."); }
 
       overlay.style.display = "flex";
       window.open(SUNO_URL, "_blank", "noopener,noreferrer");
@@ -668,23 +768,20 @@
       overlay.style.display = "none";
     });
 
+    scrollUploadBtn.addEventListener("click", () => {
+      dropzone.scrollIntoView({ behavior:"smooth", block:"start" });
+    });
+
     function setDropDrag(on){
       if (on) dropzone.classList.add("drag");
       else dropzone.classList.remove("drag");
     }
 
     ["dragenter","dragover"].forEach(evt => {
-      dropzone.addEventListener(evt, (e) => {
-        e.preventDefault();
-        setDropDrag(true);
-      });
+      dropzone.addEventListener(evt, (e) => { e.preventDefault(); setDropDrag(true); });
     });
-
     ["dragleave","drop"].forEach(evt => {
-      dropzone.addEventListener(evt, (e) => {
-        e.preventDefault();
-        setDropDrag(false);
-      });
+      dropzone.addEventListener(evt, (e) => { e.preventDefault(); setDropDrag(false); });
     });
 
     dropzone.addEventListener("drop", (e) => {
@@ -709,11 +806,11 @@
     async function uploadAndAttach(file){
       setUploadStatus("", null);
 
-      const curId = getCurrentCampaignId();
-      if (!curId){ setUploadStatus("No active campaign. Create a campaign first.", "error"); return; }
+      const { user, client, isAdmin } = await refreshAll();
+      if (!user || !isAdmin){ setUploadStatus("Admin only.", "error"); return; }
 
-      const { user, client } = await refreshAll();
-      if (!user){ setUploadStatus("Please log in first.", "error"); return; }
+      const curId = getCurrentCampaignId();
+      if (!curId){ setUploadStatus("No active campaign.", "error"); return; }
 
       if (!file){ setUploadStatus("Choose or drop an MP3 file first.", "error"); return; }
 
@@ -727,11 +824,10 @@
       uploadBtn.disabled = true;
       generateBtn.disabled = true;
 
-      setUploadStatus(`Reading duration…`, null);
+      setUploadStatus("Reading duration…", null);
       const durationSeconds = await getAudioDurationSeconds(file);
 
       setUploadStatus(`Uploading MP3 to ${BUCKET_AUDIO}…`, null);
-
       const path = `${user.id}/${curId}/${Date.now()}-${safeFileName(file.name)}`;
 
       const { error: upErr } = await client.storage.from(BUCKET_AUDIO).upload(path, file, {
@@ -759,10 +855,6 @@
 
       const cat = catSelect.value || null;
       const cond = condSelect.value || null;
-      const emotion = emotionSelect.value || null;
-      const genre = genreSelect.value || null;
-      const style = document.getElementById("artist_style").value.trim() || null;
-      const hook = document.getElementById("hook").value.trim() || null;
       const lyrics = document.getElementById("lyrics").value.trim() || null;
 
       const { data: songRow, error: songErr } = await client
@@ -805,6 +897,10 @@
       setUploadStatus(`Attached ✅ (duration: ${durationSeconds ? durationSeconds + "s" : "unknown"})`, "ok");
       uploadBtn.disabled = false;
       generateBtn.disabled = false;
+
+      // refresh readiness
+      const { data: camp2 } = await client.from("campaigns").select("id,donation_url,song_id").eq("id", curId).single();
+      if (camp2) setReadiness(camp2);
 
       await refreshAll();
     }
