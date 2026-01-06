@@ -1,1 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Browse Campaigns — SongRaise</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f9fafb;color:#111827;line-height:1.55}
+    .wrap{max-width:1140px;margin:0 auto;padding:18px 14px 70px}
+    .top{position:sticky;top:0;z-index:50;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:10px 12px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:0 10px 24px rgba(15,23,42,.06)}
+    .logo{font-weight:900;font-size:1.15rem;letter-spacing:-.02em}
+    .logo span{color:#2563eb}
+    .nav{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .btn{padding:8px 12px;border-radius:999px;border:1px solid #d1d5db;background:#fff;cursor:pointer;font-weight:900;text-decoration:none;color:#111827;display:inline-block}
+    .btn:hover{background:#f3f4f6}
+    .btn-primary{background:#2563eb;border-color:#2563eb;color:#fff}
+    .btn-primary:hover{background:#1d4ed8}
+    h1{font-size:2.0rem;letter-spacing:-.02em;margin:16px 0 6px}
+    .lead{color:#4b5563;max-width:980px}
+    .card{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:14px 14px;box-shadow:0 8px 18px rgba(15,23,42,.04);margin-top:14px}
+    .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .controls input, .controls select{
+      padding:9px 10px;border-radius:999px;border:1px solid #d1d5db;background:#fff;min-width:240px
+    }
+    .pill{font-size:.9rem;font-weight:900;color:#374151;padding:6px 10px;border:1px solid #e5e7eb;border-radius:999px;background:#f9fafb}
+    table{width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;margin-top:12px}
+    th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:.92rem;vertical-align:top}
+    th{background:#f3f4f6;font-size:.85rem;color:#374151}
+    tr:last-child td{border-bottom:none}
+    .muted{color:#6b7280}
+    .mini{font-size:.86rem}
+    .badge{display:inline-flex;gap:8px;align-items:center;padding:6px 10px;border:1px solid #e5e7eb;border-radius:999px;background:#f9fafb;font-weight:900;font-size:.86rem;color:#374151}
+    .link{color:#2563eb;text-decoration:none;font-weight:900}
+    .link:hover{text-decoration:underline}
+    audio{width:240px;max-width:100%}
+    @media(max-width:860px){ audio{width:100%} }
+    .status{margin-top:10px;font-size:.92rem;color:#6b7280}
+    .error{color:#b91c1c;font-weight:900}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="logo">SongRaise<span>Lite</span></div>
+      <div class="nav">
+        <a class="btn" href="index.html">Home</a>
+        <a class="btn" href="how-it-works.html">How It Works</a>
+        <a class="btn" href="dashboard.html">Dashboard / Login</a>
+        <a class="btn btn-primary" href="browse.html">Browse Campaigns</a>
+      </div>
+    </div>
+
+    <h1>Browse Campaigns</h1>
+    <p class="lead">
+      Explore public SongRaise campaigns. Listen, learn, and donate directly to the charity using the campaign’s official donation link.
+    </p>
+
+    <div class="card">
+      <div class="controls">
+        <input id="q" placeholder="Search campaigns (title, cause, condition)…" />
+        <select id="filter">
+          <option value="all">All public campaigns</option>
+          <option value="ready">Only campaigns with songs</option>
+        </select>
+        <span class="pill" id="countPill">Loading…</span>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th style="min-width:240px;">Campaign</th>
+              <th style="min-width:220px;">Cause</th>
+              <th style="min-width:260px;">Listen</th>
+              <th style="min-width:160px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+
+      <div class="status" id="statusLine"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://jvvcxpjmdfeqjdmcemet.supabase.co";
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2dmN4cGptZGZlcWpkbWNlbWV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1Nzc3NzYsImV4cCI6MjA3NzE1Mzc3Nn0.LPRIt10bLZYfoOCx7nD4U0PsCURB7YToq4VbByliFi4";
+
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const rowsEl = document.getElementById("rows");
+    const statusLine = document.getElementById("statusLine");
+    const countPill = document.getElementById("countPill");
+    const qEl = document.getElementById("q");
+    const filterEl = document.getElementById("filter");
+
+    function baseUrl(){
+      const u = new URL(window.location.href);
+      const basePath = u.pathname.endsWith("/") ? u.pathname : u.pathname.replace(/[^\/]+$/, "");
+      return u.origin + basePath;
+    }
+
+    function escapeHtml(s){
+      return String(s || "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function fmtDate(ts){
+      if (!ts) return "";
+      try { return new Date(ts).toLocaleDateString(); } catch(e){ return ""; }
+    }
+
+    function textIncludes(hay, needle){
+      if (!needle) return true;
+      return (hay || "").toLowerCase().includes(needle.toLowerCase());
+    }
+
+    async function fetchPublicCampaigns(){
+      statusLine.className = "status";
+      statusLine.textContent = "Loading campaigns…";
+      rowsEl.innerHTML = "";
+      countPill.textContent = "Loading…";
+
+      // We assume "public" = campaigns with status='published'
+      // and we show them whether or not they have a song (filter controls).
+      const { data, error } = await client
+        .from("campaigns")
+        .select(`
+          id, title, description, donation_url, created_at, status, song_id,
+          songs:song_id ( id, audio_url, cause_category, cause_condition, condition )
+        `)
+        .eq("status", "published")
+        .order("created_at", { ascending: false })
+        .limit(100);
+
+      if (error){
+        statusLine.classList.add("error");
+        statusLine.textContent =
+          "Could not load public campaigns. This usually means your Supabase RLS policies are blocking public SELECT. " +
+          "Error: " + error.message;
+        countPill.textContent = "0 campaigns";
+        return [];
+      }
+
+      return data || [];
+    }
+
+    function render(list){
+      const q = (qEl.value || "").trim().toLowerCase();
+      const filter = filterEl.value;
+
+      const filtered = list.filter(c => {
+        const hasSong = !!c.song_id && !!(c.songs && c.songs.audio_url);
+        if (filter === "ready" && !hasSong) return false;
+
+        const cause = (c.songs?.cause_category || "") + " " + (c.songs?.cause_condition || c.songs?.condition || "");
+        const hay = `${c.title || ""} ${cause} ${c.description || ""}`;
+        return textIncludes(hay, q);
+      });
+
+      countPill.textContent = `${filtered.length} campaign${filtered.length === 1 ? "" : "s"}`;
+
+      if (filtered.length === 0){
+        rowsEl.innerHTML = `<tr><td colspan="4" class="muted">No campaigns match your search.</td></tr>`;
+        statusLine.textContent = "";
+        return;
+      }
+
+      const base = baseUrl();
+
+      rowsEl.innerHTML = filtered.map(c => {
+        const title = c.title || "(Untitled)";
+        const created = fmtDate(c.created_at);
+        const causeCat = c.songs?.cause_category || "";
+        const causeCond = c.songs?.cause_condition || c.songs?.condition || "";
+        const cause = (causeCat || causeCond) ? `${causeCat}${causeCat && causeCond ? " — " : ""}${causeCond}` : "—";
+
+        const hasAudio = !!(c.songs && c.songs.audio_url);
+        const audioHtml = hasAudio
+          ? `<audio controls preload="metadata" src="${escapeHtml(c.songs.audio_url)}"></audio>`
+          : `<span class="muted mini">Song in production</span>`;
+
+        const viewUrl = `${base}campaign.html?id=${encodeURIComponent(c.id)}`;
+        const donateUrl = c.donation_url ? escapeHtml(c.donation_url) : "";
+
+        const donateHtml = donateUrl
+          ? `<a class="link" href="${donateUrl}" target="_blank" rel="noopener noreferrer">Donate ↗</a>`
+          : `<span class="muted mini">No donate link</span>`;
+
+        return `
+          <tr>
+            <td>
+              <div style="font-weight:900;">${escapeHtml(title)}</div>
+              <div class="muted mini">${created ? "Created: " + created : ""}</div>
+              <div class="muted mini">${escapeHtml((c.description || "").slice(0, 110))}${(c.description || "").length > 110 ? "…" : ""}</div>
+            </td>
+            <td>
+              <span class="badge">${escapeHtml(cause)}</span>
+            </td>
+            <td>${audioHtml}</td>
+            <td>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                <a class="link" href="${viewUrl}">View</a>
+                ${donateHtml}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      statusLine.textContent = "";
+    }
+
+    let cached = [];
+
+    async function init(){
+      cached = await fetchPublicCampaigns();
+      render(cached);
+    }
+
+    qEl.addEventListener("input", () => render(cached));
+    filterEl.addEventListener("change", () => render(cached));
+
+    init();
+  </script>
+</body>
+</html>
 
