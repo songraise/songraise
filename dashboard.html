@@ -71,6 +71,7 @@
       <div class="stack">
         <a class="btn" href="index.html">Public Home</a>
         <a class="btn" href="how-it-works.html">How It Works</a>
+        <a class="btn" href="browse.html">Browse Campaigns</a>
         <div class="auth">
           <span class="pill" id="authStatus">Checking login…</span>
           <input id="emailInput" type="email" placeholder="you@email.com" />
@@ -83,7 +84,7 @@
     <div class="hero">
       <h1>Dashboard</h1>
       <p class="lead">
-        Charities create campaigns. SongRaise (admin) generates and attaches the song. Campaign pages are public and shareable.
+        Charities create campaigns. SongRaise (admin) generates and attaches the song. Only published campaigns appear publicly.
       </p>
     </div>
 
@@ -96,6 +97,7 @@
           <a class="btn" id="viewCurrentBtn" href="#" style="display:none;">View current</a>
           <button class="btn" id="clearCurrentBtn" type="button" style="display:none;">Clear current</button>
           <span class="badge" id="roleBadge" style="display:none;"></span>
+          <span class="badge" id="currentStatusBadge" style="display:none;"></span>
         </div>
 
         <form id="createForm">
@@ -190,7 +192,7 @@
           <div class="item"><b id="r4">⏳</b><div>Ready to share</div></div>
 
           <div class="muted mini" id="charityNote" style="margin-top:8px; display:none;">
-            SongRaise is generating your song. You’ll be able to share the campaign once the song is attached.
+            SongRaise is generating your song. You’ll be able to share the campaign once it’s published.
           </div>
         </div>
 
@@ -202,6 +204,8 @@
           <div class="stack" style="margin-top:10px;">
             <button class="btn" type="button" id="generateBtn" disabled>Generate in Suno</button>
             <button class="btn" type="button" id="scrollUploadBtn" disabled>Jump to Upload</button>
+            <button class="btn btn-primary" type="button" id="publishBtn" disabled>Publish</button>
+            <button class="btn" type="button" id="unpublishBtn" disabled>Unpublish</button>
           </div>
 
           <div id="adminStatus" class="status"></div>
@@ -307,6 +311,7 @@
     const currentBadge = document.getElementById("currentBadge");
     const viewCurrentBtn = document.getElementById("viewCurrentBtn");
     const clearCurrentBtn = document.getElementById("clearCurrentBtn");
+    const currentStatusBadge = document.getElementById("currentStatusBadge");
 
     const readinessBlock = document.getElementById("readinessBlock");
     const readinessSummary = document.getElementById("readinessSummary");
@@ -320,6 +325,8 @@
     const adminStatus = document.getElementById("adminStatus");
     const generateBtn = document.getElementById("generateBtn");
     const scrollUploadBtn = document.getElementById("scrollUploadBtn");
+    const publishBtn = document.getElementById("publishBtn");
+    const unpublishBtn = document.getElementById("unpublishBtn");
 
     const dropzone = document.getElementById("dropzone");
     const mp3FileEl = document.getElementById("mp3File");
@@ -484,6 +491,16 @@
       }
     }
 
+    function setCurrentStatusBadge(status){
+      if (!status){
+        currentStatusBadge.style.display = "none";
+        currentStatusBadge.textContent = "";
+        return;
+      }
+      currentStatusBadge.style.display = "inline-flex";
+      currentStatusBadge.textContent = `Status: ${status}`;
+    }
+
     function setReadiness(campaign){
       if (!campaign){ readinessBlock.style.display = "none"; return; }
       readinessBlock.style.display = "block";
@@ -491,13 +508,16 @@
       const hasCampaign = true;
       const hasDonation = !!(campaign.donation_url);
       const hasSong = !!(campaign.song_id);
+      const isPublished = (campaign.status === "published");
 
       r1.textContent = hasCampaign ? "✅" : "⏳";
       r2.textContent = hasDonation ? "✅" : "⏳";
       r3.textContent = hasSong ? "✅" : "⏳";
-      r4.textContent = hasSong ? "✅" : "⏳";
+      r4.textContent = (hasSong && isPublished) ? "✅" : "⏳";
 
-      readinessSummary.textContent = hasSong ? "Ready to share" : "Song in production";
+      if (!hasSong) readinessSummary.textContent = "Song in production";
+      else if (!isPublished) readinessSummary.textContent = "Ready (not published)";
+      else readinessSummary.textContent = "Published";
     }
 
     function buildPromptPack(){
@@ -565,17 +585,31 @@
       });
     }
 
+    async function getCampaignById(client, id){
+      if (!id) return null;
+      const { data, error } = await client.from("campaigns").select("id,title,donation_url,song_id,status").eq("id", id).single();
+      if (error) return null;
+      return data || null;
+    }
+
     async function loadCampaigns(client, user, isAdmin){
       campaignsStatus.textContent = "Loading…";
+      campaignsStatus.classList.remove("error");
       campaignsBody.innerHTML = "";
 
-      // IMPORTANT: If your RLS only allows users to see their own campaigns,
-      // then even admin cannot see others from the browser. That's OK for now.
-      let q = client.from("campaigns").select("id,title,donation_url,created_at,status,user_id,song_id").order("created_at",{ascending:false}).limit(50);
+      let q = client.from("campaigns")
+        .select("id,title,donation_url,created_at,status,user_id,song_id")
+        .order("created_at",{ascending:false})
+        .limit(50);
+
       q = isAdmin ? q : q.eq("user_id", user.id);
 
       const { data, error } = await q;
-      if (error){ campaignsStatus.textContent = "Error: " + error.message; campaignsStatus.classList.add("error"); return; }
+      if (error){
+        campaignsStatus.textContent = "Error: " + error.message;
+        campaignsStatus.classList.add("error");
+        return;
+      }
 
       if (!data || data.length === 0){
         campaignsStatus.textContent = "No campaigns yet.";
@@ -587,10 +621,11 @@
         const t = c.title || "(Untitled)";
         const created = c.created_at ? new Date(c.created_at).toLocaleString() : "";
         const view = `${base}campaign.html?id=${encodeURIComponent(c.id)}`;
-        const st = c.song_id ? "Ready to share" : "Song in production";
+        const statusText = c.status || "submitted";
+        const statusBadge = `<span class="badge">${statusText}</span>`;
         return `<tr>
           <td>${t}</td>
-          <td><span class="badge">${st}</span></td>
+          <td>${statusBadge}</td>
           <td>${created}</td>
           <td><a class="link" href="${view}">View</a></td>
         </tr>`;
@@ -616,7 +651,6 @@
         roleBadge.textContent = isAdmin ? "Admin" : "Charity";
       }
 
-      // Admin-only blocks
       adminBlock.style.display = isAdmin ? "block" : "none";
       charityNote.style.display = loggedIn && !isAdmin ? "block" : "none";
 
@@ -627,18 +661,60 @@
         campaignsStatus.textContent = "Please log in to see campaigns.";
       }
 
-      // current campaign badge
       const curId = getCurrentCampaignId();
       if (curId) renderCurrentCampaignBadge(curId, "current");
       else renderCurrentCampaignBadge("", "");
 
-      // enable admin buttons only if admin + active campaign
       const hasActive = !!curId;
       generateBtn.disabled = !(isAdmin && hasActive);
       uploadBtn.disabled = !(isAdmin && hasActive);
       scrollUploadBtn.disabled = !(isAdmin && hasActive);
+      publishBtn.disabled = !(isAdmin && hasActive);
+      unpublishBtn.disabled = !(isAdmin && hasActive);
+
+      if (loggedIn && hasActive){
+        const cur = await getCampaignById(client, curId);
+        if (cur){
+          setCurrentStatusBadge(cur.status || "submitted");
+          setReadiness(cur);
+        } else {
+          setCurrentStatusBadge("");
+        }
+      } else {
+        setCurrentStatusBadge("");
+      }
 
       return { user, client, isAdmin };
+    }
+
+    async function setCampaignStatus(newStatus){
+      const { user, client, isAdmin } = await refreshAll();
+      if (!user || !isAdmin){
+        alert("Admin only.");
+        return;
+      }
+      const curId = getCurrentCampaignId();
+      if (!curId){
+        alert("No active campaign selected.");
+        return;
+      }
+
+      const ok = confirm(`Set campaign status to "${newStatus}"?`);
+      if (!ok) return;
+
+      adminStatus.classList.remove("error","ok");
+      adminStatus.textContent = "Updating status…";
+
+      const { error } = await client.from("campaigns").update({ status: newStatus }).eq("id", curId);
+      if (error){
+        adminStatus.classList.add("error");
+        adminStatus.textContent = "Status update failed: " + error.message;
+        return;
+      }
+
+      adminStatus.classList.add("ok");
+      adminStatus.textContent = `Status updated ✅ (${newStatus})`;
+      await refreshAll();
     }
 
     loginBtn.addEventListener("click", async () => {
@@ -667,6 +743,8 @@
       uploadStatus.classList.remove("error","ok");
       fileLine.textContent = "No file selected";
       mp3FileEl.value = "";
+      currentStatusBadge.style.display = "none";
+      currentStatusBadge.textContent = "";
     });
 
     resetFormBtn.addEventListener("click", () => {
@@ -715,7 +793,7 @@
           status: "submitted",
           song_id: null
         })
-        .select("id,title,donation_url,song_id")
+        .select("id,title,donation_url,song_id,status")
         .single();
 
       if (campErr){
@@ -727,11 +805,12 @@
 
       setCurrentCampaign(camp.id, camp.title);
       setReadiness(camp);
+      setCurrentStatusBadge(camp.status || "submitted");
 
       if (isAdmin){
-        createStatus.textContent = "Campaign created ✅ Now generate the song (admin) and upload the MP3.";
+        createStatus.textContent = "Campaign created ✅ Generate the song, upload MP3, then Publish when ready.";
       } else {
-        createStatus.textContent = "Campaign submitted ✅ SongRaise is generating your song. You can share once it’s ready.";
+        createStatus.textContent = "Campaign submitted ✅ SongRaise is generating your song. You can share once it’s published.";
       }
       createStatus.classList.add("ok");
       createBtn.disabled = false;
@@ -754,6 +833,9 @@
       overlay.style.display = "flex";
       window.open(SUNO_URL, "_blank", "noopener,noreferrer");
     });
+
+    publishBtn.addEventListener("click", async () => setCampaignStatus("published"));
+    unpublishBtn.addEventListener("click", async () => setCampaignStatus("unlisted"));
 
     copyAgainBtn.addEventListener("click", async () => {
       const ok = await copyToClipboard(promptPreview.textContent || "");
@@ -898,9 +980,11 @@
       uploadBtn.disabled = false;
       generateBtn.disabled = false;
 
-      // refresh readiness
-      const { data: camp2 } = await client.from("campaigns").select("id,donation_url,song_id").eq("id", curId).single();
-      if (camp2) setReadiness(camp2);
+      const { data: camp2 } = await client.from("campaigns").select("id,donation_url,song_id,status").eq("id", curId).single();
+      if (camp2){
+        setReadiness(camp2);
+        setCurrentStatusBadge(camp2.status || "submitted");
+      }
 
       await refreshAll();
     }
