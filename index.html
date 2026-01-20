@@ -2,44 +2,299 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>SongRaise — Fundraising Campaigns Powered by Music</title>
+  <title>SongRaiseLite – Fundraising Powered by Music</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="SongRaise helps charities launch fundraising campaigns powered by music." />
+
   <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f9fafb;color:#111827;line-height:1.6}
-    .wrap{max-width:1080px;margin:0 auto;padding:18px 14px 80px}
-    .top{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center}
-    .logo{font-weight:900;font-size:1.15rem}
-    .logo span{color:#2563eb}
-    .btn{padding:8px 12px;border-radius:999px;border:1px solid #d1d5db;background:#fff;font-weight:900;text-decoration:none;color:#111827}
-    .btn-primary{background:#2563eb;color:#fff;border-color:#2563eb}
-    h1{font-size:2.4rem;margin:20px 0 10px}
-    .lead{color:#4b5563;font-size:1.1rem;max-width:860px}
-    .cta{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap}
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+      background: #ffffff;
+      color: #111827;
+      line-height: 1.55;
+    }
+
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 26px 18px 80px; }
+
+    /* Header */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 38px;
+    }
+
+    .brand { font-weight: 700; font-size: 18px; }
+
+    .nav {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav a {
+      text-decoration: none;
+      font-size: 14px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      color: #111827;
+      background: #f9fafb;
+    }
+
+    .nav a.primary {
+      background: #2563eb;
+      color: #fff;
+      border-color: #2563eb;
+    }
+
+    /* Hero */
+    h1 {
+      font-size: 34px;
+      letter-spacing: -0.4px;
+      margin-bottom: 14px;
+    }
+
+    .subtitle {
+      font-size: 17px;
+      max-width: 720px;
+      color: #374151;
+      margin-bottom: 22px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 34px;
+    }
+
+    .btn {
+      padding: 12px 18px;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      font-size: 15px;
+      cursor: pointer;
+      text-decoration: none;
+      color: #111827;
+    }
+
+    .btn.primary {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #2563eb;
+    }
+
+    /* Sections */
+    .section { margin-top: 30px; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 820px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .kicker {
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 6px;
+    }
+
+    h2 {
+      font-size: 19px;
+      margin-bottom: 10px;
+    }
+
+    h3 {
+      font-size: 21px;
+      margin-bottom: 6px;
+    }
+
+    .muted { color: #6b7280; }
+
+    ul {
+      padding-left: 18px;
+      margin-top: 8px;
+    }
+
+    li { margin: 7px 0; }
+
+    .badge-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .badge {
+      font-size: 13px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+    }
+
+    audio { width: 100%; margin-top: 10px; }
+
+    .caption {
+      font-size: 14px;
+      margin-top: 12px;
+      color: #374151;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 32px;
+      padding-top: 16px;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .footer a {
+      font-size: 14px;
+      text-decoration: none;
+      color: #374151;
+    }
+
+    .footer a:hover { text-decoration: underline; }
   </style>
 </head>
+
 <body>
   <div class="wrap">
-    <<div class="top">
-  <div class="logo">SongRaise<span>Lite</span></div>
-  <div>
-    <a class="btn" href="browse.html">Browse Campaigns</a>
-    <a class="btn" href="how-it-works.html">How It Works</a>
-    <a class="btn btn-primary" href="dashboard.html">Dashboard / Login</a>
-  </div>
-</div>
 
+    <!-- HEADER -->
+    <div class="topbar">
+      <div class="brand">SongRaiseLite</div>
+      <div class="nav">
+        <a href="#">Browse Campaigns</a>
+        <a href="#">How It Works</a>
+        <a href="#" class="primary">Dashboard / Login</a>
+      </div>
+    </div>
+
+    <!-- HERO -->
     <h1>Fundraising campaigns powered by music.</h1>
-    <p class="lead">
-      SongRaise helps charities create shareable campaign pages with a song, a story,
-      and a donate button — all in one place.
+    <p class="subtitle">
+      SongRaise helps charities and creators turn original songs into shareable fundraising campaigns —
+      combining music, storytelling, and impact in one place.
     </p>
 
-    <div class="cta">
-      <a class="btn btn-primary" href="how-it-works.html">See How It Works</a>
-      <a class="btn" href="dashboard.html">Create a Campaign</a>
+    <div class="hero-actions">
+      <a href="#" class="btn primary">See How It Works</a>
+      <a href="#" class="btn">Create a Campaign</a>
     </div>
+
+    <!-- WHAT IS SONGRAISE -->
+    <section class="section">
+      <div class="grid-2">
+        <div class="card">
+          <div class="kicker">Quick overview</div>
+          <h2>What is SongRaise?</h2>
+          <ul>
+            <li>Each campaign is centered around an original song created to support a specific charitable cause.</li>
+            <li>Supporters listen, share, and donate to help the campaign reach its fundraising goal.</li>
+            <li>Funds raised go toward the listed charity or its designated research initiative.</li>
+          </ul>
+          <div class="badge-row">
+            <div class="badge">🎵 Music + story</div>
+            <div class="badge">📣 Shareable campaign</div>
+            <div class="badge">❤️ Real-world impact</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="kicker">Transparency &amp; trust</div>
+          <h2>Where does the money go?</h2>
+          <p class="muted">
+            SongRaise is a campaign platform — not a bank.
+            Donations are directed to the listed charity (or its designated fundraising partner).
+            SongRaise does not offer cash prizes, gambling, or speculative rewards.
+          </p>
+          <ul>
+            <li><strong>Clear beneficiary</strong> on every campaign.</li>
+            <li><strong>Simple participation</strong>: listen, share, donate.</li>
+            <li><strong>Pilot-friendly</strong> campaigns designed for clarity and safety.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURED CAMPAIGN -->
+    <section class="section">
+      <div class="card">
+        <div class="kicker">Featured campaign</div>
+        <h3>Arrhythmias Climbathon</h3>
+        <div class="muted">Supporting arrhythmias research</div>
+
+        <!-- 🔊 AUDIO PLAYER -->
+        <audio controls preload="none">
+          <source src="https://jvvcxpjmdfeqjdmcemet.supabase.co/storage/v1/object/public/song-audio/d646b863-08dd-4a32-a4f1-509a14c9198b/ef0807ea-23aa-4544-b077-87ff7c7cbd24/1767383727245-rhythm-of-the-heart.mp3" type="audio/mpeg">
+          Your browser does not support the audio element.
+        </audio>
+
+        <div class="caption">
+          “This original song was created to raise awareness and funds for arrhythmias research.”
+          <br />
+          <strong>Song:</strong> Arrhythmias Climbathon
+        </div>
+
+        <div class="muted" style="margin-top:10px;">
+          Share the song. Support the cause. Help move the campaign closer to its goal.
+        </div>
+      </div>
+    </section>
+
+    <!-- WHO IT'S FOR -->
+    <section class="section">
+      <div class="grid-2">
+        <div class="card">
+          <h2>For Supporters</h2>
+          <ul>
+            <li>Discover causes through music.</li>
+            <li>Share campaigns with friends.</li>
+            <li>Support meaningful research and impact.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h2>For Charities</h2>
+          <ul>
+            <li>A new way to tell your story.</li>
+            <li>Music-driven engagement that feels human.</li>
+            <li>Simple, shareable campaign pages.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      <div class="muted">SongRaiseLite is currently running pilot campaigns.</div>
+      <div>
+        <a href="#">About</a> ·
+        <a href="mailto:youremail@example.com">Contact</a> ·
+        <a href="#">Privacy</a> ·
+        <a href="#">Terms</a>
+      </div>
+    </div>
+
   </div>
 </body>
 </html>
