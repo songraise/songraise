@@ -199,6 +199,54 @@
       background: #fff;
       box-shadow: var(--shadow2);
     }
+
+    /* NEW: 3-step supporters block */
+    .supporters{
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: var(--shadow2);
+      padding: 14px;
+    }
+    .supportersGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    @media(max-width: 920px){
+      .supportersGrid{ grid-template-columns: 1fr; }
+    }
+    .supporterStep{
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--chip);
+      padding: 12px;
+      display:flex;
+      gap: 10px;
+      align-items:flex-start;
+    }
+    .icon{
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size: 18px;
+      flex: 0 0 auto;
+    }
+    .stepTitle{
+      font-weight: 900;
+      margin-bottom: 3px;
+      letter-spacing: -0.01em;
+    }
+    .stepText{
+      font-size: 13.5px;
+      color: var(--muted);
+    }
   </style>
 </head>
 
@@ -246,6 +294,38 @@
                 <div class="tiny">Donations go to the listed charity (or its fundraising partner).</div>
               </div>
               <a class="btn primary" id="donateBtnTop" href="#" target="_blank" rel="noopener noreferrer">❤️ Donate</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- ✅ NEW: Supporters can do 3 things -->
+        <div class="supporters">
+          <div class="label">Supporters can do 3 things</div>
+          <div class="muted">Every listen helps. Every share spreads the story. Every donation moves the campaign toward its goal.</div>
+
+          <div class="supportersGrid">
+            <div class="supporterStep">
+              <div class="icon">🎧</div>
+              <div>
+                <div class="stepTitle">Listen</div>
+                <div class="stepText">Play the song and understand the cause in under a minute.</div>
+              </div>
+            </div>
+
+            <div class="supporterStep">
+              <div class="icon">📣</div>
+              <div>
+                <div class="stepTitle">Share</div>
+                <div class="stepText">Copy the link or use your phone’s share menu to spread it.</div>
+              </div>
+            </div>
+
+            <div class="supporterStep">
+              <div class="icon">❤️</div>
+              <div>
+                <div class="stepTitle">Donate</div>
+                <div class="stepText">If you’re able, donate through the campaign’s donation page.</div>
+              </div>
             </div>
           </div>
         </div>
@@ -501,7 +581,6 @@
 
       campaignTitle.textContent = c.title || "(Untitled)";
 
-      // Status pill
       if (c.status){
         campaignStatusPill.style.display = "inline-flex";
         campaignStatusPill.className = "pill primary";
@@ -570,7 +649,6 @@
         }
       }
 
-      // Done
       loadingRow.style.display = "none";
       content.style.display = "block";
     }
