@@ -13,65 +13,21 @@
       color: #111827;
       line-height: 1.55;
     }
-
     .wrap { max-width: 1100px; margin: 0 auto; padding: 26px 18px 80px; }
 
-    /* Header */
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 38px;
-    }
-
-    .brand { font-weight: 700; font-size: 18px; }
-
-    .nav {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
+    .topbar { display:flex; justify-content:space-between; align-items:center; gap:14px; margin-bottom:38px; }
+    .brand { font-weight:700; font-size:18px; }
+    .nav { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
     .nav a {
-      text-decoration: none;
-      font-size: 14px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid #e5e7eb;
-      color: #111827;
-      background: #f9fafb;
-      display: inline-block;
+      text-decoration:none; font-size:14px; padding:8px 12px; border-radius:999px;
+      border:1px solid #e5e7eb; color:#111827; background:#f9fafb; display:inline-block;
     }
+    .nav a.primary { background:#2563eb; color:#fff; border-color:#2563eb; }
 
-    .nav a.primary {
-      background: #2563eb;
-      color: #fff;
-      border-color: #2563eb;
-    }
+    h1 { font-size:34px; letter-spacing:-0.4px; margin-bottom:14px; }
+    .subtitle { font-size:17px; max-width:720px; color:#374151; margin-bottom:22px; }
 
-    /* Hero */
-    h1 {
-      font-size: 34px;
-      letter-spacing: -0.4px;
-      margin-bottom: 14px;
-    }
-
-    .subtitle {
-      font-size: 17px;
-      max-width: 720px;
-      color: #374151;
-      margin-bottom: 22px;
-    }
-
-    .hero-actions {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 34px;
-      align-items: center;
-    }
+    .hero-actions { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:34px; align-items:center; }
 
     .btn {
       padding: 12px 18px;
@@ -86,126 +42,42 @@
       line-height: 1;
       user-select: none;
     }
+    .btn.primary { background:#2563eb; color:#fff; border-color:#2563eb; }
 
-    .btn.primary {
-      background: #2563eb;
-      color: #ffffff;
-      border-color: #2563eb;
-    }
+    button.btn { appearance:none; -webkit-appearance:none; }
 
-    /* Make buttons look like links */
-    button.btn {
-      appearance: none;
-      -webkit-appearance: none;
-      border: 1px solid #e5e7eb;
-    }
-    button.btn.primary {
-      border-color: #2563eb;
-    }
+    .section { margin-top:30px; }
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media (max-width:820px){ .grid-2{ grid-template-columns:1fr; } h1{ font-size:30px; } }
 
-    /* Sections */
-    .section { margin-top: 30px; }
+    .card { border:1px solid #e5e7eb; background:#fff; border-radius:18px; padding:16px; }
+    .kicker { font-size:13px; color:#6b7280; margin-bottom:6px; }
+    h2 { font-size:19px; margin-bottom:10px; }
+    h3 { font-size:21px; margin-bottom:6px; }
+    .muted { color:#6b7280; }
+    ul { padding-left:18px; margin-top:8px; }
+    li { margin:7px 0; }
 
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
+    .badge-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+    .badge { font-size:13px; padding:7px 10px; border-radius:999px; background:#f9fafb; border:1px solid #e5e7eb; }
 
-    @media (max-width: 820px) {
-      .grid-2 { grid-template-columns: 1fr; }
-      h1 { font-size: 30px; }
-    }
+    audio { width:100%; margin-top:10px; }
+    .caption { font-size:14px; margin-top:12px; color:#374151; }
 
-    .card {
-      border: 1px solid #e5e7eb;
-      background: #ffffff;
-      border-radius: 18px;
-      padding: 16px;
-    }
+    .actions-row { margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
 
-    .kicker {
-      font-size: 13px;
-      color: #6b7280;
-      margin-bottom: 6px;
-    }
-
-    h2 {
-      font-size: 19px;
-      margin-bottom: 10px;
-    }
-
-    h3 {
-      font-size: 21px;
-      margin-bottom: 6px;
-    }
-
-    .muted { color: #6b7280; }
-
-    ul {
-      padding-left: 18px;
-      margin-top: 8px;
-    }
-
-    li { margin: 7px 0; }
-
-    .badge-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
-
-    .badge {
-      font-size: 13px;
-      padding: 7px 10px;
-      border-radius: 999px;
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-    }
-
-    audio { width: 100%; margin-top: 10px; }
-
-    .caption {
-      font-size: 14px;
-      margin-top: 12px;
-      color: #374151;
-    }
-
-    .actions-row {
-      margin-top: 14px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    /* Footer */
     .footer {
-      margin-top: 32px;
-      padding-top: 16px;
-      border-top: 1px solid #e5e7eb;
-      display: flex;
-      justify-content: space-between;
-      gap: 14px;
-      flex-wrap: wrap;
-      align-items: center;
+      margin-top:32px; padding-top:16px; border-top:1px solid #e5e7eb;
+      display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap; align-items:center;
     }
-
-    .footer a {
-      font-size: 14px;
-      text-decoration: none;
-      color: #374151;
-    }
-
-    .footer a:hover { text-decoration: underline; }
+    .footer a { font-size:14px; text-decoration:none; color:#374151; }
+    .footer a:hover { text-decoration:underline; }
   </style>
 </head>
 
 <body>
   <div class="wrap">
 
-    <!-- HEADER -->
     <div class="topbar">
       <div class="brand">SongRaiseLite</div>
       <div class="nav">
@@ -215,7 +87,6 @@
       </div>
     </div>
 
-    <!-- HERO -->
     <h1>Fundraising campaigns powered by music.</h1>
     <p class="subtitle">
       SongRaise helps charities and creators turn original songs into shareable fundraising campaigns —
@@ -227,7 +98,6 @@
       <a href="dashboard.html" class="btn">Create a Campaign</a>
     </div>
 
-    <!-- WHAT IS SONGRAISE -->
     <section class="section">
       <div class="grid-2">
         <div class="card">
@@ -262,15 +132,13 @@
       </div>
     </section>
 
-    <!-- FEATURED CAMPAIGN -->
     <section class="section">
       <div class="card">
         <div class="kicker">Featured campaign</div>
         <h3>Arrhythmias Climbathon</h3>
         <div class="muted">Supporting arrhythmias research</div>
 
-        <!-- 🔊 AUDIO PLAYER -->
-        <!-- Paste your working MP3 url into src="" below -->
+        <!-- ✅ EXACT MP3 URL -->
         <audio controls preload="metadata">
           <source src="https://jvvcxpjmdfeqjdmcemet.supabase.co/storage/v1/object/public/song-audio/d646b863-08dd-4a32-a4f1-509a14c9198b/d5b9a5b2-2f82-4025-bbcb-0132c1fdd752/1767983611626-spell-it-with-a-heartbeat.mp3" type="audio/mpeg">
           Your browser does not support the audio element.
@@ -287,32 +155,15 @@
         </div>
 
         <div class="actions-row">
-          <!-- ✅ Bulletproof desktop + mobile navigation -->
-          <button
-            type="button"
-            class="btn primary"
+          <!-- ✅ Bulletproof navigation -->
+          <button type="button" class="btn primary"
             onclick="window.location.href='campaign.html?id=ef0807ea-23aa-4544-b077-87ff7c7cbd24'">
             View Campaign
-          </button>
-
-          <button
-            type="button"
-            class="btn"
-            onclick="(function(){
-              var url = window.location.origin + window.location.pathname.replace(/index\\.html?$/,'') + 'campaign.html?id=ef0807ea-23aa-4544-b077-87ff7c7cbd24';
-              if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(url).then(function(){ alert('Copied share link:\\n' + url); }).catch(function(){ prompt('Copy this link:', url); });
-              } else {
-                prompt('Copy this link:', url);
-              }
-            })();">
-            Copy Share Link
           </button>
         </div>
       </div>
     </section>
 
-    <!-- WHO IT'S FOR -->
     <section class="section">
       <div class="grid-2">
         <div class="card">
@@ -335,7 +186,6 @@
       </div>
     </section>
 
-    <!-- FOOTER -->
     <div class="footer">
       <div class="muted">SongRaiseLite is currently running pilot campaigns.</div>
       <div>
