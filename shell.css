@@ -1,1 +1,35 @@
+/* SongRaiseLite shared shell styles */
+* { box-sizing: border-box; }
+:root{
+  --border:#e5e7eb;
+  --muted:#6b7280;
+  --text:#111827;
+  --bg:#ffffff;
+  --chip:#f9fafb;
+  --primary:#2563eb;
+  --card:#ffffff;
+}
+html,body{ margin:0; padding:0; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,BlinkMacSystemFont,"Inter",sans-serif; line-height:1.55; }
+a{ color:inherit; }
+
+.sr-wrap{ max-width:1100px; margin:0 auto; padding:26px 18px 80px; }
+.sr-topbar{ display:flex; justify-content:space-between; align-items:center; gap:14px; margin-bottom:26px; }
+.sr-brand{ font-weight:700; font-size:18px; }
+.sr-nav{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.sr-nav a{
+  text-decoration:none; font-size:14px; padding:8px 12px; border-radius:999px;
+  border:1px solid var(--border); color:var(--text); background:var(--chip); display:inline-block;
+}
+.sr-nav a.primary{ background:var(--primary); color:#fff; border-color:var(--primary); }
+
+.sr-footer{
+  margin-top:32px; padding-top:16px; border-top:1px solid var(--border);
+  display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap; align-items:center;
+}
+.sr-footer a{ font-size:14px; text-decoration:none; color:#374151; }
+.sr-footer a:hover{ text-decoration:underline; }
+.sr-muted{ color:var(--muted); }
+
+/* Optional: make existing page content breathe */
+.sr-page{ margin-top: 10px; }
 
