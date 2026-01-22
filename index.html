@@ -54,6 +54,7 @@
       max-width:1120px;
       margin:0 auto;
       padding:18px 16px 18px;
+      padding-bottom:140px; /* NEW: room so mascot never collides with footer/CTA */
       min-height:100vh;
       display:flex;
       flex-direction:column;
@@ -494,14 +495,14 @@
     .footer a{color:var(--muted); opacity:.9}
     .footer a:hover{opacity:1}
 
-    /* Mascot (Treble clef stick figure) */
+    /* Mascot (Treble clef stick figure) — FIXED for visibility */
     .mascot{
-      position:absolute;
-      left:10px;
-      bottom:8px;
-      width:170px;
-      z-index:1;
-      opacity:.95;
+      position:fixed;   /* FIX: was absolute (could be clipped/covered) */
+      left:14px;
+      bottom:14px;      /* FIX: keep it above the very edge */
+      width:150px;
+      z-index:50;       /* FIX: ensure it sits above CTA/footer */
+      opacity:.96;
       filter: drop-shadow(0 12px 18px rgba(20,22,43,.12));
       pointer-events:none;
     }
@@ -520,8 +521,15 @@
       .bottom{flex-direction:column; align-items:stretch}
       .bottom .right{justify-content:stretch}
       .bottom .right .btn{width:100%}
-      .mascot{display:none;} /* keep mobile clean */
       .hero{padding-top:6px}
+
+      /* FIX: show mascot on mobile + move it up so it won't overlap the bottom CTA */
+      .mascot{
+        width:110px;
+        left:10px;
+        bottom:88px;
+        opacity:.95;
+      }
     }
   </style>
 </head>
@@ -541,7 +549,7 @@
     <div class="mascot" aria-hidden="true">
       <!-- Simple cartoon treble clef stick figure as inline SVG -->
       <svg viewBox="0 0 220 220">
-        <!-- confetti notes -->
+        <!-- confetti dots -->
         <g opacity=".55" fill="#5b49ff">
           <circle cx="170" cy="45" r="4"/>
           <circle cx="190" cy="65" r="3"/>
@@ -555,7 +563,7 @@
           <circle cx="22" cy="150" r="3"/>
         </g>
 
-        <!-- body: treble clef-like swirl -->
+        <!-- treble-clef-ish swirl -->
         <path d="M120 35
                  C95 35, 80 55, 95 75
                  C112 95, 140 85, 140 62
@@ -585,7 +593,7 @@
         <path d="M82 208 C74 218, 64 220, 54 214" fill="none" stroke="#14162b" stroke-width="6" stroke-linecap="round"/>
         <path d="M94 208 C104 218, 118 220, 130 212" fill="none" stroke="#14162b" stroke-width="6" stroke-linecap="round"/>
 
-        <!-- little trumpet/megaphone -->
+        <!-- little megaphone -->
         <g transform="translate(154,132) rotate(-12)">
           <path d="M0 26 L46 10 L46 42 Z" fill="#ffbf2f" stroke="#14162b" stroke-width="5" stroke-linejoin="round"/>
           <rect x="-10" y="22" width="14" height="16" rx="6" fill="#ffd34d" stroke="#14162b" stroke-width="5"/>
@@ -680,6 +688,7 @@
                 <span class="logochip">Special Olympics</span>
               </div>
             </div>
+
           </div>
         </div>
       </section>
@@ -811,7 +820,6 @@
         .replace(/foundation/g,"")
         .replace(/[^a-z0-9]+/g,"")
         .slice(0,22) || "yourcharity";
-      // Make it nicer (capital first)
       return base.charAt(0).toUpperCase() + base.slice(1) + ".org";
     }
 
@@ -833,7 +841,6 @@
     // Fake donate/share actions (demo stubs)
     $("donateBtn").addEventListener("click", () => {
       alert("Demo: this would open the charity’s secure donation page with tracking parameters.");
-      // In production: window.open(charityDonationUrlWithCampaignId, "_blank", "noopener");
     });
 
     $("shareBtn").addEventListener("click", async () => {
