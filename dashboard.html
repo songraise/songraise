@@ -15,7 +15,6 @@
       --muted:#5c617a;
       --muted2:#7b8098;
 
-      --card:#ffffff;
       --border:#e7e8f3;
       --shadow: 0 18px 60px rgba(20,22,43,.12);
 
@@ -26,14 +25,15 @@
       --cta2:#ffbf2f;
       --ctaInk:#2b240a;
 
-      --ok:#1fbf84;
+      --ok:#047857;
       --okBg:#e9fbf3;
       --okBorder:#bff0dc;
 
       --danger:#b91c1c;
+      --dangerBg:#fff1f2;
+      --dangerBorder:#fecdd3;
 
       --radius:18px;
-      --radius2:14px;
       --font: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
     }
 
@@ -78,7 +78,7 @@
       100%{transform: translateY(0px) rotate(-2deg)}
     }
 
-    /* Shell wrappers you already had */
+    /* Shell wrappers */
     .sr-wrap{position:relative; z-index:1;}
     .sr-page{position:relative; z-index:1;}
 
@@ -124,13 +124,14 @@
       background: rgba(255,255,255,.86);
       color: rgba(20,22,43,.70);
       font-weight:900;
+      white-space:nowrap;
     }
 
     .stack{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 
     .pill{
-      font-size:.9rem;font-weight:900;color:#374151;
-      padding:6px 10px;border:1px solid rgba(231,232,243,.95);
+      font-size:.9rem;font-weight:900;color:rgba(20,22,43,.78);
+      padding:7px 11px;border:1px solid rgba(231,232,243,.95);
       border-radius:999px;background:rgba(255,255,255,.80)
     }
 
@@ -212,12 +213,34 @@
     .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     @media(max-width:680px){.row2{grid-template-columns:1fr}}
 
-    .status{margin-top:10px;font-size:.92rem;color:var(--muted2)}
-    .error{color:var(--danger);font-weight:900}
-    .ok{color:#047857;font-weight:900}
+    .hr{border:none;border-top:1px solid rgba(231,232,243,.95);margin:14px 0}
+
+    /* Status styles */
+    .status{
+      margin-top:10px;
+      font-size:.92rem;
+      color:var(--muted2);
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(231,232,243,.95);
+      background: rgba(255,255,255,.78);
+    }
+    .status:empty{display:none}
+    .status.ok{
+      color:var(--ok);
+      border-color:var(--okBorder);
+      background:var(--okBg);
+      font-weight:900;
+    }
+    .status.error{
+      color:var(--danger);
+      border-color:var(--dangerBorder);
+      background:var(--dangerBg);
+      font-weight:900;
+    }
+
     .muted{color:var(--muted2)}
     .mini{font-size:.86rem}
-    .hr{border:none;border-top:1px solid rgba(231,232,243,.95);margin:14px 0}
 
     table{
       width:100%;
@@ -542,7 +565,6 @@
         </div>
       </div>
 
-      <!-- YOUR JS BELOW IS UNCHANGED -->
       <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
       <script>
         const SUPABASE_URL = "https://jvvcxpjmdfeqjdmcemet.supabase.co";
@@ -879,7 +901,7 @@
 
         async function loadCampaigns(client, user, isAdmin){
           campaignsStatus.textContent = "Loading…";
-          campaignsStatus.classList.remove("error");
+          campaignsStatus.classList.remove("error","ok");
           campaignsBody.innerHTML = "";
 
           let q = client.from("campaigns")
@@ -891,8 +913,8 @@
 
           const { data, error } = await q;
           if (error){
-            campaignsStatus.textContent = "Error: " + error.message;
             campaignsStatus.classList.add("error");
+            campaignsStatus.textContent = "Error: " + error.message;
             return;
           }
 
