@@ -5,142 +5,859 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SongRaise — Turn listening into giving</title>
   <style>
-    /* ---------- SAME STYLES AS BEFORE (UNCHANGED) ---------- */
     :root{
-      --bg1:#f7fbff; --bg2:#f2f0ff; --bg3:#fff7ea;
-      --ink:#14162b; --muted:#5c617a; --muted2:#7b8098;
-      --border:#e7e8f3; --shadow:0 18px 60px rgba(20,22,43,.12);
-      --brand:#5b49ff; --brand2:#2ec9a2;
-      --cta:#ffd34d; --cta2:#ffbf2f; --ctaInk:#2b240a;
-      --ok:#1fbf84; --okBg:#e9fbf3; --okBorder:#bff0dc;
-      --radius:18px; --radius2:14px;
-      --font: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      --bg1:#f7fbff;
+      --bg2:#f2f0ff;
+      --bg3:#fff7ea;
+
+      --ink:#14162b;
+      --muted:#5c617a;
+      --muted2:#7b8098;
+
+      --card:#ffffff;
+      --border:#e7e8f3;
+      --shadow: 0 18px 60px rgba(20,22,43,.12);
+
+      --brand:#5b49ff;
+      --brand2:#2ec9a2;
+
+      --cta:#ffd34d;
+      --cta2:#ffbf2f;
+      --ctaInk:#2b240a;
+
+      --ok:#1fbf84;
+      --okBg:#e9fbf3;
+      --okBorder:#bff0dc;
+
+      --radius:18px;
+      --radius2:14px;
+      --font: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
     }
+
     *{box-sizing:border-box}
+    html,body{height:100%}
     body{
-      margin:0;font-family:var(--font);color:var(--ink);
+      margin:0;
+      font-family:var(--font);
+      color:var(--ink);
       background:
         radial-gradient(1100px 520px at 50% 0%, rgba(91,73,255,.18), transparent 60%),
         radial-gradient(900px 520px at 20% 10%, rgba(46,201,162,.12), transparent 55%),
         radial-gradient(900px 520px at 85% 20%, rgba(255,211,77,.22), transparent 55%),
-        linear-gradient(180deg,var(--bg1),var(--bg2),var(--bg3));
+        linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 45%, var(--bg3) 100%);
       overflow-x:hidden;
     }
-    a{text-decoration:none;color:inherit}
-    .wrap{max-width:1120px;margin:0 auto;padding:18px 16px 140px;position:relative}
-    /* ---------- HEADER ---------- */
+
+    a{color:inherit;text-decoration:none}
+    .wrap{
+      max-width:1120px;
+      margin:0 auto;
+      padding:18px 16px 18px;
+      padding-bottom:140px; /* room for mascot + bottom CTA */
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      position:relative;
+    }
+
+    /* floating music notes (background) */
+    .notes{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+      z-index:0;
+    }
+    .note{
+      position:absolute;
+      font-size:26px;
+      opacity:.22;
+      filter: blur(.2px);
+      animation: floaty 7s ease-in-out infinite;
+      user-select:none;
+    }
+    .note:nth-child(1){left:6%; top:18%; animation-duration:8s}
+    .note:nth-child(2){left:88%; top:22%; font-size:30px; opacity:.18; animation-duration:9s}
+    .note:nth-child(3){left:78%; top:58%; font-size:24px; opacity:.16; animation-duration:7.5s}
+    .note:nth-child(4){left:10%; top:70%; font-size:22px; opacity:.14; animation-duration:8.5s}
+    .note:nth-child(5){left:55%; top:8%; font-size:20px; opacity:.14; animation-duration:10s}
+    @keyframes floaty{
+      0%{transform: translateY(0px) rotate(-2deg)}
+      50%{transform: translateY(-10px) rotate(2deg)}
+      100%{transform: translateY(0px) rotate(-2deg)}
+    }
+
+    /* Header */
     .topbar{
-      display:flex;justify-content:space-between;align-items:center;
-      padding:10px 12px;border:1px solid var(--border);
-      background:rgba(255,255,255,.75);border-radius:999px;
-      box-shadow:0 10px 28px rgba(20,22,43,.07)
+      position:relative;
+      z-index:3;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:10px 12px;
+      border:1px solid rgba(231,232,243,.85);
+      background: rgba(255,255,255,.70);
+      border-radius:999px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 28px rgba(20,22,43,.07);
     }
-    .brand{font-weight:900}
-    .nav{display:flex;gap:14px;align-items:center;font-size:.92rem;color:var(--muted)}
+    .brand{
+      display:flex;align-items:center;gap:10px;
+      font-weight:900; letter-spacing:-.02em;
+    }
+    .mark{
+      width:30px;height:30px;border-radius:10px;
+      background: linear-gradient(135deg, rgba(91,73,255,.95), rgba(46,201,162,.72));
+      display:inline-flex;align-items:center;justify-content:center;
+      box-shadow: 0 10px 22px rgba(91,73,255,.18);
+      flex:0 0 auto;
+    }
+    .mark svg{width:18px;height:18px;fill:#fff}
+    .nav{
+      display:flex;align-items:center;gap:14px;
+      color:var(--muted);
+      font-size:.92rem;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .nav a{opacity:.9}
+    .nav a:hover{opacity:1}
     .btn{
-      padding:10px 14px;border-radius:999px;border:1px solid var(--border);
-      background:#fff;font-weight:800;cursor:pointer
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:10px 14px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.80);
+      color:var(--ink);
+      font-weight:800;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .08s ease, background .15s ease, border-color .15s ease;
+      white-space:nowrap;
     }
+    .btn:hover{background:#fff}
+    .btn:active{transform: translateY(1px)}
     .btn.primary{
-      background:linear-gradient(180deg,var(--cta),var(--cta2));
-      color:var(--ctaInk);border:none
+      border-color: rgba(255,211,77,.70);
+      background: linear-gradient(180deg, var(--cta) 0%, var(--cta2) 100%);
+      color: var(--ctaInk);
+      box-shadow: 0 16px 40px rgba(255,191,47,.22);
     }
-    /* ---------- HERO ---------- */
-    .hero{text-align:center;margin:22px 0}
-    h1{margin:0;font-size:clamp(2.2rem,3.5vw,3.3rem)}
-    .sub{color:var(--muted)}
-    .trustline{font-weight:800;color:var(--muted2)}
-    /* ---------- MAIN ---------- */
-    .main{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+    /* Hero */
+    .hero{
+      position:relative;
+      z-index:2;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      padding:10px 4px 0;
+      align-items:center;
+      text-align:center;
+    }
+    h1{
+      margin:0;
+      font-size: clamp(2.2rem, 3.6vw, 3.3rem);
+      line-height:1.05;
+      letter-spacing:-.03em;
+    }
+    .sub{
+      margin:0;
+      color:var(--muted);
+      font-size: clamp(1rem, 1.35vw, 1.15rem);
+      max-width: 62ch;
+    }
+    .trustline{
+      margin-top:2px;
+      color:var(--muted2);
+      font-weight:800;
+      font-size:.98rem;
+    }
+
+    /* Main */
+    .main{
+      position:relative;
+      z-index:2;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+      align-items:stretch;
+    }
     .card{
-      background:#fff;border:1px solid var(--border);
-      border-radius:var(--radius);box-shadow:var(--shadow)
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.82);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
     }
-    .head{padding:14px 16px;border-bottom:1px solid var(--border)}
-    .body{padding:16px}
-    input{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border)}
-    .checks{margin-top:12px}
-    .check{font-weight:700}
-    /* ---------- BOTTOM CTA ---------- */
+    .card .head{
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border-bottom: 1px solid rgba(231,232,243,.85);
+      background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.80));
+    }
+    .card .head h2{
+      margin:0;
+      font-size:1.06rem;
+      letter-spacing:-.01em;
+    }
+    .card .body{padding:14px 16px 16px}
+
+    /* Form */
+    .formgrid{display:grid; gap:10px}
+    label{display:block; font-size:.86rem; color:var(--muted); margin-bottom:6px; font-weight:700}
+    input{
+      width:100%;
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid rgba(231,232,243,.95);
+      background: rgba(255,255,255,.92);
+      color:var(--ink);
+      outline:none;
+      font-size:1rem;
+    }
+    input:focus{
+      border-color: rgba(91,73,255,.45);
+      box-shadow: 0 0 0 4px rgba(91,73,255,.12);
+    }
+    .helper{
+      color:var(--muted2);
+      font-size:.92rem;
+      font-weight:700;
+    }
+
+    .checks{display:grid; gap:8px; margin-top:10px}
+    .check{
+      display:flex; gap:10px; align-items:flex-start;
+      color: rgba(20,22,43,.92);
+      font-size:.95rem;
+      font-weight:750;
+    }
+    .check .tick{
+      width:18px;height:18px;border-radius:6px;
+      background: var(--okBg);
+      border:1px solid var(--okBorder);
+      display:inline-flex; align-items:center; justify-content:center;
+      flex:0 0 auto;
+      margin-top:1px;
+    }
+    .check .tick svg{width:12px;height:12px;fill:var(--ok)}
+    .statline{
+      margin-top:12px;
+      padding-top:12px;
+      border-top:1px solid rgba(231,232,243,.9);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .logos{display:flex; gap:8px; flex-wrap:wrap}
+    .logochip{
+      font-size:.78rem;
+      padding:6px 9px;
+      border-radius:999px;
+      border:1px solid rgba(231,232,243,.95);
+      background: rgba(255,255,255,.88);
+      color: rgba(20,22,43,.70);
+      white-space:nowrap;
+      font-weight:750;
+    }
+
+    /* Preview widget */
+    .previewShell{
+      border-radius: var(--radius2);
+      border:1px solid rgba(231,232,243,.95);
+      background: rgba(255,255,255,.90);
+      overflow:hidden;
+    }
+    .wTop{
+      padding:12px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border-bottom:1px solid rgba(231,232,243,.90);
+      background: rgba(255,255,255,.92);
+    }
+    .wCharity{display:flex; align-items:center; gap:10px; min-width:0}
+    .wLogo{
+      width:28px;height:28px;border-radius:9px;
+      background: linear-gradient(135deg, rgba(91,73,255,.92), rgba(46,201,162,.72));
+      box-shadow: 0 8px 18px rgba(20,22,43,.10);
+      flex:0 0 auto;
+    }
+    .wName{display:flex; flex-direction:column; min-width:0}
+    .wName b{
+      font-size:.96rem;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .wName span{color:var(--muted2); font-size:.82rem; font-weight:650}
+    .badge{
+      font-size:.74rem; font-weight:900;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--okBorder);
+      background: var(--okBg);
+      color: var(--ok);
+      white-space:nowrap;
+    }
+
+    .wBody{padding:12px}
+    .wHeadline{margin:0; font-size:1.08rem; letter-spacing:-.01em}
+    .wSub{margin:6px 0 10px; color:var(--muted); font-size:.92rem; font-weight:650}
+
+    .progressWrap{
+      padding:10px 10px;
+      border-radius:14px;
+      border:1px solid rgba(231,232,243,.95);
+      background: rgba(248,249,255,.95);
+      margin-bottom:10px;
+    }
+    .bar{
+      height:10px;
+      border-radius:999px;
+      background: rgba(20,22,43,.06);
+      overflow:hidden;
+      border:1px solid rgba(231,232,243,.95);
+    }
+    .fill{
+      height:100%;
+      width: 14%;
+      border-radius:999px;
+      background: linear-gradient(90deg, rgba(91,73,255,.90), rgba(46,201,162,.85));
+    }
+    .pRow{
+      margin-top:8px;
+      display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;
+      color: rgba(20,22,43,.88);
+      font-size:.88rem;
+      font-weight:700;
+    }
+    .pRow strong{font-weight:950}
+
+    .player{
+      display:grid;
+      gap:10px;
+      padding:10px;
+      border-radius:14px;
+      border:1px solid rgba(231,232,243,.95);
+      background: rgba(248,249,255,.95);
+      margin-bottom:10px;
+    }
+    .trackTop{display:flex; gap:10px; align-items:center}
+    .cover{
+      width:44px;height:44px;border-radius:12px;
+      background:
+        radial-gradient(18px 18px at 30% 30%, rgba(255,255,255,.60), transparent 60%),
+        linear-gradient(135deg, rgba(91,73,255,.85), rgba(255,191,47,.55));
+      border:1px solid rgba(231,232,243,.95);
+      flex:0 0 auto;
+    }
+    .trackMeta{min-width:0}
+    .trackMeta b{display:block; font-size:.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .trackMeta span{display:block; font-size:.82rem; color:var(--muted2); font-weight:700}
+    .playrow{display:flex; align-items:center; gap:10px}
+    .play{
+      width:40px;height:40px;border-radius:14px;
+      border:1px solid rgba(91,73,255,.35);
+      background: rgba(91,73,255,.10);
+      display:inline-flex; align-items:center; justify-content:center;
+      cursor:pointer;
+    }
+    .play svg{width:18px;height:18px;fill:rgba(20,22,43,.85)}
+    .scrub{
+      flex:1;
+      height:10px;
+      border-radius:999px;
+      background: rgba(20,22,43,.06);
+      border:1px solid rgba(231,232,243,.95);
+      overflow:hidden;
+    }
+    .scrub > i{
+      display:block; height:100%;
+      width: 0%;
+      background: linear-gradient(90deg, rgba(46,201,162,.85), rgba(91,73,255,.85));
+    }
+
+    .cta{display:grid; gap:10px; margin-bottom:10px}
+    .donateBtn{
+      width:100%;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid rgba(91,73,255,.22);
+      background: linear-gradient(180deg, rgba(91,73,255,.90), rgba(91,73,255,.72));
+      color:#fff;
+      font-weight:950;
+      cursor:pointer;
+      text-align:center;
+      box-shadow: 0 14px 40px rgba(91,73,255,.18);
+    }
+    .donateBtn small{display:block; font-weight:800; opacity:.92}
+    .linkBtn{
+      width:100%;
+      padding:11px 12px;
+      border-radius:14px;
+      border:1px solid rgba(231,232,243,.95);
+      background: rgba(255,255,255,.92);
+      color: rgba(20,22,43,.90);
+      font-weight:900;
+      cursor:pointer;
+      text-align:center;
+    }
+    .disclaimer{
+      color:var(--muted2);
+      font-size:.82rem;
+      line-height:1.35;
+      font-weight:650;
+    }
+    .stats{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      color: rgba(20,22,43,.85);
+      font-size:.86rem;
+      padding-top:10px;
+      border-top:1px solid rgba(231,232,243,.9);
+      font-weight:750;
+    }
+    .stat{
+      display:flex; gap:8px; align-items:center;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(231,232,243,.95);
+      background: rgba(255,255,255,.88);
+    }
+
+    /* Bottom CTA */
     .bottom{
-      display:flex;justify-content:space-between;align-items:center;
-      margin-top:18px;padding:14px;border-radius:var(--radius);
-      background:#fff;border:1px solid var(--border)
+      position:relative;
+      z-index:2;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:12px 12px;
+      border:1px solid rgba(231,232,243,.95);
+      background: rgba(255,255,255,.78);
+      border-radius: var(--radius);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 12px 30px rgba(20,22,43,.08);
     }
-    @media(max-width:900px){
-      .main{grid-template-columns:1fr}
-      .bottom{flex-direction:column;gap:12px}
+    .bottom h3{margin:0;font-size:1.06rem;letter-spacing:-.01em}
+    .bottom .mini{color:var(--muted2);font-size:.92rem;margin-top:3px;font-weight:750}
+    .bottom .right{display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end}
+
+    /* Footer */
+    .footer{
+      position:relative;
+      z-index:2;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      color:var(--muted2);
+      font-size:.85rem;
+      padding:4px 2px 8px;
+      flex-wrap:wrap;
+      font-weight:750;
+    }
+    .footer a{color:var(--muted); opacity:.9}
+    .footer a:hover{opacity:1}
+
+    /* Mascot (Treble clef stick figure) */
+    .mascot{
+      position:fixed;
+      left:14px;
+      bottom:14px;
+      width:150px;
+      z-index:50;
+      opacity:.96;
+      filter: drop-shadow(0 12px 18px rgba(20,22,43,.12));
+      pointer-events:none;
+    }
+
+    /* Responsive */
+    @media (max-width: 980px){
+      .main{grid-template-columns:1fr; }
+      .bottom{flex-direction:column; align-items:stretch}
+      .bottom .right{justify-content:stretch}
+      .bottom .right .btn{width:100%}
+      .hero{padding-top:6px}
+
+      /* keep mascot visible + move it above bottom CTA */
+      .mascot{
+        width:110px;
+        left:10px;
+        bottom:88px;
+        opacity:.95;
+      }
     }
   </style>
 </head>
 <body>
+  <div class="wrap">
 
-<div class="wrap">
-
-  <!-- HEADER -->
-  <div class="topbar">
-    <div class="brand">SongRaise</div>
-    <div class="nav">
-      <a href="how-it-works.html">How It Works</a>
-      <a href="browse.html">Explore</a>
-      <a href="dashboard.html">Login</a>
-      <a class="btn primary" href="dashboard.html">Get Started</a>
+    <!-- background notes -->
+    <div class="notes" aria-hidden="true">
+      <div class="note">🎵</div>
+      <div class="note">🎶</div>
+      <div class="note">♪</div>
+      <div class="note">♫</div>
+      <div class="note">🎼</div>
     </div>
-  </div>
 
-  <!-- HERO -->
-  <div class="hero">
-    <h1>Turn listening into giving.</h1>
-    <p class="sub">Add a music-powered fundraising campaign to your website in minutes.</p>
-    <div class="trustline">No credit card. No donation system changes.</div>
-  </div>
+    <!-- Mascot -->
+    <div class="mascot" aria-hidden="true">
+      <svg viewBox="0 0 220 220">
+        <g opacity=".55" fill="#5b49ff">
+          <circle cx="170" cy="45" r="4"/>
+          <circle cx="190" cy="65" r="3"/>
+        </g>
+        <g opacity=".45" fill="#2ec9a2">
+          <circle cx="30" cy="55" r="4"/>
+          <circle cx="55" cy="35" r="3"/>
+        </g>
+        <g opacity=".55" fill="#ffbf2f">
+          <circle cx="45" cy="170" r="4"/>
+          <circle cx="22" cy="150" r="3"/>
+        </g>
 
-  <!-- MAIN -->
-  <div class="main">
-    <div class="card">
-      <div class="head"><b>Start a campaign</b></div>
-      <div class="body">
-        <label>Campaign title</label>
-        <input value="Help fund Crohn’s research — powered by music." />
-        <br><br>
-        <label>Fundraising goal</label>
-        <input value="$5,000" />
-        <br><br>
-        <label>Charity name</label>
-        <input value="Crohn’s & Colitis Foundation" />
-        <br><br>
-        <button class="btn primary" onclick="location.href='dashboard.html'">
-          Next
-        </button>
-        <div class="checks">
-          ✔ Donations happen on your website<br>
-          ✔ Track plays, clicks, & donations<br>
-          ✔ Works with your donation system
+        <path d="M120 35
+                 C95 35, 80 55, 95 75
+                 C112 95, 140 85, 140 62
+                 C140 44, 122 35, 110 48
+                 C92 66, 112 88, 130 92
+                 C158 98, 170 120, 155 142
+                 C140 164, 105 164, 92 144
+                 C78 122, 98 104, 120 112
+                 C150 123, 135 170, 103 176
+                 C73 182, 54 160, 58 134
+                 C62 108, 98 98, 116 104"
+              fill="none" stroke="#14162b" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+
+        <circle cx="88" cy="188" r="22" fill="#fff" stroke="#14162b" stroke-width="6"/>
+        <circle cx="80" cy="182" r="3.2" fill="#14162b"/>
+        <circle cx="96" cy="182" r="3.2" fill="#14162b"/>
+        <path d="M80 194 C86 200, 92 200, 98 194" fill="none" stroke="#14162b" stroke-width="5" stroke-linecap="round"/>
+        <circle cx="76" cy="191" r="2.5" fill="#ff6aa2" opacity=".7"/>
+        <circle cx="100" cy="191" r="2.5" fill="#ff6aa2" opacity=".7"/>
+
+        <path d="M72 176 C50 168, 42 156, 34 146" fill="none" stroke="#14162b" stroke-width="6" stroke-linecap="round"/>
+        <path d="M104 176 C128 170, 144 160, 160 146" fill="none" stroke="#14162b" stroke-width="6" stroke-linecap="round"/>
+
+        <path d="M82 208 C74 218, 64 220, 54 214" fill="none" stroke="#14162b" stroke-width="6" stroke-linecap="round"/>
+        <path d="M94 208 C104 218, 118 220, 130 212" fill="none" stroke="#14162b" stroke-width="6" stroke-linecap="round"/>
+
+        <g transform="translate(154,132) rotate(-12)">
+          <path d="M0 26 L46 10 L46 42 Z" fill="#ffbf2f" stroke="#14162b" stroke-width="5" stroke-linejoin="round"/>
+          <rect x="-10" y="22" width="14" height="16" rx="6" fill="#ffd34d" stroke="#14162b" stroke-width="5"/>
+          <path d="M46 10 C58 16, 58 36, 46 42" fill="none" stroke="#14162b" stroke-width="5" stroke-linecap="round"/>
+        </g>
+
+        <g transform="translate(172,92) rotate(10)" fill="#5b49ff" opacity=".9">
+          <path d="M12 0 v26 c0 7-6 12-12 10s-6-10 0-13c3-2 7-2 12-1V0z"/>
+          <circle cx="0" cy="23" r="6"/>
+        </g>
+      </svg>
+    </div>
+
+    <!-- Header -->
+    <div class="topbar">
+      <div class="brand">
+        <span class="mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 2c-2.6 0-4.7 2.1-4.7 4.7 0 2.1 1.4 3.9 3.3 4.5v8.8c0 1.2 1 2.2 2.2 2.2 1.2 0 2.2-1 2.2-2.2V11.2c1.9-.6 3.3-2.4 3.3-4.5C20.7 4.1 14.6 2 12 2z"/></svg>
+        </span>
+        <span>SongRaise</span>
+      </div>
+      <div class="nav">
+        <a href="how-it-works.html">How It Works</a>
+        <a href="browse.html">Explore</a>
+        <a href="dashboard.html">Login</a>
+        <a class="btn primary" href="dashboard.html">Get Started</a>
+      </div>
+    </div>
+
+    <!-- Hero -->
+    <div class="hero">
+      <h1>Turn listening into giving.</h1>
+      <p class="sub">Add a music-powered fundraising campaign to your website in minutes.</p>
+      <div class="trustline">No credit card. No donation system changes.</div>
+    </div>
+
+    <!-- Main Split -->
+    <div class="main">
+
+      <!-- Left: Builder -->
+      <section class="card" id="get-started">
+        <div class="head">
+          <h2>Start a campaign</h2>
+          <span class="helper">Live preview updates as you type</span>
         </div>
+        <div class="body">
+          <div class="formgrid">
+            <div>
+              <label for="title">Campaign title</label>
+              <input id="title" type="text" value="Help fund Crohn’s research — powered by music." />
+            </div>
+            <div>
+              <label for="goal">Fundraising goal</label>
+              <input id="goal" type="text" value="$5,000" />
+            </div>
+            <div>
+              <label for="charity">Charity name</label>
+              <input id="charity" type="text" value="Crohn’s & Colitis Foundation" />
+            </div>
+
+            <!-- WIRED: send to dashboard -->
+            <button class="btn primary" id="nextBtn" type="button" style="width:100%; padding:12px 14px; border-radius:14px;">
+              Next
+            </button>
+
+            <div class="checks">
+              <div class="check">
+                <span class="tick" aria-hidden="true">
+                  <svg viewBox="0 0 20 20"><path d="M7.9 13.7 4.6 10.4l-1.2 1.2 4.5 4.5L16.8 7.2 15.6 6z"/></svg>
+                </span>
+                <span>Donations happen on your website</span>
+              </div>
+              <div class="check">
+                <span class="tick" aria-hidden="true">
+                  <svg viewBox="0 0 20 20"><path d="M7.9 13.7 4.6 10.4l-1.2 1.2 4.5 4.5L16.8 7.2 15.6 6z"/></svg>
+                </span>
+                <span>Track plays, clicks, &amp; donations</span>
+              </div>
+              <div class="check">
+                <span class="tick" aria-hidden="true">
+                  <svg viewBox="0 0 20 20"><path d="M7.9 13.7 4.6 10.4l-1.2 1.2 4.5 4.5L16.8 7.2 15.6 6z"/></svg>
+                </span>
+                <span>Works with your donation system</span>
+              </div>
+            </div>
+
+            <div class="statline">
+              <div class="helper"><b>$421,589</b> raised · <b>157</b> live campaigns</div>
+              <div class="logos" aria-label="Example charities">
+                <span class="logochip">Crohn’s &amp; Colitis Foundation</span>
+                <span class="logochip">Starlight Children’s Foundation</span>
+                <span class="logochip">Special Olympics</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: Live Preview Widget -->
+      <section class="card">
+        <div class="head">
+          <h2>Live preview</h2>
+          <span class="helper">This is what donors see</span>
+        </div>
+        <div class="body">
+          <div class="previewShell" role="region" aria-label="Campaign widget preview">
+
+            <div class="wTop">
+              <div class="wCharity">
+                <div class="wLogo" aria-hidden="true"></div>
+                <div class="wName">
+                  <b id="pvCharity">Crohn’s &amp; Colitis Foundation</b>
+                  <span>Hosted campaign</span>
+                </div>
+              </div>
+              <div class="badge">✔ Verified Charity</div>
+            </div>
+
+            <div class="wBody">
+              <p class="wHeadline" id="pvTitle"><b>Help fund Crohn’s research — powered by music.</b></p>
+              <p class="wSub">Listen to the campaign track, then donate on our secure donation page.</p>
+
+              <div class="progressWrap">
+                <div class="bar" aria-hidden="true"><div class="fill" id="pvFill"></div></div>
+                <div class="pRow">
+                  <span><strong id="pvRaised">$715</strong> raised</span>
+                  <span>Goal: <strong id="pvGoal">$5,000</strong></span>
+                  <span><strong>28</strong> days left</span>
+                </div>
+                <div style="margin-top:6px; color:rgba(123,128,152,.95); font-size:.82rem; font-weight:700;">
+                  Campaign ends <span id="pvEnd">May 30, 2026</span>
+                </div>
+              </div>
+
+              <div class="player">
+                <div class="trackTop">
+                  <div class="cover" aria-hidden="true"></div>
+                  <div class="trackMeta">
+                    <b id="pvTrack">For the Fighters</b>
+                    <span>Created to support <span id="pvCause">Crohn’s &amp; Colitis research</span></span>
+                  </div>
+                </div>
+                <div class="playrow">
+                  <button class="play" id="playBtn" type="button" aria-label="Play preview (demo only)">
+                    <svg viewBox="0 0 24 24"><path d="M8 5v14l12-7z"/></svg>
+                  </button>
+                  <div class="scrub" aria-hidden="true"><i id="scrubFill"></i></div>
+                  <div style="color:rgba(123,128,152,.98); font-size:.82rem; width:44px; text-align:right; font-weight:800;" id="timeTxt">0:00</div>
+                </div>
+              </div>
+
+              <div class="cta">
+                <button class="donateBtn" type="button" id="donateBtn">
+                  Donate on <span id="pvDomain">CrohnsColitisFoundation.org</span>
+                  <small>Opens secure donation page</small>
+                </button>
+                <button class="linkBtn" type="button" id="shareBtn">I can’t donate — share instead</button>
+                <div class="disclaimer">
+                  Donations are processed by <span id="pvCharity2">Crohn’s &amp; Colitis Foundation</span>.<br/>
+                  SongRaise does not handle funds.
+                </div>
+              </div>
+
+              <div class="stats" aria-label="Live stats">
+                <span class="stat">🎵 <span id="pvPlays">1,256</span> plays</span>
+                <span class="stat">💲 <span id="pvClicks">104</span> donate clicks</span>
+                <span class="stat">💜 <span id="pvShares">57</span> shares</span>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Bottom CTA -->
+    <div class="bottom">
+      <div>
+        <h3>See how it looks on your site.</h3>
+        <div class="mini">No credit card. No donation system changes.</div>
+      </div>
+      <div class="right">
+        <a class="btn primary" href="dashboard.html">Create a free campaign</a>
+        <a class="btn" href="browse.html">Explore campaigns</a>
       </div>
     </div>
 
-    <div class="card">
-      <div class="head"><b>Live preview</b></div>
-      <div class="body">
-        This preview matches your real <code>campaign.html</code> experience.
+    <!-- Footer -->
+    <div class="footer">
+      <div>Powered by <b>SongRaise</b></div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <a href="#privacy">Privacy</a>
+        <a href="#contact">Contact</a>
       </div>
     </div>
+
   </div>
 
-  <!-- BOTTOM CTA -->
-  <div class="bottom">
-    <div>
-      <b>See how it looks on your site.</b><br>
-      <span class="trustline">No credit card. No donation system changes.</span>
-    </div>
-    <div>
-      <a class="btn primary" href="dashboard.html">Create a free campaign</a>
-      <a class="btn" href="browse.html">Explore campaigns</a>
-    </div>
-  </div>
+  <script>
+    // Interactivity: update preview as user types + fake play scrub
+    const $ = (id) => document.getElementById(id);
 
-</div>
+    const inputs = {
+      title: $("title"),
+      goal: $("goal"),
+      charity: $("charity"),
+    };
 
+    function sanitize(s){ return (s || "").trim(); }
+
+    function escapeHtml(str){
+      return str.replace(/[&<>"']/g, (m) => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+      }[m]));
+    }
+
+    function guessDomain(charity){
+      const base = charity
+        .toLowerCase()
+        .replace(/&/g,"and")
+        .replace(/foundation/g,"")
+        .replace(/[^a-z0-9]+/g,"")
+        .slice(0,22) || "yourcharity";
+      return base.charAt(0).toUpperCase() + base.slice(1) + ".org";
+    }
+
+    function updatePreview(){
+      const title = sanitize(inputs.title.value) || "Turn listening into giving.";
+      const goal = sanitize(inputs.goal.value) || "$5,000";
+      const charity = sanitize(inputs.charity.value) || "Your Charity";
+
+      $("pvTitle").innerHTML = "<b>" + escapeHtml(title) + "</b>";
+      $("pvGoal").textContent = goal;
+      $("pvCharity").textContent = charity;
+      $("pvCharity2").textContent = charity;
+      $("pvDomain").textContent = guessDomain(charity);
+    }
+
+    Object.values(inputs).forEach(el => el.addEventListener("input", updatePreview));
+    updatePreview();
+
+    // WIRED: Next takes them into the real app flow (dashboard)
+    $("nextBtn").addEventListener("click", () => {
+      window.location.href = "dashboard.html";
+    });
+
+    // Donate/share are demo stubs (safe)
+    $("donateBtn").addEventListener("click", () => {
+      alert("Demo: this would open the charity’s secure donation page with tracking parameters.");
+    });
+
+    $("shareBtn").addEventListener("click", async () => {
+      const url = window.location.href.split("#")[0];
+      try{
+        await navigator.clipboard.writeText(url);
+        alert("Copied link (demo).");
+      }catch(e){
+        alert("Copy failed (browser permissions).");
+      }
+    });
+
+    // Fake audio scrub
+    let playing = false;
+    let t = 0;
+    let timer = null;
+    const duration = 38;
+
+    function renderTime(){
+      const mm = Math.floor(t/60);
+      const ss = String(t%60).padStart(2,"0");
+      $("timeTxt").textContent = `${mm}:${ss}`;
+      $("scrubFill").style.width = `${(t/duration)*100}%`;
+    }
+
+    function setPlayIcon(isPlay){
+      $("playBtn").innerHTML = isPlay
+        ? '<svg viewBox="0 0 24 24"><path d="M8 5v14l12-7z"/></svg>'
+        : '<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>';
+    }
+
+    $("playBtn").addEventListener("click", () => {
+      playing = !playing;
+      setPlayIcon(playing);
+
+      if(playing){
+        timer = setInterval(() => {
+          t = Math.min(duration, t + 1);
+          renderTime();
+          if(t >= duration){
+            playing = false;
+            setPlayIcon(true);
+            clearInterval(timer);
+            timer = null;
+          }
+        }, 250);
+      } else {
+        if(timer){ clearInterval(timer); timer = null; }
+      }
+    });
+
+    renderTime();
+  </script>
 </body>
 </html>
