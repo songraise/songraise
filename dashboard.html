@@ -1,1019 +1,1298 @@
 <!DOCTYPE html>
 <html lang="en">
-  <link rel="stylesheet" href="shell.css">
-
 <head>
   <meta charset="UTF-8" />
   <title>SongRaise Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="shell.css">
   <style>
+    :root{
+      --bg1:#f7fbff;
+      --bg2:#f2f0ff;
+      --bg3:#fff7ea;
+
+      --ink:#14162b;
+      --muted:#5c617a;
+      --muted2:#7b8098;
+
+      --card:#ffffff;
+      --border:#e7e8f3;
+      --shadow: 0 18px 60px rgba(20,22,43,.12);
+
+      --brand:#5b49ff;
+      --brand2:#2ec9a2;
+
+      --cta:#ffd34d;
+      --cta2:#ffbf2f;
+      --ctaInk:#2b240a;
+
+      --ok:#1fbf84;
+      --okBg:#e9fbf3;
+      --okBorder:#bff0dc;
+
+      --danger:#b91c1c;
+
+      --radius:18px;
+      --radius2:14px;
+      --font: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f9fafb;color:#111827;line-height:1.55}
-    .wrap{max-width:1140px;margin:0 auto;padding:18px 14px 70px}
-    .top{position:sticky;top:0;z-index:50;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:10px 12px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:0 10px 24px rgba(15,23,42,.06)}
-    .logo{font-weight:900;font-size:1.15rem;letter-spacing:-.02em}
-    .logo span{color:#2563eb}
+
+    body{
+      font-family:var(--font);
+      color:var(--ink);
+      line-height:1.55;
+      background:
+        radial-gradient(1100px 520px at 50% 0%, rgba(91,73,255,.18), transparent 60%),
+        radial-gradient(900px 520px at 20% 10%, rgba(46,201,162,.12), transparent 55%),
+        radial-gradient(900px 520px at 85% 20%, rgba(255,211,77,.22), transparent 55%),
+        linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 45%, var(--bg3) 100%);
+      overflow-x:hidden;
+    }
+
+    /* Subtle floating notes in background */
+    .notes{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+      z-index:0;
+    }
+    .note{
+      position:absolute;
+      font-size:26px;
+      opacity:.16;
+      filter: blur(.2px);
+      animation: floaty 7.8s ease-in-out infinite;
+      user-select:none;
+    }
+    .note:nth-child(1){left:6%; top:18%; animation-duration:8.6s}
+    .note:nth-child(2){left:88%; top:22%; font-size:30px; opacity:.13; animation-duration:9.6s}
+    .note:nth-child(3){left:78%; top:58%; font-size:24px; opacity:.12; animation-duration:7.9s}
+    .note:nth-child(4){left:10%; top:70%; font-size:22px; opacity:.10; animation-duration:9.2s}
+    .note:nth-child(5){left:55%; top:8%; font-size:20px; opacity:.10; animation-duration:10.4s}
+    @keyframes floaty{
+      0%{transform: translateY(0px) rotate(-2deg)}
+      50%{transform: translateY(-10px) rotate(2deg)}
+      100%{transform: translateY(0px) rotate(-2deg)}
+    }
+
+    /* Shell wrappers you already had */
+    .sr-wrap{position:relative; z-index:1;}
+    .sr-page{position:relative; z-index:1;}
+
+    .wrap{max-width:1140px;margin:0 auto;padding:18px 14px 90px}
+
+    /* Topbar */
+    .top{
+      position:sticky;top:0;z-index:50;
+      background: rgba(255,255,255,.74);
+      border:1px solid rgba(231,232,243,.90);
+      border-radius:999px;
+      padding:10px 12px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 28px rgba(20,22,43,.07);
+    }
+
+    .logo{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:900;
+      font-size:1.12rem;
+      letter-spacing:-.02em
+    }
+    .mark{
+      width:30px;height:30px;border-radius:10px;
+      background: linear-gradient(135deg, rgba(91,73,255,.95), rgba(46,201,162,.72));
+      display:inline-flex;align-items:center;justify-content:center;
+      box-shadow: 0 10px 22px rgba(91,73,255,.18);
+      flex:0 0 auto;
+    }
+    .mark svg{width:18px;height:18px;fill:#fff}
+    .logo .lite{
+      font-size:.78rem;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(231,232,243,.95);
+      background: rgba(255,255,255,.86);
+      color: rgba(20,22,43,.70);
+      font-weight:900;
+    }
+
+    .stack{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+    .pill{
+      font-size:.9rem;font-weight:900;color:#374151;
+      padding:6px 10px;border:1px solid rgba(231,232,243,.95);
+      border-radius:999px;background:rgba(255,255,255,.80)
+    }
+
     .auth{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .pill{font-size:.9rem;font-weight:900;color:#374151;padding:6px 10px;border:1px solid #e5e7eb;border-radius:999px;background:#f9fafb}
-    .auth input{width:240px;padding:8px 10px;border-radius:999px;border:1px solid #d1d5db}
-    .btn{padding:8px 12px;border-radius:999px;border:1px solid #d1d5db;background:#fff;cursor:pointer;font-weight:900;text-decoration:none;color:#111827;display:inline-block}
-    .btn:hover{background:#f3f4f6}
+
+    .auth input{
+      width:240px;
+      padding:9px 12px;
+      border-radius:999px;
+      border:1px solid rgba(231,232,243,.95);
+      background: rgba(255,255,255,.92);
+      outline:none;
+    }
+    .auth input:focus{
+      border-color: rgba(91,73,255,.45);
+      box-shadow: 0 0 0 4px rgba(91,73,255,.12);
+    }
+
+    .btn{
+      padding:9px 12px;
+      border-radius:999px;
+      border:1px solid rgba(231,232,243,.95);
+      background: rgba(255,255,255,.88);
+      cursor:pointer;
+      font-weight:900;
+      text-decoration:none;
+      color:var(--ink);
+      display:inline-block;
+      transition: transform .08s ease, background .15s ease, border-color .15s ease;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn:hover{background:#fff}
+    .btn:active{transform: translateY(1px)}
     .btn:disabled{opacity:.55;cursor:not-allowed}
-    .btn-primary{background:#2563eb;border-color:#2563eb;color:#fff}
-    .btn-primary:hover{background:#1d4ed8}
-    .hero{padding:18px 0}
+
+    .btn-primary{
+      background: linear-gradient(180deg, var(--cta) 0%, var(--cta2) 100%);
+      border-color: rgba(255,191,47,.55);
+      color: var(--ctaInk);
+      box-shadow: 0 16px 40px rgba(255,191,47,.22);
+    }
+
+    .hero{padding:18px 2px 10px}
     h1{font-size:2.0rem;letter-spacing:-.02em;margin-bottom:6px}
-    .lead{color:#4b5563;max-width:980px}
+    .lead{color:var(--muted);max-width:980px;font-weight:650}
+
     .grid{display:grid;grid-template-columns:1.05fr .95fr;gap:16px;align-items:start}
     @media(max-width:980px){.grid{grid-template-columns:1fr}}
-    .card{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:16px;box-shadow:0 8px 18px rgba(15,23,42,.04)}
-    .card h2{font-size:1.15rem;margin-bottom:10px}
-    label{display:block;margin:10px 0 4px;font-size:.85rem;font-weight:900;color:#374151}
-    input,textarea,select{width:100%;padding:9px 10px;border-radius:12px;border:1px solid #d1d5db;font-size:.95rem;background:#fff}
+
+    .card{
+      background: rgba(255,255,255,.86);
+      border:1px solid rgba(231,232,243,.95);
+      border-radius:18px;
+      padding:16px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+    .card h2{font-size:1.15rem;margin-bottom:10px;letter-spacing:-.01em}
+
+    label{display:block;margin:10px 0 4px;font-size:.85rem;font-weight:900;color:rgba(20,22,43,.78)}
+
+    input,textarea,select{
+      width:100%;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid rgba(231,232,243,.95);
+      font-size:.95rem;
+      background: rgba(255,255,255,.92);
+      outline:none;
+    }
+    input:focus,textarea:focus,select:focus{
+      border-color: rgba(91,73,255,.45);
+      box-shadow: 0 0 0 4px rgba(91,73,255,.12);
+    }
+
     textarea{min-height:92px;resize:vertical}
+
     .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     @media(max-width:680px){.row2{grid-template-columns:1fr}}
-    .status{margin-top:10px;font-size:.92rem;color:#6b7280}
-    .error{color:#b91c1c;font-weight:900}
+
+    .status{margin-top:10px;font-size:.92rem;color:var(--muted2)}
+    .error{color:var(--danger);font-weight:900}
     .ok{color:#047857;font-weight:900}
-    .muted{color:#6b7280}
+    .muted{color:var(--muted2)}
     .mini{font-size:.86rem}
-    .hr{border:none;border-top:1px solid #e5e7eb;margin:14px 0}
-    table{width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden}
-    th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:.92rem;vertical-align:top}
-    th{background:#f3f4f6;font-size:.85rem;color:#374151}
+    .hr{border:none;border-top:1px solid rgba(231,232,243,.95);margin:14px 0}
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      border:1px solid rgba(231,232,243,.95);
+      border-radius:14px;
+      overflow:hidden;
+      background: rgba(255,255,255,.92);
+    }
+    th,td{
+      padding:10px;
+      border-bottom:1px solid rgba(231,232,243,.95);
+      text-align:left;
+      font-size:.92rem;
+      vertical-align:top;
+    }
+    th{
+      background: rgba(248,249,255,.95);
+      font-size:.85rem;
+      color:rgba(20,22,43,.78);
+      font-weight:900;
+    }
     tr:last-child td{border-bottom:none}
-    .link{color:#2563eb;text-decoration:none;font-weight:900}
+
+    .link{color:var(--brand);text-decoration:none;font-weight:900}
     .link:hover{text-decoration:underline}
-    code{background:#f3f4f6;padding:2px 6px;border-radius:8px}
-    .stack{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .badge{display:inline-flex;gap:8px;align-items:center;padding:6px 10px;border:1px solid #e5e7eb;border-radius:999px;background:#f9fafb;font-weight:900;font-size:.86rem;color:#374151}
-    .drop{border:2px dashed #d1d5db;border-radius:16px;padding:14px;background:#fafafa;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;text-align:center}
-    .drop.drag{border-color:#2563eb;background:#eff6ff}
+
+    code{background:rgba(248,249,255,.95);padding:2px 6px;border-radius:8px;border:1px solid rgba(231,232,243,.95)}
+
+    .badge{
+      display:inline-flex;gap:8px;align-items:center;
+      padding:6px 10px;
+      border:1px solid rgba(231,232,243,.95);
+      border-radius:999px;
+      background: rgba(255,255,255,.86);
+      font-weight:900;
+      font-size:.86rem;
+      color:rgba(20,22,43,.78)
+    }
+
+    .drop{
+      border:2px dashed rgba(231,232,243,.95);
+      border-radius:16px;
+      padding:14px;
+      background: rgba(255,255,255,.78);
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      align-items:center;
+      justify-content:center;
+      text-align:center
+    }
+    .drop.drag{border-color: rgba(91,73,255,.65); background: rgba(91,73,255,.08)}
     .drop .big{font-weight:900}
-    .fileline{font-weight:900;color:#111827}
-    .overlay{position:fixed;inset:0;background:rgba(17,24,39,.58);display:none;align-items:center;justify-content:center;padding:16px;z-index:9999}
-    .modal{max-width:900px;width:100%;background:#fff;border-radius:18px;border:1px solid #e5e7eb;box-shadow:0 20px 60px rgba(0,0,0,.18);padding:16px}
+    .fileline{font-weight:900;color:var(--ink)}
+
+    .overlay{
+      position:fixed;inset:0;
+      background:rgba(17,24,39,.58);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      z-index:9999
+    }
+    .modal{
+      max-width:900px;width:100%;
+      background: rgba(255,255,255,.94);
+      border-radius:18px;
+      border:1px solid rgba(231,232,243,.95);
+      box-shadow:0 20px 60px rgba(0,0,0,.18);
+      padding:16px
+    }
     .modal h3{font-size:1.1rem;margin-bottom:6px}
     .steps{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
-    .step{border:1px solid #e5e7eb;border-radius:14px;padding:12px;background:#f9fafb}
+    .step{
+      border:1px solid rgba(231,232,243,.95);
+      border-radius:14px;
+      padding:12px;
+      background: rgba(248,249,255,.95)
+    }
     .step b{display:block;margin-bottom:4px}
-    .modal pre{white-space:pre-wrap;word-wrap:break-word;background:#111827;color:#f9fafb;border-radius:14px;padding:12px;font-size:.9rem;line-height:1.45}
+
+    .modal pre{
+      white-space:pre-wrap;
+      word-wrap:break-word;
+      background:#111827;
+      color:#f9fafb;
+      border-radius:14px;
+      padding:12px;
+      font-size:.9rem;
+      line-height:1.45
+    }
     .modal .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-    .checklist{border:1px solid #e5e7eb;border-radius:16px;padding:12px;background:#f9fafb}
+
+    .checklist{
+      border:1px solid rgba(231,232,243,.95);
+      border-radius:16px;
+      padding:12px;
+      background: rgba(248,249,255,.95)
+    }
     .checklist .item{display:flex;gap:10px;align-items:flex-start;margin:8px 0}
     .checklist .item b{min-width:18px}
-    .checklist .item .go{margin-left:auto}
+
+    @media(max-width:980px){
+      .auth input{width: min(86vw, 340px);}
+    }
   </style>
 </head>
-  
+
 <body>
+  <div class="notes" aria-hidden="true">
+    <div class="note">🎵</div>
+    <div class="note">🎶</div>
+    <div class="note">♪</div>
+    <div class="note">♫</div>
+    <div class="note">🎼</div>
+  </div>
+
   <div class="sr-wrap">
-  <div id="sr-header"></div>
-  <div class="sr-page">
+    <div id="sr-header"></div>
+    <div class="sr-page">
 
-  <div class="wrap">
-    <div class="top">
-      <div class="logo">SongRaise<span>Lite</span></div>
-      <div class="stack">
-        <a class="btn" href="index.html">Public Home</a>
-        <a class="btn" href="how-it-works.html">How It Works</a>
-        <a class="btn" href="browse.html">Browse Campaigns</a>
-        <div class="auth">
-          <span class="pill" id="authStatus">Checking login…</span>
-          <input id="emailInput" type="email" placeholder="you@email.com" />
-          <button class="btn" id="loginBtn" type="button">Email me a login link</button>
-          <button class="btn" id="logoutBtn" type="button" style="display:none;">Log out</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="hero">
-      <h1>Dashboard</h1>
-      <p class="lead">
-        Charities create campaigns. SongRaise (admin) generates and attaches the song. Only published campaigns appear publicly.
-      </p>
-    </div>
-
-    <div class="grid">
-      <div class="card">
-        <h2>Create campaign (Charity)</h2>
-
-        <div class="stack" style="margin-bottom:10px;">
-          <span class="badge" id="currentBadge">No active campaign</span>
-          <a class="btn" id="viewCurrentBtn" href="#" style="display:none;">View current</a>
-          <button class="btn" id="clearCurrentBtn" type="button" style="display:none;">Clear current</button>
-          <span class="badge" id="roleBadge" style="display:none;"></span>
-          <span class="badge" id="currentStatusBadge" style="display:none;"></span>
-        </div>
-
-        <form id="createForm">
-          <label for="title">Campaign title</label>
-          <input id="title" required placeholder="e.g., Arrhythmias Climbathon" />
-
-          <div class="row2">
-            <div>
-              <label for="donation_url">Donation URL</label>
-              <input id="donation_url" type="url" required placeholder="https://..." />
-            </div>
-            <div>
-              <label for="campaign_slug">Campaign slug (optional)</label>
-              <input id="campaign_slug" placeholder="e.g., arrhythmias-climbathon" />
-            </div>
+      <div class="wrap">
+        <div class="top">
+          <div class="logo">
+            <span class="mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 2c-2.6 0-4.7 2.1-4.7 4.7 0 2.1 1.4 3.9 3.3 4.5v8.8c0 1.2 1 2.2 2.2 2.2 1.2 0 2.2-1 2.2-2.2V11.2c1.9-.6 3.3-2.4 3.3-4.5C20.7 4.1 14.6 2 12 2z"/></svg>
+            </span>
+            <span>SongRaise</span>
+            <span class="lite">Dashboard</span>
           </div>
 
-          <label for="description">Campaign description</label>
-          <textarea id="description" placeholder="Short description…"></textarea>
+          <div class="stack">
+            <a class="btn" href="index.html">Public Home</a>
+            <a class="btn" href="how-it-works.html">How It Works</a>
+            <a class="btn" href="browse.html">Browse Campaigns</a>
 
-          <div class="hr"></div>
-
-          <h2 style="margin:0 0 6px;font-size:1.05rem;">Cause details</h2>
-          <p class="muted mini">These fields help SongRaise generate a great fundraising song for your campaign.</p>
-
-          <div class="row2">
-            <div>
-              <label for="cause_category_select">Category</label>
-              <select id="cause_category_select"></select>
+            <div class="auth">
+              <span class="pill" id="authStatus">Checking login…</span>
+              <input id="emailInput" type="email" placeholder="you@email.com" />
+              <button class="btn" id="loginBtn" type="button">Email me a login link</button>
+              <button class="btn" id="logoutBtn" type="button" style="display:none;">Log out</button>
             </div>
-            <div>
-              <label for="cause_condition_select">Condition / Symptom</label>
-              <select id="cause_condition_select" disabled></select>
-            </div>
-          </div>
-
-          <div class="row2">
-            <div>
-              <label for="emotion_select">Emotion</label>
-              <select id="emotion_select">
-                <option value="Hopeful">Hopeful</option>
-                <option value="Uplifting">Uplifting</option>
-                <option value="Inspirational">Inspirational</option>
-                <option value="Empathetic">Empathetic</option>
-                <option value="Funny">Funny</option>
-                <option value="Anthemic">Anthemic</option>
-              </select>
-            </div>
-            <div>
-              <label for="genre_select">Genre</label>
-              <select id="genre_select">
-                <option value="Pop">Pop</option>
-                <option value="Rock">Rock</option>
-                <option value="Indie Pop">Indie Pop</option>
-                <option value="Hip-hop">Hip-hop</option>
-                <option value="Country">Country</option>
-                <option value="EDM">EDM</option>
-                <option value="Folk">Folk</option>
-                <option value="R&B">R&B</option>
-              </select>
-            </div>
-          </div>
-
-          <label for="artist_style">Artist style (optional)</label>
-          <input id="artist_style" placeholder="e.g., uplifting pop, stadium rock, cinematic" />
-
-          <label for="hook">Hook idea (optional)</label>
-          <input id="hook" placeholder='e.g., “You are not alone” call-and-response chorus' />
-
-          <label for="lyrics">Lyrics (optional)</label>
-          <textarea id="lyrics" placeholder="If you already have lyrics, paste them here (optional)…"></textarea>
-
-          <div class="stack" style="margin-top:12px;">
-            <button class="btn btn-primary" type="submit" id="createBtn">Create campaign</button>
-            <button class="btn" type="button" id="resetFormBtn">Reset form</button>
-          </div>
-
-          <div id="createStatus" class="status"></div>
-        </form>
-
-        <div class="hr"></div>
-
-        <div id="readinessBlock" class="checklist" style="display:none;">
-          <div class="stack" style="justify-content:space-between;">
-            <div style="font-weight:900;">Campaign readiness</div>
-            <span class="badge" id="readinessSummary">—</span>
-          </div>
-
-          <div class="item"><b id="r1">⏳</b><div>Campaign created</div></div>
-          <div class="item"><b id="r2">⏳</b><div>Donation link added</div></div>
-          <div class="item"><b id="r3">⏳</b><div>Song in production (SongRaise)</div></div>
-          <div class="item"><b id="r4">⏳</b><div>Ready to share</div></div>
-
-          <div class="muted mini" id="charityNote" style="margin-top:8px; display:none;">
-            SongRaise is generating your song. You’ll be able to share the campaign once it’s published.
           </div>
         </div>
 
-        <div id="adminBlock" style="display:none;margin-top:14px;">
-          <div class="hr"></div>
-          <h2>Admin production</h2>
-          <p class="muted mini">Only visible to the SongRaise administrator. Charities do not see Suno or uploads.</p>
+        <div class="hero">
+          <h1>Dashboard</h1>
+          <p class="lead">
+            Charities create campaigns. SongRaise (admin) generates and attaches the song. Only published campaigns appear publicly.
+          </p>
+        </div>
 
-          <div class="stack" style="margin-top:10px;">
-            <button class="btn" type="button" id="generateBtn" disabled>Generate in Suno</button>
-            <button class="btn" type="button" id="scrollUploadBtn" disabled>Jump to Upload</button>
-            <button class="btn btn-primary" type="button" id="publishBtn" disabled>Publish</button>
-            <button class="btn" type="button" id="unpublishBtn" disabled>Unpublish</button>
+        <div class="grid">
+          <div class="card">
+            <h2>Create campaign (Charity)</h2>
+
+            <div class="stack" style="margin-bottom:10px;">
+              <span class="badge" id="currentBadge">No active campaign</span>
+              <a class="btn" id="viewCurrentBtn" href="#" style="display:none;">View current</a>
+              <button class="btn" id="clearCurrentBtn" type="button" style="display:none;">Clear current</button>
+              <span class="badge" id="roleBadge" style="display:none;"></span>
+              <span class="badge" id="currentStatusBadge" style="display:none;"></span>
+            </div>
+
+            <form id="createForm">
+              <label for="title">Campaign title</label>
+              <input id="title" required placeholder="e.g., Arrhythmias Climbathon" />
+
+              <div class="row2">
+                <div>
+                  <label for="donation_url">Donation URL</label>
+                  <input id="donation_url" type="url" required placeholder="https://..." />
+                </div>
+                <div>
+                  <label for="campaign_slug">Campaign slug (optional)</label>
+                  <input id="campaign_slug" placeholder="e.g., arrhythmias-climbathon" />
+                </div>
+              </div>
+
+              <label for="description">Campaign description</label>
+              <textarea id="description" placeholder="Short description…"></textarea>
+
+              <div class="hr"></div>
+
+              <h2 style="margin:0 0 6px;font-size:1.05rem;">Cause details</h2>
+              <p class="muted mini">These fields help SongRaise generate a great fundraising song for your campaign.</p>
+
+              <div class="row2">
+                <div>
+                  <label for="cause_category_select">Category</label>
+                  <select id="cause_category_select"></select>
+                </div>
+                <div>
+                  <label for="cause_condition_select">Condition / Symptom</label>
+                  <select id="cause_condition_select" disabled></select>
+                </div>
+              </div>
+
+              <div class="row2">
+                <div>
+                  <label for="emotion_select">Emotion</label>
+                  <select id="emotion_select">
+                    <option value="Hopeful">Hopeful</option>
+                    <option value="Uplifting">Uplifting</option>
+                    <option value="Inspirational">Inspirational</option>
+                    <option value="Empathetic">Empathetic</option>
+                    <option value="Funny">Funny</option>
+                    <option value="Anthemic">Anthemic</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="genre_select">Genre</label>
+                  <select id="genre_select">
+                    <option value="Pop">Pop</option>
+                    <option value="Rock">Rock</option>
+                    <option value="Indie Pop">Indie Pop</option>
+                    <option value="Hip-hop">Hip-hop</option>
+                    <option value="Country">Country</option>
+                    <option value="EDM">EDM</option>
+                    <option value="Folk">Folk</option>
+                    <option value="R&B">R&B</option>
+                  </select>
+                </div>
+              </div>
+
+              <label for="artist_style">Artist style (optional)</label>
+              <input id="artist_style" placeholder="e.g., uplifting pop, stadium rock, cinematic" />
+
+              <label for="hook">Hook idea (optional)</label>
+              <input id="hook" placeholder='e.g., “You are not alone” call-and-response chorus' />
+
+              <label for="lyrics">Lyrics (optional)</label>
+              <textarea id="lyrics" placeholder="If you already have lyrics, paste them here (optional)…"></textarea>
+
+              <div class="stack" style="margin-top:12px;">
+                <button class="btn btn-primary" type="submit" id="createBtn">Create campaign</button>
+                <button class="btn" type="button" id="resetFormBtn">Reset form</button>
+              </div>
+
+              <div id="createStatus" class="status"></div>
+            </form>
+
+            <div class="hr"></div>
+
+            <div id="readinessBlock" class="checklist" style="display:none;">
+              <div class="stack" style="justify-content:space-between;">
+                <div style="font-weight:900;">Campaign readiness</div>
+                <span class="badge" id="readinessSummary">—</span>
+              </div>
+
+              <div class="item"><b id="r1">⏳</b><div>Campaign created</div></div>
+              <div class="item"><b id="r2">⏳</b><div>Donation link added</div></div>
+              <div class="item"><b id="r3">⏳</b><div>Song in production (SongRaise)</div></div>
+              <div class="item"><b id="r4">⏳</b><div>Ready to share</div></div>
+
+              <div class="muted mini" id="charityNote" style="margin-top:8px; display:none;">
+                SongRaise is generating your song. You’ll be able to share the campaign once it’s published.
+              </div>
+            </div>
+
+            <div id="adminBlock" style="display:none;margin-top:14px;">
+              <div class="hr"></div>
+              <h2>Admin production</h2>
+              <p class="muted mini">Only visible to the SongRaise administrator. Charities do not see Suno or uploads.</p>
+
+              <div class="stack" style="margin-top:10px;">
+                <button class="btn" type="button" id="generateBtn" disabled>Generate in Suno</button>
+                <button class="btn" type="button" id="scrollUploadBtn" disabled>Jump to Upload</button>
+                <button class="btn btn-primary" type="button" id="publishBtn" disabled>Publish</button>
+                <button class="btn" type="button" id="unpublishBtn" disabled>Unpublish</button>
+              </div>
+
+              <div id="adminStatus" class="status"></div>
+
+              <div class="hr"></div>
+
+              <h2>Upload MP3 & attach (REPLACE)</h2>
+              <div class="drop" id="dropzone">
+                <div class="big">Drop MP3 or choose file</div>
+                <div class="muted mini">This replaces the campaign’s current song.</div>
+                <input id="mp3File" type="file" accept="audio/mpeg,audio/mp3" />
+                <div class="fileline" id="fileLine">No file selected</div>
+                <button class="btn btn-primary" id="uploadBtn" type="button" disabled>Upload & attach</button>
+                <div class="muted mini" id="bucketLabel">Bucket: <code>song-audio</code></div>
+              </div>
+              <div id="uploadStatus" class="status"></div>
+            </div>
           </div>
 
-          <div id="adminStatus" class="status"></div>
-
-          <div class="hr"></div>
-
-          <h2>Upload MP3 & attach (REPLACE)</h2>
-          <div class="drop" id="dropzone">
-            <div class="big">Drop MP3 or choose file</div>
-            <div class="muted mini">This replaces the campaign’s current song.</div>
-            <input id="mp3File" type="file" accept="audio/mpeg,audio/mp3" />
-            <div class="fileline" id="fileLine">No file selected</div>
-            <button class="btn btn-primary" id="uploadBtn" type="button" disabled>Upload & attach</button>
-            <div class="muted mini" id="bucketLabel">Bucket: <code>song-audio</code></div>
+          <div class="card">
+            <h2>My campaigns</h2>
+            <div style="overflow-x:auto;">
+              <table>
+                <thead>
+                  <tr><th>Title</th><th>Status</th><th>Created</th><th>View</th></tr>
+                </thead>
+                <tbody id="campaignsBody"></tbody>
+              </table>
+            </div>
+            <div id="campaignsStatus" class="status">Loading…</div>
           </div>
-          <div id="uploadStatus" class="status"></div>
         </div>
       </div>
 
-      <div class="card">
-        <h2>My campaigns</h2>
-        <div style="overflow-x:auto;">
-          <table>
-            <thead>
-              <tr><th>Title</th><th>Status</th><th>Created</th><th>View</th></tr>
-            </thead>
-            <tbody id="campaignsBody"></tbody>
-          </table>
+      <div class="overlay" id="overlay">
+        <div class="modal">
+          <h3>Generate in Suno (Admin)</h3>
+          <div class="muted mini">Prompt Pack copied to clipboard. Paste into Suno and generate.</div>
+          <div class="steps">
+            <div class="step"><b>Step 1</b> Suno opens in a new tab.</div>
+            <div class="step"><b>Step 2</b> Paste Prompt Pack below into Suno and generate.</div>
+            <div class="step"><b>Step 3</b> Download MP3 and upload it here to attach.</div>
+          </div>
+          <pre id="promptPreview"></pre>
+          <div class="actions">
+            <button class="btn" id="copyAgainBtn" type="button">Copy again</button>
+            <button class="btn" id="openSunoBtn" type="button">Open Suno</button>
+            <button class="btn" id="closeOverlayBtn" type="button">Close</button>
+          </div>
         </div>
-        <div id="campaignsStatus" class="status">Loading…</div>
       </div>
-    </div>
-  </div>
 
-  <div class="overlay" id="overlay">
-    <div class="modal">
-      <h3>Generate in Suno (Admin)</h3>
-      <div class="muted mini">Prompt Pack copied to clipboard. Paste into Suno and generate.</div>
-      <div class="steps">
-        <div class="step"><b>Step 1</b> Suno opens in a new tab.</div>
-        <div class="step"><b>Step 2</b> Paste Prompt Pack below into Suno and generate.</div>
-        <div class="step"><b>Step 3</b> Download MP3 and upload it here to attach.</div>
-      </div>
-      <pre id="promptPreview"></pre>
-      <div class="actions">
-        <button class="btn" id="copyAgainBtn" type="button">Copy again</button>
-        <button class="btn" id="openSunoBtn" type="button">Open Suno</button>
-        <button class="btn" id="closeOverlayBtn" type="button">Close</button>
-      </div>
-    </div>
-  </div>
+      <!-- YOUR JS BELOW IS UNCHANGED -->
+      <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+      <script>
+        const SUPABASE_URL = "https://jvvcxpjmdfeqjdmcemet.supabase.co";
+        const SUPABASE_REF = "jvvcxpjmdfeqjdmcemet";
+        const SUPABASE_ANON_KEY =
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2dmN4cGptZGZlcWpkbWNlbWV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1Nzc3NzYsImV4cCI6MjA3NzE1Mzc3Nn0.LPRIt10bLZYfoOCx7nD4U0PsCURB7YToq4VbByliFi4";
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    const SUPABASE_URL = "https://jvvcxpjmdfeqjdmcemet.supabase.co";
-    const SUPABASE_REF = "jvvcxpjmdfeqjdmcemet";
-    const SUPABASE_ANON_KEY =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2dmN4cGptZGZlcWpkbWNlbWV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1Nzc3NzYsImV4cCI6MjA3NzE1Mzc3Nn0.LPRIt10bLZYfoOCx7nD4U0PsCURB7YToq4VbByliFi4";
+        const ADMIN_EMAIL = "jason.susnick@gmail.com";
+        const BUCKET_AUDIO = "song-audio";
+        const SUNO_URL = "https://suno.com";
 
-    const ADMIN_EMAIL = "jason.susnick@gmail.com";
-    const BUCKET_AUDIO = "song-audio";
-    const SUNO_URL = "https://suno.com";
+        const CATEGORY_TO_CONDITIONS = {
+          "🧠 Neurological Disorders": ["Alzheimer’s Disease","Dementia","Epilepsy","Seizures","Headache","Stroke","Hydrocephalus","Cerebral Palsy","Parkinson’s Disease","Multiple Sclerosis (MS)"],
+          "❤️ Cardiovascular Diseases": ["Arrhythmias","Heart Attack","High Blood Pressure (Hypertension)","High Cholesterol","Vascular Anomalies"],
+          "🩺 Endocrine & Metabolic Disorders": ["Diabetes","Hyperthyroidism","Obesity","Osteoporosis"],
+          "🤰 Reproductive & Women’s Health": ["Fertility & Reproductive Health (topic)","Rare Pregnancy Complications","Pelvic Floor Disorders","Ovarian Cancer (Cancer)"],
+          "🧬 Genetic & Autoimmune Disorders": ["Genetic Disorders","Systemic Lupus Erythematosus (Lupus)","Sjögren’s Syndrome","Scleroderma"],
+          "🩹 Musculoskeletal (Bones, Joints, Soft Tissue)": ["Arthritis","Bones and Joints (general)","Scoliosis","Sports-Related Conditions","Knee Injuries","Back and Neck Pain","Hand Conditions"],
+          "🫁 Respiratory Conditions": ["Asthma","Influenza","Seasonal Allergies"],
+          "🧠 Mental Health & Behavioral Conditions": ["Anxiety Disorders","Eating Disorders","Mood Disorders","Stress (topic)"],
+          "🦠 Infectious Diseases": ["HIV & AIDS","Hepatitis","Herpes (HSV-1 & HSV-2)","Human Papillomavirus (HPV)","Influenza","Lyme Disease","Sexually Transmitted Diseases","Zika Virus","Urinary Tract Infections","Bladder Infections (UTI category)"],
+          "🩻 Gastrointestinal Conditions": ["Celiac Disease","Irritable Bowel Syndrome (IBS)","Hernias","Colon Cancer (Cancer)","Stomach (Gastric) Cancer (Cancer)"],
+          "🧼 Dermatologic Conditions": ["Melanoma (Cancer)"],
+          "🩸 Kidney & Urinary Conditions": ["Kidney Stones","End Stage Renal Disease (ESRD)","Urinary Incontinence","Urinary Tract Infections","Kidney Cancer (Cancer)","Bladder Cancer (Cancer)"],
+          "👁️ Hearing & Sensory Disorders": ["Hearing Loss"],
+          "🦀 Cancer (All Types Grouped Together)": ["Breast Cancer","Prostate Cancer","Lung Cancer","Colon Cancer","Stomach (Gastric) Cancer","Pancreatic Cancer","Esophageal Cancer","Kidney Cancer","Brain Tumors / Brain Cancer","Head and Neck Cancer","Ovarian Cancer","Bladder Cancer","Melanoma","Sarcoma","Leukemia","Lymphoma"],
+          "🫁 Thoracic / Aortic Conditions": ["Abdominal Aortic Aneurysm (AAA)"],
+          "🩹 Injury & Pain Conditions": ["Knee Injuries","Back & Neck Pain"],
+          "Other": ["Other"]
+        };
 
-    const CATEGORY_TO_CONDITIONS = {
-      "🧠 Neurological Disorders": ["Alzheimer’s Disease","Dementia","Epilepsy","Seizures","Headache","Stroke","Hydrocephalus","Cerebral Palsy","Parkinson’s Disease","Multiple Sclerosis (MS)"],
-      "❤️ Cardiovascular Diseases": ["Arrhythmias","Heart Attack","High Blood Pressure (Hypertension)","High Cholesterol","Vascular Anomalies"],
-      "🩺 Endocrine & Metabolic Disorders": ["Diabetes","Hyperthyroidism","Obesity","Osteoporosis"],
-      "🤰 Reproductive & Women’s Health": ["Fertility & Reproductive Health (topic)","Rare Pregnancy Complications","Pelvic Floor Disorders","Ovarian Cancer (Cancer)"],
-      "🧬 Genetic & Autoimmune Disorders": ["Genetic Disorders","Systemic Lupus Erythematosus (Lupus)","Sjögren’s Syndrome","Scleroderma"],
-      "🩹 Musculoskeletal (Bones, Joints, Soft Tissue)": ["Arthritis","Bones and Joints (general)","Scoliosis","Sports-Related Conditions","Knee Injuries","Back and Neck Pain","Hand Conditions"],
-      "🫁 Respiratory Conditions": ["Asthma","Influenza","Seasonal Allergies"],
-      "🧠 Mental Health & Behavioral Conditions": ["Anxiety Disorders","Eating Disorders","Mood Disorders","Stress (topic)"],
-      "🦠 Infectious Diseases": ["HIV & AIDS","Hepatitis","Herpes (HSV-1 & HSV-2)","Human Papillomavirus (HPV)","Influenza","Lyme Disease","Sexually Transmitted Diseases","Zika Virus","Urinary Tract Infections","Bladder Infections (UTI category)"],
-      "🩻 Gastrointestinal Conditions": ["Celiac Disease","Irritable Bowel Syndrome (IBS)","Hernias","Colon Cancer (Cancer)","Stomach (Gastric) Cancer (Cancer)"],
-      "🧼 Dermatologic Conditions": ["Melanoma (Cancer)"],
-      "🩸 Kidney & Urinary Conditions": ["Kidney Stones","End Stage Renal Disease (ESRD)","Urinary Incontinence","Urinary Tract Infections","Kidney Cancer (Cancer)","Bladder Cancer (Cancer)"],
-      "👁️ Hearing & Sensory Disorders": ["Hearing Loss"],
-      "🦀 Cancer (All Types Grouped Together)": ["Breast Cancer","Prostate Cancer","Lung Cancer","Colon Cancer","Stomach (Gastric) Cancer","Pancreatic Cancer","Esophageal Cancer","Kidney Cancer","Brain Tumors / Brain Cancer","Head and Neck Cancer","Ovarian Cancer","Bladder Cancer","Melanoma","Sarcoma","Leukemia","Lymphoma"],
-      "🫁 Thoracic / Aortic Conditions": ["Abdominal Aortic Aneurysm (AAA)"],
-      "🩹 Injury & Pain Conditions": ["Knee Injuries","Back & Neck Pain"],
-      "Other": ["Other"]
-    };
+        const authStatusEl = document.getElementById("authStatus");
+        const emailEl = document.getElementById("emailInput");
+        const loginBtn = document.getElementById("loginBtn");
+        const logoutBtn = document.getElementById("logoutBtn");
+        const roleBadge = document.getElementById("roleBadge");
 
-    const authStatusEl = document.getElementById("authStatus");
-    const emailEl = document.getElementById("emailInput");
-    const loginBtn = document.getElementById("loginBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const roleBadge = document.getElementById("roleBadge");
+        const campaignsBody = document.getElementById("campaignsBody");
+        const campaignsStatus = document.getElementById("campaignsStatus");
 
-    const campaignsBody = document.getElementById("campaignsBody");
-    const campaignsStatus = document.getElementById("campaignsStatus");
+        const createForm = document.getElementById("createForm");
+        const createBtn = document.getElementById("createBtn");
+        const resetFormBtn = document.getElementById("resetFormBtn");
+        const createStatus = document.getElementById("createStatus");
 
-    const createForm = document.getElementById("createForm");
-    const createBtn = document.getElementById("createBtn");
-    const resetFormBtn = document.getElementById("resetFormBtn");
-    const createStatus = document.getElementById("createStatus");
+        const catSelect = document.getElementById("cause_category_select");
+        const condSelect = document.getElementById("cause_condition_select");
+        const emotionSelect = document.getElementById("emotion_select");
+        const genreSelect = document.getElementById("genre_select");
 
-    const catSelect = document.getElementById("cause_category_select");
-    const condSelect = document.getElementById("cause_condition_select");
-    const emotionSelect = document.getElementById("emotion_select");
-    const genreSelect = document.getElementById("genre_select");
+        const currentBadge = document.getElementById("currentBadge");
+        const viewCurrentBtn = document.getElementById("viewCurrentBtn");
+        const clearCurrentBtn = document.getElementById("clearCurrentBtn");
+        const currentStatusBadge = document.getElementById("currentStatusBadge");
 
-    const currentBadge = document.getElementById("currentBadge");
-    const viewCurrentBtn = document.getElementById("viewCurrentBtn");
-    const clearCurrentBtn = document.getElementById("clearCurrentBtn");
-    const currentStatusBadge = document.getElementById("currentStatusBadge");
+        const readinessBlock = document.getElementById("readinessBlock");
+        const readinessSummary = document.getElementById("readinessSummary");
+        const charityNote = document.getElementById("charityNote");
+        const r1 = document.getElementById("r1");
+        const r2 = document.getElementById("r2");
+        const r3 = document.getElementById("r3");
+        const r4 = document.getElementById("r4");
 
-    const readinessBlock = document.getElementById("readinessBlock");
-    const readinessSummary = document.getElementById("readinessSummary");
-    const charityNote = document.getElementById("charityNote");
-    const r1 = document.getElementById("r1");
-    const r2 = document.getElementById("r2");
-    const r3 = document.getElementById("r3");
-    const r4 = document.getElementById("r4");
+        const adminBlock = document.getElementById("adminBlock");
+        const adminStatus = document.getElementById("adminStatus");
+        const generateBtn = document.getElementById("generateBtn");
+        const scrollUploadBtn = document.getElementById("scrollUploadBtn");
+        const publishBtn = document.getElementById("publishBtn");
+        const unpublishBtn = document.getElementById("unpublishBtn");
 
-    const adminBlock = document.getElementById("adminBlock");
-    const adminStatus = document.getElementById("adminStatus");
-    const generateBtn = document.getElementById("generateBtn");
-    const scrollUploadBtn = document.getElementById("scrollUploadBtn");
-    const publishBtn = document.getElementById("publishBtn");
-    const unpublishBtn = document.getElementById("unpublishBtn");
+        const dropzone = document.getElementById("dropzone");
+        const mp3FileEl = document.getElementById("mp3File");
+        const fileLine = document.getElementById("fileLine");
+        const uploadBtn = document.getElementById("uploadBtn");
+        const uploadStatus = document.getElementById("uploadStatus");
 
-    const dropzone = document.getElementById("dropzone");
-    const mp3FileEl = document.getElementById("mp3File");
-    const fileLine = document.getElementById("fileLine");
-    const uploadBtn = document.getElementById("uploadBtn");
-    const uploadStatus = document.getElementById("uploadStatus");
+        const overlay = document.getElementById("overlay");
+        const promptPreview = document.getElementById("promptPreview");
+        const copyAgainBtn = document.getElementById("copyAgainBtn");
+        const openSunoBtn = document.getElementById("openSunoBtn");
+        const closeOverlayBtn = document.getElementById("closeOverlayBtn");
 
-    const overlay = document.getElementById("overlay");
-    const promptPreview = document.getElementById("promptPreview");
-    const copyAgainBtn = document.getElementById("copyAgainBtn");
-    const openSunoBtn = document.getElementById("openSunoBtn");
-    const closeOverlayBtn = document.getElementById("closeOverlayBtn");
+        const clientForAuth = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const clientForAuth = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    function baseUrl(){
-      const u = new URL(window.location.href);
-      const basePath = u.pathname.endsWith("/") ? u.pathname : u.pathname.replace(/[^\/]+$/, "");
-      return u.origin + basePath;
-    }
-
-    function cleanUrl(){
-      const url = new URL(window.location.href);
-      url.hash = "";
-      url.searchParams.delete("code");
-      url.searchParams.delete("error");
-      url.searchParams.delete("error_code");
-      url.searchParams.delete("error_description");
-      history.replaceState({}, document.title, url.toString());
-    }
-
-    function readHashTokens(){
-      const hash = (window.location.hash || "").replace(/^#/, "");
-      const p = new URLSearchParams(hash);
-      return { access_token: p.get("access_token"), refresh_token: p.get("refresh_token"), expires_at: p.get("expires_at"), expires_in: p.get("expires_in") };
-    }
-
-    function decodeJwtPayload(jwt){
-      try{
-        const parts = jwt.split(".");
-        if (parts.length < 2) return null;
-        const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-        const json = decodeURIComponent(atob(b64).split("").map(c => "%" + c.charCodeAt(0).toString(16).padStart(2,"0")).join(""));
-        return JSON.parse(json);
-      } catch(e){ return null; }
-    }
-
-    function storageKey(){ return `sb-${SUPABASE_REF}-auth-token`; }
-
-    function saveSessionToStorage(access_token, refresh_token, expires_at, expires_in){
-      const now = Math.floor(Date.now()/1000);
-      const exp = expires_at ? Number(expires_at) : expires_in ? (now + Number(expires_in)) : (now + 3600);
-      localStorage.setItem(storageKey(), JSON.stringify({ access_token, refresh_token, token_type:"bearer", expires_in: Math.max(0, exp-now), expires_at: exp, user:null }));
-    }
-
-    function getStoredSession(){
-      const raw = localStorage.getItem(storageKey());
-      if (!raw) return null;
-      try { return JSON.parse(raw); } catch(e){ return null; }
-    }
-
-    function importFromHashIfPresent(){
-      const t = readHashTokens();
-      if (t.access_token && t.refresh_token){
-        saveSessionToStorage(t.access_token, t.refresh_token, t.expires_at, t.expires_in);
-        cleanUrl();
-      }
-    }
-
-    async function refreshIfExpired(){
-      const sess = getStoredSession();
-      if (!sess?.access_token || !sess?.refresh_token) return;
-      const payload = decodeJwtPayload(sess.access_token);
-      const now = Math.floor(Date.now()/1000);
-      if (!payload?.exp || payload.exp > (now + 60)) return;
-
-      authStatusEl.textContent = "Refreshing…";
-      const resp = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
-        method: "POST",
-        headers: { "Content-Type":"application/json", "apikey": SUPABASE_ANON_KEY },
-        body: JSON.stringify({ refresh_token: sess.refresh_token })
-      });
-
-      if (!resp.ok){ localStorage.removeItem(storageKey()); return; }
-      const data = await resp.json();
-      if (data?.access_token && data?.refresh_token){ saveSessionToStorage(data.access_token, data.refresh_token, null, data.expires_in); }
-    }
-
-    function currentUserFromStorage(){
-      const sess = getStoredSession();
-      if (!sess?.access_token) return null;
-      const p = decodeJwtPayload(sess.access_token);
-      if (!p?.sub) return null;
-      return { id: p.sub, email: (p.email || "").toLowerCase() };
-    }
-
-    function buildClient(){
-      const sess = getStoredSession();
-      const token = sess?.access_token || null;
-      if (token){
-        return supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-          auth: { persistSession:false, autoRefreshToken:false, detectSessionInUrl:false, storage: window.localStorage },
-          global: { headers: { Authorization: `Bearer ${token}` } }
-        });
-      }
-      return supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-        auth: { persistSession:false, autoRefreshToken:false, detectSessionInUrl:false, storage: window.localStorage }
-      });
-    }
-
-    function setAuthPill(text, ok){
-      authStatusEl.textContent = text;
-      logoutBtn.style.display = ok ? "inline-block" : "none";
-    }
-
-    function fillSelect(selectEl, options, placeholder){
-      selectEl.innerHTML = "";
-      const ph = document.createElement("option");
-      ph.value = "";
-      ph.textContent = placeholder;
-      selectEl.appendChild(ph);
-      options.forEach(v => {
-        const o = document.createElement("option");
-        o.value = v;
-        o.textContent = v;
-        selectEl.appendChild(o);
-      });
-    }
-
-    function updateConditionDropdown(){
-      const cat = catSelect.value || "";
-      const list = CATEGORY_TO_CONDITIONS[cat] || [];
-      if (!cat){
-        condSelect.disabled = true;
-        fillSelect(condSelect, [], "Select a condition…");
-        return;
-      }
-      condSelect.disabled = false;
-      fillSelect(condSelect, list, "Select a condition…");
-      condSelect.value = "";
-    }
-
-    function currentCampaignKey(){ return "songraise_current_campaign_id"; }
-    function setCurrentCampaign(id, title){
-      if (id) localStorage.setItem(currentCampaignKey(), id);
-      else localStorage.removeItem(currentCampaignKey());
-      renderCurrentCampaignBadge(id, title);
-    }
-    function getCurrentCampaignId(){ return localStorage.getItem(currentCampaignKey()) || ""; }
-
-    function renderCurrentCampaignBadge(id, title){
-      const base = baseUrl();
-      if (id){
-        currentBadge.textContent = `Active campaign: ${title ? title : id}`;
-        viewCurrentBtn.style.display = "inline-block";
-        viewCurrentBtn.href = `${base}campaign.html?id=${encodeURIComponent(id)}`;
-        clearCurrentBtn.style.display = "inline-block";
-      } else {
-        currentBadge.textContent = "No active campaign";
-        viewCurrentBtn.style.display = "none";
-        clearCurrentBtn.style.display = "none";
-      }
-    }
-
-    function setCurrentStatusBadge(status){
-      if (!status){
-        currentStatusBadge.style.display = "none";
-        currentStatusBadge.textContent = "";
-        return;
-      }
-      currentStatusBadge.style.display = "inline-flex";
-      currentStatusBadge.textContent = `Status: ${status}`;
-    }
-
-    function setReadiness(campaign){
-      if (!campaign){ readinessBlock.style.display = "none"; return; }
-      readinessBlock.style.display = "block";
-
-      const hasCampaign = true;
-      const hasDonation = !!(campaign.donation_url);
-      const hasSong = !!(campaign.song_id);
-      const isPublished = (campaign.status === "published");
-
-      r1.textContent = hasCampaign ? "✅" : "⏳";
-      r2.textContent = hasDonation ? "✅" : "⏳";
-      r3.textContent = hasSong ? "✅" : "⏳";
-      r4.textContent = (hasSong && isPublished) ? "✅" : "⏳";
-
-      if (!hasSong) readinessSummary.textContent = "Song in production";
-      else if (!isPublished) readinessSummary.textContent = "Ready (not published)";
-      else readinessSummary.textContent = "Published";
-    }
-
-    function buildPromptPack(){
-      const title = document.getElementById("title").value.trim();
-      const cat = catSelect.value || "";
-      const cond = condSelect.value || "";
-      const emotion = emotionSelect.value || "";
-      const genre = genreSelect.value || "";
-      const style = document.getElementById("artist_style").value.trim();
-      const hook = document.getElementById("hook").value.trim();
-
-      const lines = [];
-      lines.push("SONGRAISE PROMPT PACK (Admin)");
-      if (title) lines.push(`Campaign Title: ${title}`);
-      if (cat) lines.push(`Category: ${cat}`);
-      if (cond) lines.push(`Condition: ${cond}`);
-      if (emotion) lines.push(`Emotion: ${emotion}`);
-      if (genre) lines.push(`Genre: ${genre}`);
-      if (style) lines.push(`Artist style: ${style}`);
-      if (hook) lines.push(`Hook idea: ${hook}`);
-      lines.push("");
-      lines.push("PROMPT (paste into Suno):");
-
-      const promptParts = [];
-      if (cat || cond) promptParts.push(`Fundraising song about ${cond ? cond : "this cause"}${cat ? ` (${cat})` : ""}.`);
-      if (emotion) promptParts.push(`Emotion: ${emotion}.`);
-      if (genre) promptParts.push(`Genre: ${genre}.`);
-      if (style) promptParts.push(`Style: ${style}.`);
-      promptParts.push("Uplifting, empathetic, community-focused, clear call-to-action to donate.");
-      if (hook) promptParts.push(`Include hook: "${hook}".`);
-      promptParts.push("Catchy and respectful. Memorable chorus.");
-
-      lines.push(promptParts.join(" "));
-      return lines.join("\n");
-    }
-
-    async function copyToClipboard(text){
-      try{ await navigator.clipboard.writeText(text); return true; }
-      catch(e){ return false; }
-    }
-
-    function safeFileName(name){
-      return (name || "audio.mp3")
-        .toLowerCase()
-        .replace(/[^a-z0-9\.\-_]+/g, "-")
-        .replace(/-+/g, "-")
-        .replace(/^-|-$/g, "");
-    }
-
-    async function getAudioDurationSeconds(file){
-      return new Promise((resolve) => {
-        try{
-          const url = URL.createObjectURL(file);
-          const audio = new Audio();
-          audio.preload = "metadata";
-          audio.src = url;
-          const cleanup = () => { try{ URL.revokeObjectURL(url); }catch(e){} };
-          audio.onloadedmetadata = () => {
-            const d = Number.isFinite(audio.duration) ? audio.duration : null;
-            cleanup();
-            resolve(d ? Math.round(d) : null);
-          };
-          audio.onerror = () => { cleanup(); resolve(null); };
-        }catch(e){ resolve(null); }
-      });
-    }
-
-    async function getCampaignById(client, id){
-      if (!id) return null;
-      const { data, error } = await client.from("campaigns").select("id,title,donation_url,song_id,status").eq("id", id).single();
-      if (error) return null;
-      return data || null;
-    }
-
-    async function loadCampaigns(client, user, isAdmin){
-      campaignsStatus.textContent = "Loading…";
-      campaignsStatus.classList.remove("error");
-      campaignsBody.innerHTML = "";
-
-      let q = client.from("campaigns")
-        .select("id,title,donation_url,created_at,status,user_id,song_id")
-        .order("created_at",{ascending:false})
-        .limit(50);
-
-      q = isAdmin ? q : q.eq("user_id", user.id);
-
-      const { data, error } = await q;
-      if (error){
-        campaignsStatus.textContent = "Error: " + error.message;
-        campaignsStatus.classList.add("error");
-        return;
-      }
-
-      if (!data || data.length === 0){
-        campaignsStatus.textContent = "No campaigns yet.";
-        return;
-      }
-
-      const base = baseUrl();
-      campaignsBody.innerHTML = data.map(c => {
-        const t = c.title || "(Untitled)";
-        const created = c.created_at ? new Date(c.created_at).toLocaleString() : "";
-        const view = `${base}campaign.html?id=${encodeURIComponent(c.id)}`;
-        const statusText = c.status || "submitted";
-        const statusBadge = `<span class="badge">${statusText}</span>`;
-        return `<tr>
-          <td>${t}</td>
-          <td>${statusBadge}</td>
-          <td>${created}</td>
-          <td><a class="link" href="${view}">View</a></td>
-        </tr>`;
-      }).join("");
-
-      campaignsStatus.textContent = `Showing ${data.length} campaign(s).`;
-    }
-
-    async function refreshAll(){
-      importFromHashIfPresent();
-      await refreshIfExpired();
-
-      const user = currentUserFromStorage();
-      const client = buildClient();
-
-      const loggedIn = !!user;
-      const isAdmin = loggedIn && user.email === ADMIN_EMAIL;
-
-      setAuthPill(loggedIn ? "Logged in ✅" : "Logged out", loggedIn);
-
-      roleBadge.style.display = loggedIn ? "inline-flex" : "none";
-      if (loggedIn){
-        roleBadge.textContent = isAdmin ? "Admin" : "Charity";
-      }
-
-      adminBlock.style.display = isAdmin ? "block" : "none";
-      charityNote.style.display = loggedIn && !isAdmin ? "block" : "none";
-
-      if (loggedIn){
-        await loadCampaigns(client, user, isAdmin);
-      } else {
-        campaignsBody.innerHTML = "";
-        campaignsStatus.textContent = "Please log in to see campaigns.";
-      }
-
-      const curId = getCurrentCampaignId();
-      if (curId) renderCurrentCampaignBadge(curId, "current");
-      else renderCurrentCampaignBadge("", "");
-
-      const hasActive = !!curId;
-      generateBtn.disabled = !(isAdmin && hasActive);
-      uploadBtn.disabled = !(isAdmin && hasActive);
-      scrollUploadBtn.disabled = !(isAdmin && hasActive);
-      publishBtn.disabled = !(isAdmin && hasActive);
-      unpublishBtn.disabled = !(isAdmin && hasActive);
-
-      if (loggedIn && hasActive){
-        const cur = await getCampaignById(client, curId);
-        if (cur){
-          setCurrentStatusBadge(cur.status || "submitted");
-          setReadiness(cur);
-        } else {
-          setCurrentStatusBadge("");
+        function baseUrl(){
+          const u = new URL(window.location.href);
+          const basePath = u.pathname.endsWith("/") ? u.pathname : u.pathname.replace(/[^\/]+$/, "");
+          return u.origin + basePath;
         }
-      } else {
-        setCurrentStatusBadge("");
-      }
 
-      return { user, client, isAdmin };
-    }
+        function cleanUrl(){
+          const url = new URL(window.location.href);
+          url.hash = "";
+          url.searchParams.delete("code");
+          url.searchParams.delete("error");
+          url.searchParams.delete("error_code");
+          url.searchParams.delete("error_description");
+          history.replaceState({}, document.title, url.toString());
+        }
 
-    async function setCampaignStatus(newStatus){
-      const { user, client, isAdmin } = await refreshAll();
-      if (!user || !isAdmin){
-        alert("Admin only.");
-        return;
-      }
-      const curId = getCurrentCampaignId();
-      if (!curId){
-        alert("No active campaign selected.");
-        return;
-      }
+        function readHashTokens(){
+          const hash = (window.location.hash || "").replace(/^#/, "");
+          const p = new URLSearchParams(hash);
+          return { access_token: p.get("access_token"), refresh_token: p.get("refresh_token"), expires_at: p.get("expires_at"), expires_in: p.get("expires_in") };
+        }
 
-      const ok = confirm(`Set campaign status to "${newStatus}"?`);
-      if (!ok) return;
+        function decodeJwtPayload(jwt){
+          try{
+            const parts = jwt.split(".");
+            if (parts.length < 2) return null;
+            const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+            const json = decodeURIComponent(atob(b64).split("").map(c => "%" + c.charCodeAt(0).toString(16).padStart(2,"0")).join(""));
+            return JSON.parse(json);
+          } catch(e){ return null; }
+        }
 
-      adminStatus.classList.remove("error","ok");
-      adminStatus.textContent = "Updating status…";
+        function storageKey(){ return `sb-${SUPABASE_REF}-auth-token`; }
 
-      const { error } = await client.from("campaigns").update({ status: newStatus }).eq("id", curId);
-      if (error){
-        adminStatus.classList.add("error");
-        adminStatus.textContent = "Status update failed: " + error.message;
-        return;
-      }
+        function saveSessionToStorage(access_token, refresh_token, expires_at, expires_in){
+          const now = Math.floor(Date.now()/1000);
+          const exp = expires_at ? Number(expires_at) : expires_in ? (now + Number(expires_in)) : (now + 3600);
+          localStorage.setItem(storageKey(), JSON.stringify({ access_token, refresh_token, token_type:"bearer", expires_in: Math.max(0, exp-now), expires_at: exp, user:null }));
+        }
 
-      adminStatus.classList.add("ok");
-      adminStatus.textContent = `Status updated ✅ (${newStatus})`;
-      await refreshAll();
-    }
+        function getStoredSession(){
+          const raw = localStorage.getItem(storageKey());
+          if (!raw) return null;
+          try { return JSON.parse(raw); } catch(e){ return null; }
+        }
 
-    loginBtn.addEventListener("click", async () => {
-      const email = (emailEl.value || "").trim();
-      if (!email){ alert("Type your email first."); return; }
-      const redirectTo = `${baseUrl()}dashboard.html?v=${Date.now()}`;
-      setAuthPill("Sending link…", false);
-      const { error } = await clientForAuth.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo } });
-      if (error){ setAuthPill("Logged out", false); alert("Login error: " + error.message); return; }
-      alert("Login email sent. Open the newest email and click the login link once.");
-      setAuthPill("Check your email (link sent)", false);
-    });
+        function importFromHashIfPresent(){
+          const t = readHashTokens();
+          if (t.access_token && t.refresh_token){
+            saveSessionToStorage(t.access_token, t.refresh_token, t.expires_at, t.expires_in);
+            cleanUrl();
+          }
+        }
 
-    logoutBtn.addEventListener("click", async () => {
-      localStorage.removeItem(storageKey());
-      setCurrentCampaign("", "");
-      await refreshAll();
-    });
+        async function refreshIfExpired(){
+          const sess = getStoredSession();
+          if (!sess?.access_token || !sess?.refresh_token) return;
+          const payload = decodeJwtPayload(sess.access_token);
+          const now = Math.floor(Date.now()/1000);
+          if (!payload?.exp || payload.exp > (now + 60)) return;
 
-    catSelect.addEventListener("change", updateConditionDropdown);
+          authStatusEl.textContent = "Refreshing…";
+          const resp = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+            method: "POST",
+            headers: { "Content-Type":"application/json", "apikey": SUPABASE_ANON_KEY },
+            body: JSON.stringify({ refresh_token: sess.refresh_token })
+          });
 
-    clearCurrentBtn.addEventListener("click", () => {
-      setCurrentCampaign("", "");
-      readinessBlock.style.display = "none";
-      uploadStatus.textContent = "";
-      uploadStatus.classList.remove("error","ok");
-      fileLine.textContent = "No file selected";
-      mp3FileEl.value = "";
-      currentStatusBadge.style.display = "none";
-      currentStatusBadge.textContent = "";
-    });
+          if (!resp.ok){ localStorage.removeItem(storageKey()); return; }
+          const data = await resp.json();
+          if (data?.access_token && data?.refresh_token){ saveSessionToStorage(data.access_token, data.refresh_token, null, data.expires_in); }
+        }
 
-    resetFormBtn.addEventListener("click", () => {
-      createForm.reset();
-      condSelect.disabled = true;
-      fillSelect(condSelect, [], "Select a condition…");
-      createStatus.textContent = "";
-      createStatus.classList.remove("error","ok");
-      readinessBlock.style.display = "none";
-    });
+        function currentUserFromStorage(){
+          const sess = getStoredSession();
+          if (!sess?.access_token) return null;
+          const p = decodeJwtPayload(sess.access_token);
+          if (!p?.sub) return null;
+          return { id: p.sub, email: (p.email || "").toLowerCase() };
+        }
 
-    createForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      createStatus.textContent = "";
-      createStatus.classList.remove("error","ok");
+        function buildClient(){
+          const sess = getStoredSession();
+          const token = sess?.access_token || null;
+          if (token){
+            return supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+              auth: { persistSession:false, autoRefreshToken:false, detectSessionInUrl:false, storage: window.localStorage },
+              global: { headers: { Authorization: `Bearer ${token}` } }
+            });
+          }
+          return supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: { persistSession:false, autoRefreshToken:false, detectSessionInUrl:false, storage: window.localStorage }
+          });
+        }
 
-      const { user, client, isAdmin } = await refreshAll();
-      if (!user){
-        createStatus.textContent = "Please log in first.";
-        createStatus.classList.add("error");
-        return;
-      }
+        function setAuthPill(text, ok){
+          authStatusEl.textContent = text;
+          logoutBtn.style.display = ok ? "inline-block" : "none";
+        }
 
-      const title = document.getElementById("title").value.trim();
-      const donation_url = document.getElementById("donation_url").value.trim();
-      const campaign_slug = document.getElementById("campaign_slug").value.trim() || null;
-      const description = document.getElementById("description").value.trim() || null;
+        function fillSelect(selectEl, options, placeholder){
+          selectEl.innerHTML = "";
+          const ph = document.createElement("option");
+          ph.value = "";
+          ph.textContent = placeholder;
+          selectEl.appendChild(ph);
+          options.forEach(v => {
+            const o = document.createElement("option");
+            o.value = v;
+            o.textContent = v;
+            selectEl.appendChild(o);
+          });
+        }
 
-      if (!title || !donation_url){
-        createStatus.textContent = "Please fill Campaign title and Donation URL.";
-        createStatus.classList.add("error");
-        return;
-      }
+        function updateConditionDropdown(){
+          const cat = catSelect.value || "";
+          const list = CATEGORY_TO_CONDITIONS[cat] || [];
+          if (!cat){
+            condSelect.disabled = true;
+            fillSelect(condSelect, [], "Select a condition…");
+            return;
+          }
+          condSelect.disabled = false;
+          fillSelect(condSelect, list, "Select a condition…");
+          condSelect.value = "";
+        }
 
-      createBtn.disabled = true;
-      createStatus.textContent = "Creating campaign…";
+        function currentCampaignKey(){ return "songraise_current_campaign_id"; }
+        function setCurrentCampaign(id, title){
+          if (id) localStorage.setItem(currentCampaignKey(), id);
+          else localStorage.removeItem(currentCampaignKey());
+          renderCurrentCampaignBadge(id, title);
+        }
+        function getCurrentCampaignId(){ return localStorage.getItem(currentCampaignKey()) || ""; }
 
-      const { data: camp, error: campErr } = await client
-        .from("campaigns")
-        .insert({
-          user_id: user.id,
-          title,
-          description,
-          donation_url,
-          campaign_slug,
-          status: "submitted",
-          song_id: null
-        })
-        .select("id,title,donation_url,song_id,status")
-        .single();
+        function renderCurrentCampaignBadge(id, title){
+          const base = baseUrl();
+          if (id){
+            currentBadge.textContent = `Active campaign: ${title ? title : id}`;
+            viewCurrentBtn.style.display = "inline-block";
+            viewCurrentBtn.href = `${base}campaign.html?id=${encodeURIComponent(id)}`;
+            clearCurrentBtn.style.display = "inline-block";
+          } else {
+            currentBadge.textContent = "No active campaign";
+            viewCurrentBtn.style.display = "none";
+            clearCurrentBtn.style.display = "none";
+          }
+        }
 
-      if (campErr){
-        createStatus.textContent = "Error creating campaign: " + campErr.message;
-        createStatus.classList.add("error");
-        createBtn.disabled = false;
-        return;
-      }
+        function setCurrentStatusBadge(status){
+          if (!status){
+            currentStatusBadge.style.display = "none";
+            currentStatusBadge.textContent = "";
+            return;
+          }
+          currentStatusBadge.style.display = "inline-flex";
+          currentStatusBadge.textContent = `Status: ${status}`;
+        }
 
-      setCurrentCampaign(camp.id, camp.title);
-      setReadiness(camp);
-      setCurrentStatusBadge(camp.status || "submitted");
+        function setReadiness(campaign){
+          if (!campaign){ readinessBlock.style.display = "none"; return; }
+          readinessBlock.style.display = "block";
 
-      if (isAdmin){
-        createStatus.textContent = "Campaign created ✅ Generate the song, upload MP3, then Publish when ready.";
-      } else {
-        createStatus.textContent = "Campaign submitted ✅ SongRaise is generating your song. You can share once it’s published.";
-      }
-      createStatus.classList.add("ok");
-      createBtn.disabled = false;
+          const hasCampaign = true;
+          const hasDonation = !!(campaign.donation_url);
+          const hasSong = !!(campaign.song_id);
+          const isPublished = (campaign.status === "published");
 
-      await refreshAll();
-    });
+          r1.textContent = hasCampaign ? "✅" : "⏳";
+          r2.textContent = hasDonation ? "✅" : "⏳";
+          r3.textContent = hasSong ? "✅" : "⏳";
+          r4.textContent = (hasSong && isPublished) ? "✅" : "⏳";
 
-    generateBtn.addEventListener("click", async () => {
-      const { user, isAdmin } = await refreshAll();
-      if (!user || !isAdmin){ return; }
+          if (!hasSong) readinessSummary.textContent = "Song in production";
+          else if (!isPublished) readinessSummary.textContent = "Ready (not published)";
+          else readinessSummary.textContent = "Published";
+        }
 
-      const curId = getCurrentCampaignId();
-      if (!curId){ alert("Select/create a campaign first."); return; }
+        function buildPromptPack(){
+          const title = document.getElementById("title").value.trim();
+          const cat = catSelect.value || "";
+          const cond = condSelect.value || "";
+          const emotion = emotionSelect.value || "";
+          const genre = genreSelect.value || "";
+          const style = document.getElementById("artist_style").value.trim();
+          const hook = document.getElementById("hook").value.trim();
 
-      const pack = buildPromptPack();
-      promptPreview.textContent = pack;
-      const ok = await copyToClipboard(pack);
-      if (!ok){ alert("Clipboard blocked. Copy manually from the box."); }
+          const lines = [];
+          lines.push("SONGRAISE PROMPT PACK (Admin)");
+          if (title) lines.push(`Campaign Title: ${title}`);
+          if (cat) lines.push(`Category: ${cat}`);
+          if (cond) lines.push(`Condition: ${cond}`);
+          if (emotion) lines.push(`Emotion: ${emotion}`);
+          if (genre) lines.push(`Genre: ${genre}`);
+          if (style) lines.push(`Artist style: ${style}`);
+          if (hook) lines.push(`Hook idea: ${hook}`);
+          lines.push("");
+          lines.push("PROMPT (paste into Suno):");
 
-      overlay.style.display = "flex";
-      window.open(SUNO_URL, "_blank", "noopener,noreferrer");
-    });
+          const promptParts = [];
+          if (cat || cond) promptParts.push(`Fundraising song about ${cond ? cond : "this cause"}${cat ? ` (${cat})` : ""}.`);
+          if (emotion) promptParts.push(`Emotion: ${emotion}.`);
+          if (genre) promptParts.push(`Genre: ${genre}.`);
+          if (style) promptParts.push(`Style: ${style}.`);
+          promptParts.push("Uplifting, empathetic, community-focused, clear call-to-action to donate.");
+          if (hook) promptParts.push(`Include hook: "${hook}".`);
+          promptParts.push("Catchy and respectful. Memorable chorus.");
 
-    publishBtn.addEventListener("click", async () => setCampaignStatus("published"));
-    unpublishBtn.addEventListener("click", async () => setCampaignStatus("unlisted"));
+          lines.push(promptParts.join(" "));
+          return lines.join("\n");
+        }
 
-    copyAgainBtn.addEventListener("click", async () => {
-      const ok = await copyToClipboard(promptPreview.textContent || "");
-      alert(ok ? "Copied ✅" : "Could not copy. Select and copy manually.");
-    });
+        async function copyToClipboard(text){
+          try{ await navigator.clipboard.writeText(text); return true; }
+          catch(e){ return false; }
+        }
 
-    openSunoBtn.addEventListener("click", () => {
-      window.open(SUNO_URL, "_blank", "noopener,noreferrer");
-    });
+        function safeFileName(name){
+          return (name || "audio.mp3")
+            .toLowerCase()
+            .replace(/[^a-z0-9\.\-_]+/g, "-")
+            .replace(/-+/g, "-")
+            .replace(/^-|-$/g, "");
+        }
 
-    closeOverlayBtn.addEventListener("click", () => {
-      overlay.style.display = "none";
-    });
+        async function getAudioDurationSeconds(file){
+          return new Promise((resolve) => {
+            try{
+              const url = URL.createObjectURL(file);
+              const audio = new Audio();
+              audio.preload = "metadata";
+              audio.src = url;
+              const cleanup = () => { try{ URL.revokeObjectURL(url); }catch(e){} };
+              audio.onloadedmetadata = () => {
+                const d = Number.isFinite(audio.duration) ? audio.duration : null;
+                cleanup();
+                resolve(d ? Math.round(d) : null);
+              };
+              audio.onerror = () => { cleanup(); resolve(null); };
+            }catch(e){ resolve(null); }
+          });
+        }
 
-    scrollUploadBtn.addEventListener("click", () => {
-      dropzone.scrollIntoView({ behavior:"smooth", block:"start" });
-    });
+        async function getCampaignById(client, id){
+          if (!id) return null;
+          const { data, error } = await client.from("campaigns").select("id,title,donation_url,song_id,status").eq("id", id).single();
+          if (error) return null;
+          return data || null;
+        }
 
-    function setDropDrag(on){
-      if (on) dropzone.classList.add("drag");
-      else dropzone.classList.remove("drag");
-    }
+        async function loadCampaigns(client, user, isAdmin){
+          campaignsStatus.textContent = "Loading…";
+          campaignsStatus.classList.remove("error");
+          campaignsBody.innerHTML = "";
 
-    ["dragenter","dragover"].forEach(evt => {
-      dropzone.addEventListener(evt, (e) => { e.preventDefault(); setDropDrag(true); });
-    });
-    ["dragleave","drop"].forEach(evt => {
-      dropzone.addEventListener(evt, (e) => { e.preventDefault(); setDropDrag(false); });
-    });
+          let q = client.from("campaigns")
+            .select("id,title,donation_url,created_at,status,user_id,song_id")
+            .order("created_at",{ascending:false})
+            .limit(50);
 
-    dropzone.addEventListener("drop", (e) => {
-      const files = e.dataTransfer?.files;
-      if (files && files.length){
-        mp3FileEl.files = files;
-        fileLine.textContent = files[0].name || "Selected file";
-      }
-    });
+          q = isAdmin ? q : q.eq("user_id", user.id);
 
-    mp3FileEl.addEventListener("change", () => {
-      const f = mp3FileEl.files && mp3FileEl.files[0];
-      fileLine.textContent = f ? (f.name || "Selected file") : "No file selected";
-    });
+          const { data, error } = await q;
+          if (error){
+            campaignsStatus.textContent = "Error: " + error.message;
+            campaignsStatus.classList.add("error");
+            return;
+          }
 
-    function setUploadStatus(text, kind){
-      uploadStatus.textContent = text || "";
-      uploadStatus.classList.remove("error","ok");
-      if (kind) uploadStatus.classList.add(kind);
-    }
+          if (!data || data.length === 0){
+            campaignsStatus.textContent = "No campaigns yet.";
+            return;
+          }
 
-    async function uploadAndAttach(file){
-      setUploadStatus("", null);
+          const base = baseUrl();
+          campaignsBody.innerHTML = data.map(c => {
+            const t = c.title || "(Untitled)";
+            const created = c.created_at ? new Date(c.created_at).toLocaleString() : "";
+            const view = `${base}campaign.html?id=${encodeURIComponent(c.id)}`;
+            const statusText = c.status || "submitted";
+            const statusBadge = `<span class="badge">${statusText}</span>`;
+            return `<tr>
+              <td>${t}</td>
+              <td>${statusBadge}</td>
+              <td>${created}</td>
+              <td><a class="link" href="${view}">View</a></td>
+            </tr>`;
+          }).join("");
 
-      const { user, client, isAdmin } = await refreshAll();
-      if (!user || !isAdmin){ setUploadStatus("Admin only.", "error"); return; }
+          campaignsStatus.textContent = `Showing ${data.length} campaign(s).`;
+        }
 
-      const curId = getCurrentCampaignId();
-      if (!curId){ setUploadStatus("No active campaign.", "error"); return; }
+        async function refreshAll(){
+          importFromHashIfPresent();
+          await refreshIfExpired();
 
-      if (!file){ setUploadStatus("Choose or drop an MP3 file first.", "error"); return; }
+          const user = currentUserFromStorage();
+          const client = buildClient();
 
-      const isMp3 = (file.type === "audio/mpeg") || /\.mp3$/i.test(file.name || "");
-      if (!isMp3){ setUploadStatus("Please upload an MP3 file.", "error"); return; }
+          const loggedIn = !!user;
+          const isAdmin = loggedIn && user.email === ADMIN_EMAIL;
 
-      const maxMB = 25;
-      const sizeMB = file.size / (1024*1024);
-      if (sizeMB > maxMB){ setUploadStatus(`File too large (${sizeMB.toFixed(1)}MB). Max ${maxMB}MB.`, "error"); return; }
+          setAuthPill(loggedIn ? "Logged in ✅" : "Logged out", loggedIn);
 
-      uploadBtn.disabled = true;
-      generateBtn.disabled = true;
+          roleBadge.style.display = loggedIn ? "inline-flex" : "none";
+          if (loggedIn){
+            roleBadge.textContent = isAdmin ? "Admin" : "Charity";
+          }
 
-      setUploadStatus("Reading duration…", null);
-      const durationSeconds = await getAudioDurationSeconds(file);
+          adminBlock.style.display = isAdmin ? "block" : "none";
+          charityNote.style.display = loggedIn && !isAdmin ? "block" : "none";
 
-      setUploadStatus(`Uploading MP3 to ${BUCKET_AUDIO}…`, null);
-      const path = `${user.id}/${curId}/${Date.now()}-${safeFileName(file.name)}`;
+          if (loggedIn){
+            await loadCampaigns(client, user, isAdmin);
+          } else {
+            campaignsBody.innerHTML = "";
+            campaignsStatus.textContent = "Please log in to see campaigns.";
+          }
 
-      const { error: upErr } = await client.storage.from(BUCKET_AUDIO).upload(path, file, {
-        upsert: true,
-        contentType: file.type || "audio/mpeg"
-      });
+          const curId = getCurrentCampaignId();
+          if (curId) renderCurrentCampaignBadge(curId, "current");
+          else renderCurrentCampaignBadge("", "");
 
-      if (upErr){
-        setUploadStatus("Upload failed: " + upErr.message, "error");
-        uploadBtn.disabled = false;
-        generateBtn.disabled = false;
-        return;
-      }
+          const hasActive = !!curId;
+          generateBtn.disabled = !(isAdmin && hasActive);
+          uploadBtn.disabled = !(isAdmin && hasActive);
+          scrollUploadBtn.disabled = !(isAdmin && hasActive);
+          publishBtn.disabled = !(isAdmin && hasActive);
+          unpublishBtn.disabled = !(isAdmin && hasActive);
 
-      const { data: pub } = client.storage.from(BUCKET_AUDIO).getPublicUrl(path);
-      const publicUrl = pub?.publicUrl || "";
-      if (!publicUrl){
-        setUploadStatus("Upload succeeded, but public URL could not be generated.", "error");
-        uploadBtn.disabled = false;
-        generateBtn.disabled = false;
-        return;
-      }
+          if (loggedIn && hasActive){
+            const cur = await getCampaignById(client, curId);
+            if (cur){
+              setCurrentStatusBadge(cur.status || "submitted");
+              setReadiness(cur);
+            } else {
+              setCurrentStatusBadge("");
+            }
+          } else {
+            setCurrentStatusBadge("");
+          }
 
-      setUploadStatus("Creating song record…", null);
+          return { user, client, isAdmin };
+        }
 
-      const cat = catSelect.value || null;
-      const cond = condSelect.value || null;
-      const lyrics = document.getElementById("lyrics").value.trim() || null;
+        async function setCampaignStatus(newStatus){
+          const { user, client, isAdmin } = await refreshAll();
+          if (!user || !isAdmin){
+            alert("Admin only.");
+            return;
+          }
+          const curId = getCurrentCampaignId();
+          if (!curId){
+            alert("No active campaign selected.");
+            return;
+          }
 
-      const { data: songRow, error: songErr } = await client
-        .from("songs")
-        .insert({
-          audio_url: publicUrl,
-          cause_category: cat,
-          cause_condition: cond,
-          condition: cond,
-          lyrics: lyrics,
-          duration_seconds: durationSeconds,
-          status: "ready",
-          song_url: null,
-          cover_url: null
-        })
-        .select("id")
-        .single();
+          const ok = confirm(`Set campaign status to "${newStatus}"?`);
+          if (!ok) return;
 
-      if (songErr){
-        setUploadStatus("Error creating song: " + songErr.message, "error");
-        uploadBtn.disabled = false;
-        generateBtn.disabled = false;
-        return;
-      }
+          adminStatus.classList.remove("error","ok");
+          adminStatus.textContent = "Updating status…";
 
-      setUploadStatus("Attaching song to campaign (REPLACE)…", null);
+          const { error } = await client.from("campaigns").update({ status: newStatus }).eq("id", curId);
+          if (error){
+            adminStatus.classList.add("error");
+            adminStatus.textContent = "Status update failed: " + error.message;
+            return;
+          }
 
-      const { error: upCampErr } = await client
-        .from("campaigns")
-        .update({ song_id: songRow.id })
-        .eq("id", curId);
+          adminStatus.classList.add("ok");
+          adminStatus.textContent = `Status updated ✅ (${newStatus})`;
+          await refreshAll();
+        }
 
-      if (upCampErr){
-        setUploadStatus("Upload ok, but attach failed: " + upCampErr.message, "error");
-        uploadBtn.disabled = false;
-        generateBtn.disabled = false;
-        return;
-      }
+        loginBtn.addEventListener("click", async () => {
+          const email = (emailEl.value || "").trim();
+          if (!email){ alert("Type your email first."); return; }
+          const redirectTo = `${baseUrl()}dashboard.html?v=${Date.now()}`;
+          setAuthPill("Sending link…", false);
+          const { error } = await clientForAuth.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo } });
+          if (error){ setAuthPill("Logged out", false); alert("Login error: " + error.message); return; }
+          alert("Login email sent. Open the newest email and click the login link once.");
+          setAuthPill("Check your email (link sent)", false);
+        });
 
-      setUploadStatus(`Attached ✅ (duration: ${durationSeconds ? durationSeconds + "s" : "unknown"})`, "ok");
-      uploadBtn.disabled = false;
-      generateBtn.disabled = false;
+        logoutBtn.addEventListener("click", async () => {
+          localStorage.removeItem(storageKey());
+          setCurrentCampaign("", "");
+          await refreshAll();
+        });
 
-      const { data: camp2 } = await client.from("campaigns").select("id,donation_url,song_id,status").eq("id", curId).single();
-      if (camp2){
-        setReadiness(camp2);
-        setCurrentStatusBadge(camp2.status || "submitted");
-      }
+        catSelect.addEventListener("change", updateConditionDropdown);
 
-      await refreshAll();
-    }
+        clearCurrentBtn.addEventListener("click", () => {
+          setCurrentCampaign("", "");
+          readinessBlock.style.display = "none";
+          uploadStatus.textContent = "";
+          uploadStatus.classList.remove("error","ok");
+          fileLine.textContent = "No file selected";
+          mp3FileEl.value = "";
+          currentStatusBadge.style.display = "none";
+          currentStatusBadge.textContent = "";
+        });
 
-    uploadBtn.addEventListener("click", async () => {
-      const file = mp3FileEl.files && mp3FileEl.files[0];
-      await uploadAndAttach(file);
-    });
+        resetFormBtn.addEventListener("click", () => {
+          createForm.reset();
+          condSelect.disabled = true;
+          fillSelect(condSelect, [], "Select a condition…");
+          createStatus.textContent = "";
+          createStatus.classList.remove("error","ok");
+          readinessBlock.style.display = "none";
+        });
 
-    (function init(){
-      fillSelect(catSelect, Object.keys(CATEGORY_TO_CONDITIONS), "Select a category…");
-      fillSelect(condSelect, [], "Select a condition…");
-      condSelect.disabled = true;
-      refreshAll();
-    })();
+        createForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          createStatus.textContent = "";
+          createStatus.classList.remove("error","ok");
 
-    window.addEventListener("pageshow", () => { refreshAll(); });
-  </script>
-      </div>
-  <div id="sr-footer"></div>
-</div>
-<script defer src="shell.js"></script>
+          const { user, client, isAdmin } = await refreshAll();
+          if (!user){
+            createStatus.textContent = "Please log in first.";
+            createStatus.classList.add("error");
+            return;
+          }
 
+          const title = document.getElementById("title").value.trim();
+          const donation_url = document.getElementById("donation_url").value.trim();
+          const campaign_slug = document.getElementById("campaign_slug").value.trim() || null;
+          const description = document.getElementById("description").value.trim() || null;
+
+          if (!title || !donation_url){
+            createStatus.textContent = "Please fill Campaign title and Donation URL.";
+            createStatus.classList.add("error");
+            return;
+          }
+
+          createBtn.disabled = true;
+          createStatus.textContent = "Creating campaign…";
+
+          const { data: camp, error: campErr } = await client
+            .from("campaigns")
+            .insert({
+              user_id: user.id,
+              title,
+              description,
+              donation_url,
+              campaign_slug,
+              status: "submitted",
+              song_id: null
+            })
+            .select("id,title,donation_url,song_id,status")
+            .single();
+
+          if (campErr){
+            createStatus.textContent = "Error creating campaign: " + campErr.message;
+            createStatus.classList.add("error");
+            createBtn.disabled = false;
+            return;
+          }
+
+          setCurrentCampaign(camp.id, camp.title);
+          setReadiness(camp);
+          setCurrentStatusBadge(camp.status || "submitted");
+
+          if (isAdmin){
+            createStatus.textContent = "Campaign created ✅ Generate the song, upload MP3, then Publish when ready.";
+          } else {
+            createStatus.textContent = "Campaign submitted ✅ SongRaise is generating your song. You can share once it’s published.";
+          }
+          createStatus.classList.add("ok");
+          createBtn.disabled = false;
+
+          await refreshAll();
+        });
+
+        generateBtn.addEventListener("click", async () => {
+          const { user, isAdmin } = await refreshAll();
+          if (!user || !isAdmin){ return; }
+
+          const curId = getCurrentCampaignId();
+          if (!curId){ alert("Select/create a campaign first."); return; }
+
+          const pack = buildPromptPack();
+          promptPreview.textContent = pack;
+          const ok = await copyToClipboard(pack);
+          if (!ok){ alert("Clipboard blocked. Copy manually from the box."); }
+
+          overlay.style.display = "flex";
+          window.open(SUNO_URL, "_blank", "noopener,noreferrer");
+        });
+
+        publishBtn.addEventListener("click", async () => setCampaignStatus("published"));
+        unpublishBtn.addEventListener("click", async () => setCampaignStatus("unlisted"));
+
+        copyAgainBtn.addEventListener("click", async () => {
+          const ok = await copyToClipboard(promptPreview.textContent || "");
+          alert(ok ? "Copied ✅" : "Could not copy. Select and copy manually.");
+        });
+
+        openSunoBtn.addEventListener("click", () => {
+          window.open(SUNO_URL, "_blank", "noopener,noreferrer");
+        });
+
+        closeOverlayBtn.addEventListener("click", () => {
+          overlay.style.display = "none";
+        });
+
+        scrollUploadBtn.addEventListener("click", () => {
+          dropzone.scrollIntoView({ behavior:"smooth", block:"start" });
+        });
+
+        function setDropDrag(on){
+          if (on) dropzone.classList.add("drag");
+          else dropzone.classList.remove("drag");
+        }
+
+        ["dragenter","dragover"].forEach(evt => {
+          dropzone.addEventListener(evt, (e) => { e.preventDefault(); setDropDrag(true); });
+        });
+        ["dragleave","drop"].forEach(evt => {
+          dropzone.addEventListener(evt, (e) => { e.preventDefault(); setDropDrag(false); });
+        });
+
+        dropzone.addEventListener("drop", (e) => {
+          const files = e.dataTransfer?.files;
+          if (files && files.length){
+            mp3FileEl.files = files;
+            fileLine.textContent = files[0].name || "Selected file";
+          }
+        });
+
+        mp3FileEl.addEventListener("change", () => {
+          const f = mp3FileEl.files && mp3FileEl.files[0];
+          fileLine.textContent = f ? (f.name || "Selected file") : "No file selected";
+        });
+
+        function setUploadStatus(text, kind){
+          uploadStatus.textContent = text || "";
+          uploadStatus.classList.remove("error","ok");
+          if (kind) uploadStatus.classList.add(kind);
+        }
+
+        async function uploadAndAttach(file){
+          setUploadStatus("", null);
+
+          const { user, client, isAdmin } = await refreshAll();
+          if (!user || !isAdmin){ setUploadStatus("Admin only.", "error"); return; }
+
+          const curId = getCurrentCampaignId();
+          if (!curId){ setUploadStatus("No active campaign.", "error"); return; }
+
+          if (!file){ setUploadStatus("Choose or drop an MP3 file first.", "error"); return; }
+
+          const isMp3 = (file.type === "audio/mpeg") || /\.mp3$/i.test(file.name || "");
+          if (!isMp3){ setUploadStatus("Please upload an MP3 file.", "error"); return; }
+
+          const maxMB = 25;
+          const sizeMB = file.size / (1024*1024);
+          if (sizeMB > maxMB){ setUploadStatus(`File too large (${sizeMB.toFixed(1)}MB). Max ${maxMB}MB.`, "error"); return; }
+
+          uploadBtn.disabled = true;
+          generateBtn.disabled = true;
+
+          setUploadStatus("Reading duration…", null);
+          const durationSeconds = await getAudioDurationSeconds(file);
+
+          setUploadStatus(`Uploading MP3 to ${BUCKET_AUDIO}…`, null);
+          const path = `${user.id}/${curId}/${Date.now()}-${safeFileName(file.name)}`;
+
+          const { error: upErr } = await client.storage.from(BUCKET_AUDIO).upload(path, file, {
+            upsert: true,
+            contentType: file.type || "audio/mpeg"
+          });
+
+          if (upErr){
+            setUploadStatus("Upload failed: " + upErr.message, "error");
+            uploadBtn.disabled = false;
+            generateBtn.disabled = false;
+            return;
+          }
+
+          const { data: pub } = client.storage.from(BUCKET_AUDIO).getPublicUrl(path);
+          const publicUrl = pub?.publicUrl || "";
+          if (!publicUrl){
+            setUploadStatus("Upload succeeded, but public URL could not be generated.", "error");
+            uploadBtn.disabled = false;
+            generateBtn.disabled = false;
+            return;
+          }
+
+          setUploadStatus("Creating song record…", null);
+
+          const cat = catSelect.value || null;
+          const cond = condSelect.value || null;
+          const lyrics = document.getElementById("lyrics").value.trim() || null;
+
+          const { data: songRow, error: songErr } = await client
+            .from("songs")
+            .insert({
+              audio_url: publicUrl,
+              cause_category: cat,
+              cause_condition: cond,
+              condition: cond,
+              lyrics: lyrics,
+              duration_seconds: durationSeconds,
+              status: "ready",
+              song_url: null,
+              cover_url: null
+            })
+            .select("id")
+            .single();
+
+          if (songErr){
+            setUploadStatus("Error creating song: " + songErr.message, "error");
+            uploadBtn.disabled = false;
+            generateBtn.disabled = false;
+            return;
+          }
+
+          setUploadStatus("Attaching song to campaign (REPLACE)…", null);
+
+          const { error: upCampErr } = await client
+            .from("campaigns")
+            .update({ song_id: songRow.id })
+            .eq("id", curId);
+
+          if (upCampErr){
+            setUploadStatus("Upload ok, but attach failed: " + upCampErr.message, "error");
+            uploadBtn.disabled = false;
+            generateBtn.disabled = false;
+            return;
+          }
+
+          setUploadStatus(`Attached ✅ (duration: ${durationSeconds ? durationSeconds + "s" : "unknown"})`, "ok");
+          uploadBtn.disabled = false;
+          generateBtn.disabled = false;
+
+          const { data: camp2 } = await client.from("campaigns").select("id,donation_url,song_id,status").eq("id", curId).single();
+          if (camp2){
+            setReadiness(camp2);
+            setCurrentStatusBadge(camp2.status || "submitted");
+          }
+
+          await refreshAll();
+        }
+
+        uploadBtn.addEventListener("click", async () => {
+          const file = mp3FileEl.files && mp3FileEl.files[0];
+          await uploadAndAttach(file);
+        });
+
+        (function init(){
+          fillSelect(catSelect, Object.keys(CATEGORY_TO_CONDITIONS), "Select a category…");
+          fillSelect(condSelect, [], "Select a condition…");
+          condSelect.disabled = true;
+          refreshAll();
+        })();
+
+        window.addEventListener("pageshow", () => { refreshAll(); });
+      </script>
+
+    </div>
+    <div id="sr-footer"></div>
+  </div>
+
+  <script defer src="shell.js"></script>
 </body>
 </html>
