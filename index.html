@@ -6,17 +6,30 @@
   <title>SongRaise — Turn listening into giving</title>
   <style>
     :root{
-      --bg:#0b1220;
-      --panel:rgba(255,255,255,.07);
-      --panel2:rgba(255,255,255,.10);
-      --border:rgba(255,255,255,.12);
-      --text:#eaf0ff;
-      --muted:rgba(234,240,255,.72);
-      --muted2:rgba(234,240,255,.56);
-      --accent:#7c5cff;
-      --accent2:#2ee59d;
-      --danger:#ff4f55;
-      --shadow: 0 18px 60px rgba(0,0,0,.35);
+      --bg1:#f7fbff;
+      --bg2:#f2f0ff;
+      --bg3:#fff7ea;
+
+      --ink:#14162b;
+      --muted:#5c617a;
+      --muted2:#7b8098;
+
+      --card:#ffffff;
+      --card2:#fbfbff;
+      --border:#e7e8f3;
+      --shadow: 0 18px 60px rgba(20,22,43,.12);
+
+      --brand:#5b49ff;
+      --brand2:#2ec9a2;
+
+      --cta:#ffd34d;         /* sunny yellow */
+      --cta2:#ffbf2f;
+      --ctaInk:#2b240a;
+
+      --ok:#1fbf84;
+      --okBg:#e9fbf3;
+      --okBorder:#bff0dc;
+
       --radius:18px;
       --radius2:14px;
       --font: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -27,12 +40,12 @@
     body{
       margin:0;
       font-family:var(--font);
-      color:var(--text);
+      color:var(--ink);
       background:
-        radial-gradient(900px 450px at 20% 10%, rgba(124,92,255,.35), transparent 55%),
-        radial-gradient(900px 450px at 80% 20%, rgba(46,229,157,.22), transparent 55%),
-        radial-gradient(900px 450px at 50% 95%, rgba(255,79,85,.16), transparent 55%),
-        linear-gradient(180deg, #070b14 0%, #0b1220 65%, #070b14 100%);
+        radial-gradient(1100px 520px at 50% 0%, rgba(91,73,255,.18), transparent 60%),
+        radial-gradient(900px 520px at 20% 10%, rgba(46,201,162,.12), transparent 55%),
+        radial-gradient(900px 520px at 85% 20%, rgba(255,211,77,.22), transparent 55%),
+        linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 45%, var(--bg3) 100%);
       overflow-x:hidden;
     }
 
@@ -40,34 +53,67 @@
     .wrap{
       max-width:1120px;
       margin:0 auto;
-      padding:18px 16px 20px;
+      padding:18px 16px 18px;
       min-height:100vh;
       display:flex;
       flex-direction:column;
       gap:14px;
+      position:relative;
+    }
+
+    /* floating music notes (background) */
+    .notes{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+      z-index:0;
+    }
+    .note{
+      position:absolute;
+      font-size:26px;
+      opacity:.22;
+      filter: blur(.2px);
+      animation: floaty 7s ease-in-out infinite;
+      user-select:none;
+    }
+    .note:nth-child(1){left:6%; top:18%; animation-duration:8s}
+    .note:nth-child(2){left:88%; top:22%; font-size:30px; opacity:.18; animation-duration:9s}
+    .note:nth-child(3){left:78%; top:58%; font-size:24px; opacity:.16; animation-duration:7.5s}
+    .note:nth-child(4){left:10%; top:70%; font-size:22px; opacity:.14; animation-duration:8.5s}
+    .note:nth-child(5){left:55%; top:8%; font-size:20px; opacity:.14; animation-duration:10s}
+    @keyframes floaty{
+      0%{transform: translateY(0px) rotate(-2deg)}
+      50%{transform: translateY(-10px) rotate(2deg)}
+      100%{transform: translateY(0px) rotate(-2deg)}
     }
 
     /* Header */
     .topbar{
+      position:relative;
+      z-index:3;
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:12px;
       padding:10px 12px;
-      border:1px solid var(--border);
-      background:rgba(255,255,255,.04);
+      border:1px solid rgba(231,232,243,.85);
+      background: rgba(255,255,255,.70);
       border-radius:999px;
       backdrop-filter: blur(10px);
+      box-shadow: 0 10px 28px rgba(20,22,43,.07);
     }
     .brand{
       display:flex;align-items:center;gap:10px;
       font-weight:900; letter-spacing:-.02em;
     }
-    .dot{
-      width:10px;height:10px;border-radius:50%;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      box-shadow: 0 0 0 6px rgba(124,92,255,.10);
+    .mark{
+      width:30px;height:30px;border-radius:10px;
+      background: linear-gradient(135deg, rgba(91,73,255,.95), rgba(46,201,162,.72));
+      display:inline-flex;align-items:center;justify-content:center;
+      box-shadow: 0 10px 22px rgba(91,73,255,.18);
     }
+    .mark svg{width:18px;height:18px;fill:#fff}
     .nav{
       display:flex;align-items:center;gap:14px;
       color:var(--muted);
@@ -82,32 +128,37 @@
       padding:10px 14px;
       border-radius:999px;
       border:1px solid var(--border);
-      background:rgba(255,255,255,.06);
-      color:var(--text);
-      font-weight:700;
+      background: rgba(255,255,255,.80);
+      color:var(--ink);
+      font-weight:800;
       cursor:pointer;
       user-select:none;
       transition: transform .08s ease, background .15s ease, border-color .15s ease;
       white-space:nowrap;
     }
-    .btn:hover{background:rgba(255,255,255,.10)}
+    .btn:hover{background:#fff}
     .btn:active{transform: translateY(1px)}
     .btn.primary{
-      border-color: rgba(124,92,255,.55);
-      background: linear-gradient(135deg, rgba(124,92,255,.95), rgba(124,92,255,.55));
-      box-shadow: 0 14px 40px rgba(124,92,255,.22);
+      border-color: rgba(255,211,77,.70);
+      background: linear-gradient(180deg, var(--cta) 0%, var(--cta2) 100%);
+      color: var(--ctaInk);
+      box-shadow: 0 16px 40px rgba(255,191,47,.22);
     }
 
     /* Hero */
     .hero{
+      position:relative;
+      z-index:2;
       display:flex;
       flex-direction:column;
       gap:8px;
-      padding:12px 4px 2px;
+      padding:10px 4px 0;
+      align-items:center;
+      text-align:center;
     }
     h1{
       margin:0;
-      font-size: clamp(2.1rem, 3.2vw, 3.1rem);
+      font-size: clamp(2.2rem, 3.6vw, 3.3rem);
       line-height:1.05;
       letter-spacing:-.03em;
     }
@@ -115,42 +166,27 @@
       margin:0;
       color:var(--muted);
       font-size: clamp(1rem, 1.35vw, 1.15rem);
-      max-width: 60ch;
+      max-width: 62ch;
     }
     .trustline{
-      display:inline-flex;
-      gap:10px;
-      align-items:center;
-      width:fit-content;
-      padding:8px 12px;
-      border:1px solid rgba(255,255,255,.14);
-      border-radius:999px;
-      background: rgba(255,255,255,.05);
-      color: rgba(234,240,255,.90);
-      font-weight:700;
-      font-size:.92rem;
-    }
-    .pill{
-      font-size:.78rem;
+      margin-top:2px;
+      color:var(--muted2);
       font-weight:800;
-      padding:4px 8px;
-      border-radius:999px;
-      border:1px solid rgba(46,229,157,.35);
-      background: rgba(46,229,157,.10);
-      color: rgba(46,229,157,.95);
+      font-size:.98rem;
     }
 
     /* Main */
     .main{
+      position:relative;
+      z-index:2;
       display:grid;
       grid-template-columns: 1fr 1fr;
       gap:14px;
-      flex:1;
       align-items:stretch;
     }
     .card{
       border:1px solid var(--border);
-      background: rgba(255,255,255,.05);
+      background: rgba(255,255,255,.82);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow:hidden;
@@ -162,53 +198,59 @@
       align-items:center;
       justify-content:space-between;
       gap:10px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border-bottom: 1px solid rgba(231,232,243,.85);
+      background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.80));
     }
     .card .head h2{
       margin:0;
-      font-size:1.02rem;
+      font-size:1.06rem;
       letter-spacing:-.01em;
     }
     .card .body{padding:14px 16px 16px}
 
     /* Form */
     .formgrid{display:grid; gap:10px}
-    label{display:block; font-size:.85rem; color:var(--muted); margin-bottom:6px}
+    label{display:block; font-size:.86rem; color:var(--muted); margin-bottom:6px; font-weight:700}
     input{
       width:100%;
       padding:12px 12px;
       border-radius:12px;
-      border:1px solid rgba(255,255,255,.16);
-      background: rgba(7,11,20,.55);
-      color:var(--text);
+      border:1px solid rgba(231,232,243,.95);
+      background: rgba(255,255,255,.92);
+      color:var(--ink);
       outline:none;
       font-size:1rem;
     }
     input:focus{
-      border-color: rgba(124,92,255,.55);
-      box-shadow: 0 0 0 4px rgba(124,92,255,.18);
+      border-color: rgba(91,73,255,.45);
+      box-shadow: 0 0 0 4px rgba(91,73,255,.12);
     }
-    .smallmuted{color:var(--muted2); font-size:.9rem}
-    .checks{display:grid; gap:6px; margin-top:10px}
+    .helper{
+      color:var(--muted2);
+      font-size:.92rem;
+      font-weight:700;
+    }
+
+    .checks{display:grid; gap:8px; margin-top:10px}
     .check{
       display:flex; gap:10px; align-items:flex-start;
-      color: rgba(234,240,255,.86);
-      font-size:.94rem;
+      color: rgba(20,22,43,.92);
+      font-size:.95rem;
+      font-weight:750;
     }
-    .check .mark{
+    .check .tick{
       width:18px;height:18px;border-radius:6px;
-      background: rgba(46,229,157,.12);
-      border:1px solid rgba(46,229,157,.35);
+      background: var(--okBg);
+      border:1px solid var(--okBorder);
       display:inline-flex; align-items:center; justify-content:center;
       flex:0 0 auto;
       margin-top:1px;
     }
-    .check .mark svg{width:12px;height:12px;fill:rgba(46,229,157,.95)}
+    .check .tick svg{width:12px;height:12px;fill:var(--ok)}
     .statline{
       margin-top:12px;
       padding-top:12px;
-      border-top:1px solid rgba(255,255,255,.10);
+      border-top:1px solid rgba(231,232,243,.9);
       display:flex;
       align-items:center;
       justify-content:space-between;
@@ -217,23 +259,23 @@
     }
     .logos{
       display:flex; gap:8px; flex-wrap:wrap;
-      opacity:.92;
     }
     .logochip{
       font-size:.78rem;
       padding:6px 9px;
       border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.04);
-      color: rgba(234,240,255,.78);
+      border:1px solid rgba(231,232,243,.95);
+      background: rgba(255,255,255,.88);
+      color: rgba(20,22,43,.70);
       white-space:nowrap;
+      font-weight:750;
     }
 
     /* Preview widget */
     .previewShell{
       border-radius: var(--radius2);
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(7,11,20,.48);
+      border:1px solid rgba(231,232,243,.95);
+      background: rgba(255,255,255,.90);
       overflow:hidden;
     }
     .wTop{
@@ -242,8 +284,8 @@
       align-items:center;
       justify-content:space-between;
       gap:10px;
-      border-bottom:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
+      border-bottom:1px solid rgba(231,232,243,.90);
+      background: rgba(255,255,255,.92);
     }
     .wCharity{
       display:flex; align-items:center; gap:10px;
@@ -251,67 +293,68 @@
     }
     .wLogo{
       width:28px;height:28px;border-radius:9px;
-      background: linear-gradient(135deg, rgba(124,92,255,.85), rgba(46,229,157,.70));
-      box-shadow: 0 10px 26px rgba(0,0,0,.28);
+      background: linear-gradient(135deg, rgba(91,73,255,.92), rgba(46,201,162,.72));
+      box-shadow: 0 8px 18px rgba(20,22,43,.10);
       flex:0 0 auto;
     }
     .wName{
       display:flex; flex-direction:column; min-width:0;
     }
     .wName b{
-      font-size:.95rem;
+      font-size:.96rem;
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
-    .wName span{color:var(--muted2); font-size:.82rem}
+    .wName span{color:var(--muted2); font-size:.82rem; font-weight:650}
     .badge{
-      font-size:.72rem; font-weight:900;
+      font-size:.74rem; font-weight:900;
       padding:6px 10px;
       border-radius:999px;
-      border:1px solid rgba(46,229,157,.35);
-      background: rgba(46,229,157,.10);
-      color: rgba(46,229,157,.95);
+      border:1px solid var(--okBorder);
+      background: var(--okBg);
+      color: var(--ok);
       white-space:nowrap;
     }
 
     .wBody{padding:12px}
-    .wHeadline{margin:0; font-size:1.05rem; letter-spacing:-.01em}
-    .wSub{margin:6px 0 10px; color:var(--muted); font-size:.92rem}
+    .wHeadline{margin:0; font-size:1.08rem; letter-spacing:-.01em}
+    .wSub{margin:6px 0 10px; color:var(--muted); font-size:.92rem; font-weight:650}
 
     .progressWrap{
       padding:10px 10px;
       border-radius:14px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.04);
+      border:1px solid rgba(231,232,243,.95);
+      background: rgba(248,249,255,.95);
       margin-bottom:10px;
     }
     .bar{
       height:10px;
       border-radius:999px;
-      background: rgba(255,255,255,.10);
+      background: rgba(20,22,43,.06);
       overflow:hidden;
-      border:1px solid rgba(255,255,255,.10);
+      border:1px solid rgba(231,232,243,.95);
     }
     .fill{
       height:100%;
       width: 14%;
       border-radius:999px;
-      background: linear-gradient(90deg, rgba(124,92,255,.95), rgba(46,229,157,.85));
+      background: linear-gradient(90deg, rgba(91,73,255,.90), rgba(46,201,162,.85));
     }
     .pRow{
       margin-top:8px;
       display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;
-      color: rgba(234,240,255,.86);
+      color: rgba(20,22,43,.88);
       font-size:.88rem;
+      font-weight:700;
     }
-    .pRow strong{font-weight:900}
+    .pRow strong{font-weight:950}
 
     .player{
       display:grid;
       gap:10px;
       padding:10px;
       border-radius:14px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.04);
+      border:1px solid rgba(231,232,243,.95);
+      background: rgba(248,249,255,.95);
       margin-bottom:10px;
     }
     .trackTop{
@@ -320,35 +363,35 @@
     .cover{
       width:44px;height:44px;border-radius:12px;
       background:
-        radial-gradient(18px 18px at 30% 30%, rgba(255,255,255,.20), transparent 60%),
-        linear-gradient(135deg, rgba(124,92,255,.90), rgba(255,79,85,.35));
-      border:1px solid rgba(255,255,255,.10);
+        radial-gradient(18px 18px at 30% 30%, rgba(255,255,255,.60), transparent 60%),
+        linear-gradient(135deg, rgba(91,73,255,.85), rgba(255,191,47,.55));
+      border:1px solid rgba(231,232,243,.95);
       flex:0 0 auto;
     }
     .trackMeta{min-width:0}
     .trackMeta b{display:block; font-size:.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-    .trackMeta span{display:block; font-size:.82rem; color:var(--muted2)}
+    .trackMeta span{display:block; font-size:.82rem; color:var(--muted2); font-weight:700}
     .playrow{display:flex; align-items:center; gap:10px}
     .play{
       width:40px;height:40px;border-radius:14px;
-      border:1px solid rgba(124,92,255,.55);
-      background: rgba(124,92,255,.20);
+      border:1px solid rgba(91,73,255,.35);
+      background: rgba(91,73,255,.10);
       display:inline-flex; align-items:center; justify-content:center;
       cursor:pointer;
     }
-    .play svg{width:18px;height:18px;fill:rgba(234,240,255,.92)}
+    .play svg{width:18px;height:18px;fill:rgba(20,22,43,.85)}
     .scrub{
       flex:1;
       height:10px;
       border-radius:999px;
-      background: rgba(255,255,255,.10);
-      border:1px solid rgba(255,255,255,.10);
+      background: rgba(20,22,43,.06);
+      border:1px solid rgba(231,232,243,.95);
       overflow:hidden;
     }
     .scrub > i{
       display:block; height:100%;
       width: 0%;
-      background: linear-gradient(90deg, rgba(46,229,157,.85), rgba(124,92,255,.90));
+      background: linear-gradient(90deg, rgba(46,201,162,.85), rgba(91,73,255,.85));
     }
 
     .cta{
@@ -360,23 +403,23 @@
       width:100%;
       padding:12px 12px;
       border-radius:14px;
-      border:1px solid rgba(124,92,255,.55);
-      background: linear-gradient(135deg, rgba(124,92,255,.95), rgba(124,92,255,.55));
-      color:var(--text);
-      font-weight:900;
+      border:1px solid rgba(91,73,255,.22);
+      background: linear-gradient(180deg, rgba(91,73,255,.90), rgba(91,73,255,.72));
+      color:#fff;
+      font-weight:950;
       cursor:pointer;
       text-align:center;
-      box-shadow: 0 14px 40px rgba(124,92,255,.22);
+      box-shadow: 0 14px 40px rgba(91,73,255,.18);
     }
-    .donateBtn small{display:block; font-weight:700; opacity:.9}
+    .donateBtn small{display:block; font-weight:800; opacity:.92}
     .linkBtn{
       width:100%;
       padding:11px 12px;
       border-radius:14px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.05);
-      color: rgba(234,240,255,.92);
-      font-weight:800;
+      border:1px solid rgba(231,232,243,.95);
+      background: rgba(255,255,255,.92);
+      color: rgba(20,22,43,.90);
+      font-weight:900;
       cursor:pointer;
       text-align:center;
     }
@@ -384,45 +427,51 @@
       color:var(--muted2);
       font-size:.82rem;
       line-height:1.35;
+      font-weight:650;
     }
     .stats{
       display:flex;
       gap:10px;
       flex-wrap:wrap;
-      color: rgba(234,240,255,.84);
+      color: rgba(20,22,43,.85);
       font-size:.86rem;
       padding-top:10px;
-      border-top:1px solid rgba(255,255,255,.10);
+      border-top:1px solid rgba(231,232,243,.9);
+      font-weight:750;
     }
     .stat{
       display:flex; gap:8px; align-items:center;
       padding:6px 10px;
       border-radius:999px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.03);
+      border:1px solid rgba(231,232,243,.95);
+      background: rgba(255,255,255,.88);
     }
 
     /* Bottom CTA */
     .bottom{
+      position:relative;
+      z-index:2;
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:12px;
       padding:12px 12px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.04);
+      border:1px solid rgba(231,232,243,.95);
+      background: rgba(255,255,255,.78);
       border-radius: var(--radius);
       backdrop-filter: blur(10px);
+      box-shadow: 0 12px 30px rgba(20,22,43,.08);
     }
     .bottom h3{
       margin:0;
-      font-size:1.05rem;
+      font-size:1.06rem;
       letter-spacing:-.01em;
     }
     .bottom .mini{
       color:var(--muted2);
-      font-size:.9rem;
+      font-size:.92rem;
       margin-top:3px;
+      font-weight:750;
     }
     .bottom .right{
       display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end;
@@ -430,6 +479,8 @@
 
     /* Footer */
     .footer{
+      position:relative;
+      z-index:2;
       display:flex;
       justify-content:space-between;
       align-items:center;
@@ -438,9 +489,30 @@
       font-size:.85rem;
       padding:4px 2px 8px;
       flex-wrap:wrap;
+      font-weight:750;
     }
     .footer a{color:var(--muted); opacity:.9}
     .footer a:hover{opacity:1}
+
+    /* Mascot (Treble clef stick figure) */
+    .mascot{
+      position:absolute;
+      left:10px;
+      bottom:8px;
+      width:170px;
+      z-index:1;
+      opacity:.95;
+      filter: drop-shadow(0 12px 18px rgba(20,22,43,.12));
+      pointer-events:none;
+    }
+    .mascot small{
+      display:block;
+      text-align:center;
+      margin-top:6px;
+      color:rgba(20,22,43,.55);
+      font-weight:800;
+      font-size:.76rem;
+    }
 
     /* Responsive */
     @media (max-width: 980px){
@@ -448,16 +520,92 @@
       .bottom{flex-direction:column; align-items:stretch}
       .bottom .right{justify-content:stretch}
       .bottom .right .btn{width:100%}
+      .mascot{display:none;} /* keep mobile clean */
+      .hero{padding-top:6px}
     }
   </style>
 </head>
 <body>
   <div class="wrap">
 
+    <!-- background notes -->
+    <div class="notes" aria-hidden="true">
+      <div class="note">🎵</div>
+      <div class="note">🎶</div>
+      <div class="note">♪</div>
+      <div class="note">♫</div>
+      <div class="note">🎼</div>
+    </div>
+
+    <!-- Mascot -->
+    <div class="mascot" aria-hidden="true">
+      <!-- Simple cartoon treble clef stick figure as inline SVG -->
+      <svg viewBox="0 0 220 220">
+        <!-- confetti notes -->
+        <g opacity=".55" fill="#5b49ff">
+          <circle cx="170" cy="45" r="4"/>
+          <circle cx="190" cy="65" r="3"/>
+        </g>
+        <g opacity=".45" fill="#2ec9a2">
+          <circle cx="30" cy="55" r="4"/>
+          <circle cx="55" cy="35" r="3"/>
+        </g>
+        <g opacity=".55" fill="#ffbf2f">
+          <circle cx="45" cy="170" r="4"/>
+          <circle cx="22" cy="150" r="3"/>
+        </g>
+
+        <!-- body: treble clef-like swirl -->
+        <path d="M120 35
+                 C95 35, 80 55, 95 75
+                 C112 95, 140 85, 140 62
+                 C140 44, 122 35, 110 48
+                 C92 66, 112 88, 130 92
+                 C158 98, 170 120, 155 142
+                 C140 164, 105 164, 92 144
+                 C78 122, 98 104, 120 112
+                 C150 123, 135 170, 103 176
+                 C73 182, 54 160, 58 134
+                 C62 108, 98 98, 116 104"
+              fill="none" stroke="#14162b" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+
+        <!-- face -->
+        <circle cx="88" cy="188" r="22" fill="#fff" stroke="#14162b" stroke-width="6"/>
+        <circle cx="80" cy="182" r="3.2" fill="#14162b"/>
+        <circle cx="96" cy="182" r="3.2" fill="#14162b"/>
+        <path d="M80 194 C86 200, 92 200, 98 194" fill="none" stroke="#14162b" stroke-width="5" stroke-linecap="round"/>
+        <circle cx="76" cy="191" r="2.5" fill="#ff6aa2" opacity=".7"/>
+        <circle cx="100" cy="191" r="2.5" fill="#ff6aa2" opacity=".7"/>
+
+        <!-- arms -->
+        <path d="M72 176 C50 168, 42 156, 34 146" fill="none" stroke="#14162b" stroke-width="6" stroke-linecap="round"/>
+        <path d="M104 176 C128 170, 144 160, 160 146" fill="none" stroke="#14162b" stroke-width="6" stroke-linecap="round"/>
+
+        <!-- legs -->
+        <path d="M82 208 C74 218, 64 220, 54 214" fill="none" stroke="#14162b" stroke-width="6" stroke-linecap="round"/>
+        <path d="M94 208 C104 218, 118 220, 130 212" fill="none" stroke="#14162b" stroke-width="6" stroke-linecap="round"/>
+
+        <!-- little trumpet/megaphone -->
+        <g transform="translate(154,132) rotate(-12)">
+          <path d="M0 26 L46 10 L46 42 Z" fill="#ffbf2f" stroke="#14162b" stroke-width="5" stroke-linejoin="round"/>
+          <rect x="-10" y="22" width="14" height="16" rx="6" fill="#ffd34d" stroke="#14162b" stroke-width="5"/>
+          <path d="M46 10 C58 16, 58 36, 46 42" fill="none" stroke="#14162b" stroke-width="5" stroke-linecap="round"/>
+        </g>
+
+        <!-- small music note -->
+        <g transform="translate(172,92) rotate(10)" fill="#5b49ff" opacity=".9">
+          <path d="M12 0 v26 c0 7-6 12-12 10s-6-10 0-13c3-2 7-2 12-1V0z"/>
+          <circle cx="0" cy="23" r="6"/>
+        </g>
+      </svg>
+    </div>
+
     <!-- Header -->
     <div class="topbar">
       <div class="brand">
-        <span class="dot" aria-hidden="true"></span>
+        <span class="mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 2c-2.6 0-4.7 2.1-4.7 4.7 0 2.1 1.4 3.9 3.3 4.5v8.8c0 1.2 1 2.2 2.2 2.2 1.2 0 2.2-1 2.2-2.2V11.2c1.9-.6 3.3-2.4 3.3-4.5C20.7 4.1 14.6 2 12 2z"/></svg>
+        </span>
         <span>SongRaise</span>
       </div>
       <div class="nav">
@@ -472,10 +620,7 @@
     <div class="hero">
       <h1>Turn listening into giving.</h1>
       <p class="sub">Add a music-powered fundraising campaign to your website in minutes.</p>
-      <div class="trustline">
-        <span class="pill">Easy setup</span>
-        <span>No credit card. No donation system changes.</span>
-      </div>
+      <div class="trustline">No credit card. No donation system changes.</div>
     </div>
 
     <!-- Main Split -->
@@ -485,7 +630,7 @@
       <section class="card" id="get-started">
         <div class="head">
           <h2>Start a campaign</h2>
-          <span class="smallmuted">Live preview updates as you type</span>
+          <span class="helper">Live preview updates as you type</span>
         </div>
         <div class="body">
           <div class="formgrid">
@@ -508,36 +653,32 @@
 
             <div class="checks">
               <div class="check">
-                <span class="mark" aria-hidden="true">
+                <span class="tick" aria-hidden="true">
                   <svg viewBox="0 0 20 20"><path d="M7.9 13.7 4.6 10.4l-1.2 1.2 4.5 4.5L16.8 7.2 15.6 6z"/></svg>
                 </span>
                 <span>Donations happen on your website</span>
               </div>
               <div class="check">
-                <span class="mark" aria-hidden="true">
+                <span class="tick" aria-hidden="true">
                   <svg viewBox="0 0 20 20"><path d="M7.9 13.7 4.6 10.4l-1.2 1.2 4.5 4.5L16.8 7.2 15.6 6z"/></svg>
                 </span>
-                <span>Track plays, clicks, and donations</span>
+                <span>Track plays, clicks, &amp; donations</span>
               </div>
               <div class="check">
-                <span class="mark" aria-hidden="true">
+                <span class="tick" aria-hidden="true">
                   <svg viewBox="0 0 20 20"><path d="M7.9 13.7 4.6 10.4l-1.2 1.2 4.5 4.5L16.8 7.2 15.6 6z"/></svg>
                 </span>
-                <span>Works with your existing donation system</span>
+                <span>Works with your donation system</span>
               </div>
             </div>
 
             <div class="statline">
-              <div class="smallmuted"><b style="color:rgba(234,240,255,.92)"> $421,589 raised</b> · 157 live campaigns</div>
+              <div class="helper"><b>$421,589</b> raised · <b>157</b> live campaigns</div>
               <div class="logos" aria-label="Example charities">
                 <span class="logochip">Crohn’s &amp; Colitis Foundation</span>
                 <span class="logochip">Starlight Children’s Foundation</span>
                 <span class="logochip">Special Olympics</span>
               </div>
-            </div>
-
-            <div style="margin-top:10px; color:rgba(234,240,255,.55); font-size:.84rem; line-height:1.35;">
-              Tip: When you’re ready, you’ll get a one-line embed to paste into WordPress, Squarespace, Wix, Webflow, and more.
             </div>
           </div>
         </div>
@@ -547,7 +688,7 @@
       <section class="card">
         <div class="head">
           <h2>Live preview</h2>
-          <span class="smallmuted">This is what donors see</span>
+          <span class="helper">This is what donors see</span>
         </div>
         <div class="body">
           <div class="previewShell" role="region" aria-label="Campaign widget preview">
@@ -574,7 +715,7 @@
                   <span>Goal: <strong id="pvGoal">$5,000</strong></span>
                   <span><strong>28</strong> days left</span>
                 </div>
-                <div style="margin-top:6px; color:rgba(234,240,255,.56); font-size:.82rem;">
+                <div style="margin-top:6px; color:rgba(123,128,152,.95); font-size:.82rem; font-weight:700;">
                   Campaign ends <span id="pvEnd">May 30, 2026</span>
                 </div>
               </div>
@@ -592,7 +733,7 @@
                     <svg viewBox="0 0 24 24"><path d="M8 5v14l12-7z"/></svg>
                   </button>
                   <div class="scrub" aria-hidden="true"><i id="scrubFill"></i></div>
-                  <div style="color:rgba(234,240,255,.65); font-size:.82rem; width:44px; text-align:right;" id="timeTxt">0:00</div>
+                  <div style="color:rgba(123,128,152,.98); font-size:.82rem; width:44px; text-align:right; font-weight:800;" id="timeTxt">0:00</div>
                 </div>
               </div>
 
@@ -635,7 +776,7 @@
 
     <!-- Footer -->
     <div class="footer">
-      <div>Powered by <b style="color:rgba(234,240,255,.88)">SongRaise</b></div>
+      <div>Powered by <b>SongRaise</b></div>
       <div style="display:flex; gap:12px; flex-wrap:wrap;">
         <a href="#privacy">Privacy</a>
         <a href="#contact">Contact</a>
@@ -645,7 +786,7 @@
   </div>
 
   <script>
-    // Ultra-light demo interactivity: update preview as user types + fake play scrub.
+    // Light demo interactivity: update preview as user types + fake play scrub.
     const $ = (id) => document.getElementById(id);
 
     const inputs = {
@@ -656,6 +797,24 @@
 
     function sanitize(s){ return (s || "").trim(); }
 
+    function escapeHtml(str){
+      return str.replace(/[&<>"']/g, (m) => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+      }[m]));
+    }
+
+    function guessDomain(charity){
+      // Demo-only: tries to turn charity name into a readable-ish domain
+      const base = charity
+        .toLowerCase()
+        .replace(/&/g,"and")
+        .replace(/foundation/g,"")
+        .replace(/[^a-z0-9]+/g,"")
+        .slice(0,22) || "yourcharity";
+      // Make it nicer (capital first)
+      return base.charAt(0).toUpperCase() + base.slice(1) + ".org";
+    }
+
     function updatePreview(){
       const title = sanitize(inputs.title.value) || "Turn listening into giving.";
       const goal = sanitize(inputs.goal.value) || "$5,000";
@@ -665,26 +824,13 @@
       $("pvGoal").textContent = goal;
       $("pvCharity").textContent = charity;
       $("pvCharity2").textContent = charity;
-
-      // Auto-guess domain from charity name (demo-only)
-      const domain = charity
-        .toLowerCase()
-        .replace(/&/g,"and")
-        .replace(/[^a-z0-9]+/g,"")
-        .slice(0,18) || "yourcharity";
-      $("pvDomain").textContent = domain.charAt(0).toUpperCase()+domain.slice(1) + ".org";
-    }
-
-    function escapeHtml(str){
-      return str.replace(/[&<>"']/g, (m) => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-      }[m]));
+      $("pvDomain").textContent = guessDomain(charity);
     }
 
     Object.values(inputs).forEach(el => el.addEventListener("input", updatePreview));
     updatePreview();
 
-    // Fake donate/share actions
+    // Fake donate/share actions (demo stubs)
     $("donateBtn").addEventListener("click", () => {
       alert("Demo: this would open the charity’s secure donation page with tracking parameters.");
       // In production: window.open(charityDonationUrlWithCampaignId, "_blank", "noopener");
@@ -694,7 +840,7 @@
       const url = window.location.href.split("#")[0] + "#get-started";
       try{
         await navigator.clipboard.writeText(url);
-        alert("Copied campaign link (demo).");
+        alert("Copied link (demo).");
       }catch(e){
         alert("Copy failed (browser permissions).");
       }
@@ -704,7 +850,7 @@
     let playing = false;
     let t = 0;
     let timer = null;
-    const duration = 38; // seconds
+    const duration = 38; // seconds (demo)
 
     function renderTime(){
       const mm = Math.floor(t/60);
@@ -739,7 +885,6 @@
       }
     });
 
-    // Keep "Next" as a friendly stub for now
     $("nextBtn").addEventListener("click", () => {
       alert("Demo: next step would generate your embed code + donation link tracking.");
     });
