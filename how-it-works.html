@@ -1,153 +1,328 @@
 <!DOCTYPE html>
 <html lang="en">
-  <link rel="stylesheet" href="shell.css">
-
 <head>
   <meta charset="UTF-8" />
   <title>How SongRaise Works for Charities</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="How SongRaise helps charities create fundraising campaigns powered by music." />
+  <link rel="stylesheet" href="shell.css">
+
   <style>
+    :root{
+      --bg1:#f7fbff;
+      --bg2:#f2f0ff;
+      --bg3:#fff7ea;
+
+      --ink:#14162b;
+      --muted:#5c617a;
+      --muted2:#7b8098;
+
+      --card:#ffffff;
+      --border:#e7e8f3;
+      --shadow: 0 18px 60px rgba(20,22,43,.12);
+
+      --brand:#5b49ff;
+      --brand2:#2ec9a2;
+
+      --cta:#ffd34d;
+      --cta2:#ffbf2f;
+      --ctaInk:#2b240a;
+
+      --radius:18px;
+      --font: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f9fafb;color:#111827;line-height:1.6}
-    .wrap{max-width:980px;margin:0 auto;padding:18px 14px 70px}
-    .top{position:sticky;top:0;z-index:50;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:10px 12px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:0 10px 24px rgba(15,23,42,.06)}
-    .logo{font-weight:900;font-size:1.12rem;letter-spacing:-.02em}
-    .logo span{color:#2563eb}
-    .btn{display:inline-block;padding:8px 12px;border-radius:999px;border:1px solid #d1d5db;background:#fff;cursor:pointer;font-weight:900;text-decoration:none;color:#111827}
-    .btn:hover{background:#f3f4f6}
-    .btn-primary{background:#2563eb;border-color:#2563eb;color:#fff}
-    .btn-primary:hover{background:#1d4ed8}
+
+    body{
+      font-family:var(--font);
+      color:var(--ink);
+      line-height:1.6;
+      background:
+        radial-gradient(1100px 520px at 50% 0%, rgba(91,73,255,.18), transparent 60%),
+        radial-gradient(900px 520px at 20% 10%, rgba(46,201,162,.12), transparent 55%),
+        radial-gradient(900px 520px at 85% 20%, rgba(255,211,77,.22), transparent 55%),
+        linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 45%, var(--bg3) 100%);
+      overflow-x:hidden;
+    }
+
+    /* Subtle floating notes */
+    .notes{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+      z-index:0;
+    }
+    .note{
+      position:absolute;
+      font-size:26px;
+      opacity:.16;
+      filter: blur(.2px);
+      animation: floaty 7.8s ease-in-out infinite;
+      user-select:none;
+    }
+    .note:nth-child(1){left:7%; top:18%; animation-duration:8.6s}
+    .note:nth-child(2){left:89%; top:20%; font-size:30px; opacity:.13; animation-duration:9.6s}
+    .note:nth-child(3){left:78%; top:58%; font-size:24px; opacity:.12; animation-duration:7.9s}
+    .note:nth-child(4){left:10%; top:72%; font-size:22px; opacity:.10; animation-duration:9.2s}
+    .note:nth-child(5){left:55%; top:7%; font-size:20px; opacity:.10; animation-duration:10.4s}
+    @keyframes floaty{
+      0%{transform: translateY(0px) rotate(-2deg)}
+      50%{transform: translateY(-10px) rotate(2deg)}
+      100%{transform: translateY(0px) rotate(-2deg)}
+    }
+
+    .sr-wrap{position:relative; z-index:1;}
+    .sr-page{position:relative; z-index:1;}
+
+    .wrap{max-width:980px;margin:0 auto;padding:18px 14px 90px}
+
+    /* Topbar */
+    .top{
+      position:sticky;top:0;z-index:50;
+      background: rgba(255,255,255,.74);
+      border:1px solid rgba(231,232,243,.90);
+      border-radius:999px;
+      padding:10px 12px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 28px rgba(20,22,43,.07);
+    }
+
+    .logo{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:900;
+      font-size:1.12rem;
+      letter-spacing:-.02em
+    }
+    .mark{
+      width:30px;height:30px;border-radius:10px;
+      background: linear-gradient(135deg, rgba(91,73,255,.95), rgba(46,201,162,.72));
+      display:inline-flex;align-items:center;justify-content:center;
+      box-shadow: 0 10px 22px rgba(91,73,255,.18);
+      flex:0 0 auto;
+    }
+    .mark svg{width:18px;height:18px;fill:#fff}
+    .logo span{color:var(--brand)}
+    .nav{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+    .btn{
+      display:inline-block;
+      padding:9px 12px;
+      border-radius:999px;
+      border:1px solid rgba(231,232,243,.95);
+      background: rgba(255,255,255,.88);
+      cursor:pointer;
+      font-weight:900;
+      text-decoration:none;
+      color:var(--ink);
+      transition: transform .08s ease, background .15s ease, border-color .15s ease;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn:hover{background:#fff}
+    .btn:active{transform: translateY(1px)}
+
+    .btn-primary{
+      background: linear-gradient(180deg, var(--cta) 0%, var(--cta2) 100%);
+      border-color: rgba(255,191,47,.55);
+      color: var(--ctaInk);
+      box-shadow: 0 16px 40px rgba(255,191,47,.22);
+    }
+
     h1{font-size:2.1rem;letter-spacing:-.02em;margin:14px 0 8px}
-    .lead{color:#4b5563;font-size:1.05rem}
-    .card{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:16px;box-shadow:0 8px 18px rgba(15,23,42,.04);margin-top:14px}
+    .lead{color:var(--muted);font-size:1.05rem;font-weight:650}
+
+    .card{
+      background: rgba(255,255,255,.86);
+      border:1px solid rgba(231,232,243,.95);
+      border-radius:18px;
+      padding:16px;
+      box-shadow: var(--shadow);
+      margin-top:14px;
+      backdrop-filter: blur(10px);
+    }
+
     h2{font-size:1.18rem;margin-bottom:8px}
     h3{font-size:1.02rem;margin:10px 0 6px}
+
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
     @media(max-width:860px){.grid{grid-template-columns:1fr}}
-    .muted{color:#6b7280}
+
+    .muted{color:var(--muted2)}
     .mini{font-size:.92rem}
-    .pill{display:inline-flex;gap:8px;align-items:center;padding:6px 10px;border:1px solid #e5e7eb;border-radius:999px;background:#f9fafb;font-weight:900;font-size:.86rem;color:#374151}
+
+    .pill{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      padding:7px 11px;
+      border:1px solid rgba(231,232,243,.95);
+      border-radius:999px;
+      background: rgba(255,255,255,.86);
+      font-weight:900;
+      font-size:.86rem;
+      color: rgba(20,22,43,.78);
+      margin:6px 8px 0 0;
+    }
+
     ul{padding-left:18px}
     li{margin:6px 0}
+
     .steps{display:grid;gap:10px;margin-top:10px}
-    .step{border:1px solid #e5e7eb;border-radius:16px;padding:12px;background:#f9fafb}
+    .step{
+      border:1px solid rgba(231,232,243,.95);
+      border-radius:16px;
+      padding:12px;
+      background: rgba(248,249,255,.85);
+    }
     .step b{display:block;margin-bottom:4px}
-    .hr{border:none;border-top:1px solid #e5e7eb;margin:14px 0}
+
+    .hr{border:none;border-top:1px solid rgba(231,232,243,.95);margin:14px 0}
+
     .cta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
-    code{background:#f3f4f6;padding:2px 6px;border-radius:8px}
+
+    code{
+      background: rgba(91,73,255,.08);
+      border:1px solid rgba(91,73,255,.14);
+      padding:2px 6px;
+      border-radius:8px
+    }
   </style>
 </head>
-  
+
 <body>
-  <div class="sr-wrap">
-  <div id="sr-header"></div>
-  <div class="sr-page">
-
-  <div class="wrap">
-    <div class="top">
-      <div class="logo">SongRaise<span>Lite</span></div>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <a class="btn" href="index.html">Home</a>
-        <a class="btn" href="dashboard.html">Dashboard</a>
-        <a class="btn btn-primary" href="dashboard.html">Create a Campaign</a>
-      </div>
-    </div>
-
-    <h1>How SongRaise Works for Charities</h1>
-    <p class="lead">
-      SongRaise helps nonprofits launch fundraising campaigns powered by music.
-      Each campaign gets a shareable page with a song and a donate button.
-    </p>
-
-    <div class="card">
-      <div class="grid">
-        <div>
-          <h2>What you get</h2>
-          <ul>
-            <li><b>A public campaign page</b> with a built-in audio player and donate button.</li>
-            <li><b>A fundraising song</b> tailored to your cause, condition, and tone.</li>
-            <li><b>Optional lyrics</b> for transparency and accessibility.</li>
-            <li><b>A simple workflow</b> designed to reduce mistakes and admin time.</li>
-          </ul>
-        </div>
-        <div>
-          <h2>What you control</h2>
-          <ul>
-            <li><b>Your donation link</b> — donors always go to your official page.</li>
-            <li><b>Your story</b> — description, cause category, and condition.</li>
-            <li><b>Song style</b> — genre, emotion, and vibe.</li>
-            <li><b>What gets shared</b> — only campaigns you choose to distribute.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>The simple 3-step process</h2>
-      <p class="muted mini">
-        SongRaise uses a safe “human-in-the-loop” approach — automated where it helps,
-        without fragile AI scraping or complex tools.
-      </p>
-
-      <div class="steps">
-        <div class="step">
-          <b>1) Create your campaign</b>
-          Enter your campaign title, description, cause category, and donation link.
-        </div>
-
-        <div class="step">
-          <b>2) Generate the song (guided)</b>
-          Click <b>Generate in Suno</b>.
-          SongRaise opens Suno in a new tab and copies a Prompt Pack for you to paste.
-        </div>
-
-        <div class="step">
-          <b>3) Upload & attach</b>
-          Drag the MP3 back into SongRaise.
-          The system uploads it, validates it, detects duration, and attaches it to your campaign.
-        </div>
-      </div>
-
-      <div class="hr"></div>
-
-      <div class="pill">✅ Reduces human error</div>
-      <div class="pill">✅ No technical expertise required</div>
-      <div class="pill">✅ Campaign ready to share immediately</div>
-    </div>
-
-    <div class="card">
-      <h2>Sharing your campaign</h2>
-      <ul>
-        <li><b>Social media:</b> Share the campaign link anywhere.</li>
-        <li><b>Email:</b> Add it to newsletters or supporter updates.</li>
-        <li><b>Website:</b> Link or embed the campaign page.</li>
-        <li><b>Events:</b> Use QR codes to drive listens and donations.</li>
-      </ul>
-    </div>
-
-    <div class="card">
-      <h2>Trust & transparency</h2>
-      <ul>
-        <li><b>Donation links are yours</b> — SongRaise never intercepts funds.</li>
-        <li><b>Clear, focused campaign pages</b> — song, story, donate.</li>
-        <li><b>Optional lyrics display</b> — helps build donor confidence.</li>
-      </ul>
-    </div>
-
-    <div class="card">
-      <h2>Ready to get started?</h2>
-      <p class="muted">Create your first SongRaise campaign in minutes.</p>
-      <div class="cta">
-        <a class="btn btn-primary" href="dashboard.html">Create a Campaign</a>
-        <a class="btn" href="dashboard.html">Go to Dashboard</a>
-      </div>
-    </div>
+  <div class="notes" aria-hidden="true">
+    <div class="note">🎵</div>
+    <div class="note">🎶</div>
+    <div class="note">♪</div>
+    <div class="note">♫</div>
+    <div class="note">🎼</div>
   </div>
-      </div>
-  <div id="sr-footer"></div>
-</div>
-<script defer src="shell.js"></script>
 
+  <div class="sr-wrap">
+    <div id="sr-header"></div>
+    <div class="sr-page">
+
+      <div class="wrap">
+        <div class="top">
+          <div class="logo">
+            <span class="mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 2c-2.6 0-4.7 2.1-4.7 4.7 0 2.1 1.4 3.9 3.3 4.5v8.8c0 1.2 1 2.2 2.2 2.2 1.2 0 2.2-1 2.2-2.2V11.2c1.9-.6 3.3-2.4 3.3-4.5C20.7 4.1 14.6 2 12 2z"/></svg>
+            </span>
+            SongRaise<span>Lite</span>
+          </div>
+          <div class="nav">
+            <a class="btn" href="index.html">Home</a>
+            <a class="btn" href="dashboard.html">Dashboard</a>
+            <a class="btn btn-primary" href="dashboard.html">Create a Campaign</a>
+          </div>
+        </div>
+
+        <h1>How SongRaise Works for Charities</h1>
+        <p class="lead">
+          SongRaise helps nonprofits launch fundraising campaigns powered by music.
+          Each campaign gets a shareable page with a song and a donate button.
+        </p>
+
+        <div class="card">
+          <div class="grid">
+            <div>
+              <h2>What you get</h2>
+              <ul>
+                <li><b>A public campaign page</b> with a built-in audio player and donate button.</li>
+                <li><b>A fundraising song</b> tailored to your cause, condition, and tone.</li>
+                <li><b>Optional lyrics</b> for transparency and accessibility.</li>
+                <li><b>A simple workflow</b> designed to reduce mistakes and admin time.</li>
+              </ul>
+            </div>
+            <div>
+              <h2>What you control</h2>
+              <ul>
+                <li><b>Your donation link</b> — donors always go to your official page.</li>
+                <li><b>Your story</b> — description, cause category, and condition.</li>
+                <li><b>Song style</b> — genre, emotion, and vibe.</li>
+                <li><b>What gets shared</b> — only campaigns you choose to distribute.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>The simple 3-step process</h2>
+          <p class="muted mini">
+            SongRaise uses a safe “human-in-the-loop” approach — automated where it helps,
+            without fragile AI scraping or complex tools.
+          </p>
+
+          <div class="steps">
+            <div class="step">
+              <b>1) Create your campaign</b>
+              Enter your campaign title, description, cause category, and donation link.
+            </div>
+
+            <div class="step">
+              <b>2) Generate the song (guided)</b>
+              Click <b>Generate in Suno</b>.
+              SongRaise opens Suno in a new tab and copies a Prompt Pack for you to paste.
+            </div>
+
+            <div class="step">
+              <b>3) Upload & attach</b>
+              Drag the MP3 back into SongRaise.
+              The system uploads it, validates it, detects duration, and attaches it to your campaign.
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div>
+            <span class="pill">✅ Reduces human error</span>
+            <span class="pill">✅ No technical expertise required</span>
+            <span class="pill">✅ Campaign ready to share immediately</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Sharing your campaign</h2>
+          <ul>
+            <li><b>Social media:</b> Share the campaign link anywhere.</li>
+            <li><b>Email:</b> Add it to newsletters or supporter updates.</li>
+            <li><b>Website:</b> Link or embed the campaign page.</li>
+            <li><b>Events:</b> Use QR codes to drive listens and donations.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h2>Trust & transparency</h2>
+          <ul>
+            <li><b>Donation links are yours</b> — SongRaise never intercepts funds.</li>
+            <li><b>Clear, focused campaign pages</b> — song, story, donate.</li>
+            <li><b>Optional lyrics display</b> — helps build donor confidence.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h2>Ready to get started?</h2>
+          <p class="muted">Create your first SongRaise campaign in minutes.</p>
+          <div class="cta">
+            <a class="btn btn-primary" href="dashboard.html">Create a Campaign</a>
+            <a class="btn" href="dashboard.html">Go to Dashboard</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div id="sr-footer"></div>
+  </div>
+
+  <script defer src="shell.js"></script>
 </body>
 </html>
