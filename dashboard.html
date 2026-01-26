@@ -391,13 +391,14 @@
         <div class="hero">
           <h1>Dashboard</h1>
           <p class="lead">
-            Charities create campaigns. SongRaise (admin) generates and attaches the song. Only published campaigns appear publicly.
+            Create your campaign once. SongRaise produces the fundraising song behind the scenes and publishes the finished campaign page for you to share.
+            <span class="muted">Donors always donate on your official donation link.</span>
           </p>
         </div>
 
         <div class="grid">
           <div class="card">
-            <h2>Create campaign (Charity)</h2>
+            <h2>Create a campaign</h2>
 
             <div class="stack" style="margin-bottom:10px;">
               <span class="badge" id="currentBadge">No active campaign</span>
@@ -428,7 +429,7 @@
               <div class="hr"></div>
 
               <h2 style="margin:0 0 6px;font-size:1.05rem;">Cause details</h2>
-              <p class="muted mini">These fields help SongRaise generate a great fundraising song for your campaign.</p>
+              <p class="muted mini">These details help SongRaise produce a fundraising song that matches your cause and tone — no music tools required.</p>
 
               <div class="row2">
                 <div>
@@ -493,13 +494,13 @@
                 <span class="badge" id="readinessSummary">—</span>
               </div>
 
-              <div class="item"><b id="r1">⏳</b><div>Campaign created</div></div>
-              <div class="item"><b id="r2">⏳</b><div>Donation link added</div></div>
-              <div class="item"><b id="r3">⏳</b><div>Song in production (SongRaise)</div></div>
-              <div class="item"><b id="r4">⏳</b><div>Ready to share</div></div>
+              <div class="item"><b id="r1">⏳</b><div>Campaign submitted</div></div>
+              <div class="item"><b id="r2">⏳</b><div>Donation link confirmed</div></div>
+              <div class="item"><b id="r3">⏳</b><div>Song being produced by SongRaise</div></div>
+              <div class="item"><b id="r4">⏳</b><div>Published & ready to share</div></div>
 
               <div class="muted mini" id="charityNote" style="margin-top:8px; display:none;">
-                SongRaise is generating your song. You’ll be able to share the campaign once it’s published.
+                SongRaise is producing your fundraising song now. Once it’s published, you’ll share the finished campaign link anywhere (email, social, website).
               </div>
             </div>
 
@@ -1117,7 +1118,7 @@
           if (isAdmin){
             createStatus.textContent = "Campaign created ✅ Generate the song, upload MP3, then Publish when ready.";
           } else {
-            createStatus.textContent = "Campaign submitted ✅ SongRaise is generating your song. You can share once it’s published.";
+            createStatus.textContent = "Campaign submitted ✅ SongRaise is producing your fundraising song now. We’ll publish your finished campaign page when it’s ready to share.";
           }
           createStatus.classList.add("ok");
           createBtn.disabled = false;
